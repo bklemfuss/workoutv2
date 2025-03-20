@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # workoutv2
 
 A new Flutter project.
@@ -27,3 +28,6 @@ the `lib/src/localization` directory.
 
 To support additional languages, please visit the tutorial on
 [Internationalizing Flutter apps](https://flutter.dev/to/internationalization).
+=======
+# Workoutv2
+>>>>>>> 9f8c47ad56a631878b9db0d82dfcf66b21b27c76
