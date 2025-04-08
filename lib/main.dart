@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dashboard.dart';
+import 'src/dashboard.dart';
 
 void main() {
   runApp(const WorkoutApp());
