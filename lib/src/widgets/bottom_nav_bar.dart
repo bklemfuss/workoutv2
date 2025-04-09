@@ -41,7 +41,7 @@ class BottomNavBar extends StatelessWidget {
       '/',           // Dashboard route
       '/history',    // History route
       '/statistics', // Statistics route
-      '/profile',    // Account route
+      '/options',    // Options route (updated)
     ];
 
     if (index != currentIndex) {

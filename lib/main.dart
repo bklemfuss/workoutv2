@@ -5,6 +5,7 @@ import 'src/statistics_screen.dart';
 import 'src/account_screen.dart';
 import 'src/login_screen.dart';
 import 'src/widgets/bottom_nav_bar.dart';
+import 'src/options_screen.dart';
 
 void main() {
   runApp(const WorkoutApp());
@@ -25,6 +26,7 @@ class WorkoutApp extends StatelessWidget {
         '/': (context) => Dashboard(),
         '/history': (context) => const HistoryScreen(),
         '/statistics': (context) => const StatisticsScreen(),
+        '/options': (context) => const OptionsScreen(), // Add OptionsScreen route
         '/profile': (context) => const AccountScreen(),
         '/login': (context) => const LoginScreen(),
       },
