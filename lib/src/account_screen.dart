@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'widgets/app_toolbar.dart';
+import 'widgets/bottom_nav_bar.dart';
 
 class AccountScreen extends StatelessWidget {
+  const AccountScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Account'),
-        centerTitle: true,
-      ),
+      appBar: const AppToolbar(title: 'Account'),
       body: const Center(
         child: Text(
-          'Account Screen',
+          'This is the Account Screen',
           style: TextStyle(fontSize: 18),
         ),
+      ),
+      bottomNavigationBar: const BottomNavBar(
+        currentIndex: 3, // Index for Account
       ),
     );
   }
