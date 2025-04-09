@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
+import 'widgets/floating_start_new_workout_button.dart';
 
 class StatisticsScreen extends StatelessWidget {
   const StatisticsScreen({super.key});
@@ -15,7 +16,10 @@ class StatisticsScreen extends StatelessWidget {
           style: TextStyle(fontSize: 18),
         ),
       ),
-      bottomNavigationBar: const BottomNavBar(currentIndex: 2), // Pass the index
+      bottomNavigationBar: const BottomNavBar(
+        currentIndex: 2,
+      ),
+      floatingActionButton: const FloatingStartNewWorkoutButton(),
     );
   }
 }

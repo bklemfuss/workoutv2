@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
+import 'widgets/floating_start_new_workout_button.dart';
 
 class OptionsScreen extends StatelessWidget {
   const OptionsScreen({super.key});
@@ -18,6 +19,7 @@ class OptionsScreen extends StatelessWidget {
       bottomNavigationBar: const BottomNavBar(
         currentIndex: 3, // Index for Options
       ),
+      floatingActionButton: const FloatingStartNewWorkoutButton(),
     );
   }
 }
