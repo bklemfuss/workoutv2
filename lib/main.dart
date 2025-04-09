@@ -5,6 +5,7 @@ import 'src/statistics_screen.dart';
 import 'src/account_screen.dart';
 import 'src/login_screen.dart';
 import 'src/options_screen.dart';
+import 'src/start_workout_screen.dart';
 import 'src/widgets/colors.dart';
 
 void main() {
@@ -21,9 +22,14 @@ class WorkoutApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: AppColors.primary,
         scaffoldBackgroundColor: AppColors.background,
-        textTheme: TextTheme(
+        textTheme: const TextTheme(
           bodyLarge: TextStyle(fontSize: 16, color: AppColors.textPrimary),
           bodyMedium: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          selectedItemColor: AppColors.secondary, // Color for selected items
+          unselectedItemColor: AppColors.primary, // Color for unselected items
+          backgroundColor: AppColors.background, // Background color of the BottomNavBar
         ),
       ),
       initialRoute: '/',
@@ -34,6 +40,7 @@ class WorkoutApp extends StatelessWidget {
         '/options': (context) => const OptionsScreen(),
         '/profile': (context) => const AccountScreen(),
         '/login': (context) => const LoginScreen(),
+        '/start_workout': (context) => const StartWorkoutScreen(),
       },
     );
   }
