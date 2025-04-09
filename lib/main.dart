@@ -3,18 +3,18 @@ import 'src/dashboard.dart';
 import 'src/history_screen.dart';
 import 'src/statistics_screen.dart';
 import 'src/account_screen.dart';
-import 'src/services/database_helper.dart'; // Import the DatabaseHelper class
+//import 'src/services/database_helper.dart'; // Import the DatabaseHelper class
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter bindings are initialized
-  await initializeDatabase(); // Initialize the database with sample data
+  //await initializeDatabase(); // Initialize the database with sample data
   runApp(const WorkoutApp());
 }
 
-Future<void> initializeDatabase() async {
-  final dbHelper = DatabaseHelper();
-  await dbHelper.insertSampleData(); // Insert sample data into the database
-}
+//Future<void> initializeDatabase() async {
+//  final dbHelper = DatabaseHelper();
+//  await dbHelper.insertSampleData(); // Insert sample data into the database
+//}
 
 class WorkoutApp extends StatelessWidget {
   const WorkoutApp({Key? key}) : super(key: key);
