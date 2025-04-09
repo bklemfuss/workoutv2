@@ -5,6 +5,7 @@ import 'src/statistics_screen.dart';
 import 'src/account_screen.dart';
 import 'src/login_screen.dart';
 import 'src/options_screen.dart';
+import 'src/start_workout_screen.dart'; // Import the StartWorkoutScreen
 import 'src/widgets/colors.dart';
 
 void main() {
@@ -34,6 +35,7 @@ class WorkoutApp extends StatelessWidget {
         '/options': (context) => const OptionsScreen(),
         '/profile': (context) => const AccountScreen(),
         '/login': (context) => const LoginScreen(),
+        '/start_workout': (context) => const StartWorkoutScreen(), // Add StartWorkoutScreen route
       },
     );
   }
