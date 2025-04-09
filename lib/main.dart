@@ -4,7 +4,6 @@ import 'src/history_screen.dart';
 import 'src/statistics_screen.dart';
 import 'src/account_screen.dart';
 import 'src/login_screen.dart';
-import 'src/widgets/bottom_nav_bar.dart';
 import 'src/options_screen.dart';
 import 'src/widgets/colors.dart';
 

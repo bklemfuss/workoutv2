@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
-import 'widgets/colors.dart';
 
 class Dashboard extends StatelessWidget {
   @override
