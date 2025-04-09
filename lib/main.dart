@@ -4,7 +4,7 @@ import 'src/history_screen.dart';
 import 'src/statistics_screen.dart';
 import 'src/account_screen.dart';
 import 'src/login_screen.dart';
-import 'src/widgets/bottom_nav_bar.dart'; // Import the BottomNavBar widget
+import 'src/widgets/bottom_nav_bar.dart';
 
 void main() {
   runApp(const WorkoutApp());
@@ -22,38 +22,12 @@ class WorkoutApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const MainScreen(),
-        '/profile': (context) => AccountScreen(),
-        '/login': (context) => LoginScreen(),
+        '/': (context) => Dashboard(),
+        '/history': (context) => const HistoryScreen(),
+        '/statistics': (context) => const StatisticsScreen(),
+        '/profile': (context) => const AccountScreen(),
+        '/login': (context) => const LoginScreen(),
       },
-    );
-  }
-}
-
-class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
-
-  @override
-  _MainScreenState createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
-
-  final List<Widget> _screens = [
-    Dashboard(),
-    HistoryScreen(),
-    StatisticsScreen(),
-    AccountScreen(),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _currentIndex, // Only pass the currentIndex
-      ),
     );
   }
 }
