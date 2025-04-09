@@ -3,7 +3,7 @@ import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
 
 class OptionsScreen extends StatelessWidget {
-  const OptionsScreen({Key? key}) : super(key: key);
+  const OptionsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

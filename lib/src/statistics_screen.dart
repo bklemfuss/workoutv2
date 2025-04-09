@@ -3,7 +3,7 @@ import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
 
 class StatisticsScreen extends StatelessWidget {
-  const StatisticsScreen({Key? key}) : super(key: key);
+  const StatisticsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

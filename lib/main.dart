@@ -12,7 +12,7 @@ void main() {
 }
 
 class WorkoutApp extends StatelessWidget {
-  const WorkoutApp({Key? key}) : super(key: key);
+  const WorkoutApp({super.key});
 
   @override
   Widget build(BuildContext context) {
