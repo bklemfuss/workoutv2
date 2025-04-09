@@ -3,18 +3,12 @@ import 'src/dashboard.dart';
 import 'src/history_screen.dart';
 import 'src/statistics_screen.dart';
 import 'src/account_screen.dart';
-//import 'src/services/database_helper.dart'; // Import the DatabaseHelper class
+import 'src/login_screen.dart';
+import 'src/widgets/bottom_nav_bar.dart'; // Import the BottomNavBar widget
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter bindings are initialized
-  //await initializeDatabase(); // Initialize the database with sample data
+void main() {
   runApp(const WorkoutApp());
 }
-
-//Future<void> initializeDatabase() async {
-//  final dbHelper = DatabaseHelper();
-//  await dbHelper.insertSampleData(); // Insert sample data into the database
-//}
 
 class WorkoutApp extends StatelessWidget {
   const WorkoutApp({Key? key}) : super(key: key);
@@ -26,7 +20,12 @@ class WorkoutApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MainScreen(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const MainScreen(),
+        '/profile': (context) => AccountScreen(),
+        '/login': (context) => LoginScreen(),
+      },
     );
   }
 }
@@ -52,31 +51,8 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Statistics',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle),
-            label: 'Account',
-          ),
-        ],
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: _currentIndex, // Only pass the currentIndex
       ),
     );
   }
