@@ -7,10 +7,10 @@ class Dashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const AppToolbar(title: 'Dashboard'),
-      body: const Center(
+      body: Center(
         child: Text(
           'Welcome to the Workout App!',
-          style: TextStyle(fontSize: 18),
+          style: Theme.of(context).textTheme.bodyLarge, // Use the shared body text style
         ),
       ),
       bottomNavigationBar: const BottomNavBar(
