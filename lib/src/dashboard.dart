@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
+import 'widgets/colors.dart';
 
 class Dashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const AppToolbar(title: 'Dashboard'),
-      body: const Center(
+      body: Center(
         child: Text(
           'Welcome to the Workout App!',
-          style: TextStyle(fontSize: 18),
+          style: Theme.of(context).textTheme.bodyLarge, // Use the shared body text style
         ),
       ),
       bottomNavigationBar: const BottomNavBar(

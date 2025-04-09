@@ -6,6 +6,7 @@ import 'src/account_screen.dart';
 import 'src/login_screen.dart';
 import 'src/widgets/bottom_nav_bar.dart';
 import 'src/options_screen.dart';
+import 'src/widgets/colors.dart';
 
 void main() {
   runApp(const WorkoutApp());
@@ -19,14 +20,19 @@ class WorkoutApp extends StatelessWidget {
     return MaterialApp(
       title: 'Workout App',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primaryColor: AppColors.primary,
+        scaffoldBackgroundColor: AppColors.background,
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(fontSize: 16, color: AppColors.textPrimary),
+          bodyMedium: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+        ),
       ),
       initialRoute: '/',
       routes: {
         '/': (context) => Dashboard(),
         '/history': (context) => const HistoryScreen(),
         '/statistics': (context) => const StatisticsScreen(),
-        '/options': (context) => const OptionsScreen(), // Add OptionsScreen route
+        '/options': (context) => const OptionsScreen(),
         '/profile': (context) => const AccountScreen(),
         '/login': (context) => const LoginScreen(),
       },
