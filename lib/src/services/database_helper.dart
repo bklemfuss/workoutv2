@@ -48,66 +48,96 @@ class DatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
-    // Create tables if needed
+    // Create MuscleGroup table
     await db.execute('''
-      CREATE TABLE User (
-        user_id INTEGER PRIMARY KEY,
-        name TEXT,
-        email TEXT,
-        password TEXT,
-        height INTEGER,
-        weight INTEGER,
-        date_of_birth TEXT,
-        gender INTEGER,
-        notification_preferences INTEGER
+      CREATE TABLE MuscleGroup (
+        muscle_group_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        Name TEXT
       )
     ''');
+
+    // Create Template table
     await db.execute('''
-      CREATE TABLE Workout (
-        workout_id INTEGER PRIMARY KEY,
-        user_id INTEGER,
-        date TEXT,
-        FOREIGN KEY (user_id) REFERENCES User(user_id)
+      CREATE TABLE Template (
+        template_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        template_name TEXT
       )
     ''');
+
+    // Create TemplateExercise table
+    await db.execute('''
+      CREATE TABLE TemplateExercise (
+        template_exercise_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        template_id INTEGER,
+        exercise_id INTEGER,
+        FOREIGN KEY (template_id) REFERENCES Template(template_id),
+        FOREIGN KEY (exercise_id) REFERENCES Exercise(exercise_id)
+      )
+    ''');
+
+    // Create Exercise table
     await db.execute('''
       CREATE TABLE Exercise (
-        exercise_id INTEGER PRIMARY KEY,
+        exercise_id INTEGER PRIMARY KEY AUTOINCREMENT,
         muscle_group_id INTEGER,
         name TEXT,
-        description TEXT,
+        Description TEXT,
+        equipment INTEGER, -- 0 for false, 1 for true
         instructions TEXT,
-        equipment INTEGER,
         image_url TEXT,
         FOREIGN KEY (muscle_group_id) REFERENCES MuscleGroup(muscle_group_id)
       )
     ''');
+
+    // Create User table
+    await db.execute('''
+      CREATE TABLE User (
+        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        email TEXT UNIQUE,
+        password TEXT,
+        height INTEGER,
+        weight INTEGER,
+        date_of_birth TEXT,
+        gender INTEGER, -- 0 for false, 1 for true
+        notification_preferences INTEGER -- 0 for false, 1 for true
+      )
+    ''');
+
+    // Create Workout table
+    await db.execute('''
+      CREATE TABLE Workout (
+        workout_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        workout_template_id INTEGER,
+        user_id INTEGER,
+        date TEXT,
+        FOREIGN KEY (workout_template_id) REFERENCES Template(template_id),
+        FOREIGN KEY (user_id) REFERENCES User(user_id)
+      )
+    ''');
+
+    // Create WorkoutExercise table
     await db.execute('''
       CREATE TABLE WorkoutExercise (
-        workout_exercise_id INTEGER PRIMARY KEY,
+        workout_exercise_id INTEGER PRIMARY KEY AUTOINCREMENT,
         workout_id INTEGER,
         exercise_id INTEGER,
         sets INTEGER,
         reps INTEGER,
-        weight INTEGER,
+        weight REAL,
         FOREIGN KEY (workout_id) REFERENCES Workout(workout_id),
         FOREIGN KEY (exercise_id) REFERENCES Exercise(exercise_id)
       )
     ''');
+
+    // Create BodyMeasurement table
     await db.execute('''
       CREATE TABLE BodyMeasurement (
-        body_measurement_id INTEGER PRIMARY KEY,
+        body_measurement_id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
         date TEXT,
-        weight INTEGER,
+        weight REAL,
         FOREIGN KEY (user_id) REFERENCES User(user_id)
-      )
-    ''');
-    await db.execute('''
-      CREATE TABLE MuscleGroup (
-        muscle_group_id INTEGER PRIMARY KEY,
-        Name TEXT,
-        KeyField TEXT
       )
     ''');
   }
@@ -155,7 +185,7 @@ class DatabaseHelper {
     final db = await database;
     return await db.delete('Workout', where: 'workout_id = ?', whereArgs: [id]);
   }
-  // #######################################################
+// #######################################################
   // Adding example data here until database is in assets
   // #######################################################
 
@@ -175,11 +205,16 @@ class DatabaseHelper {
       'notification_preferences': 1,
     });
 
-    // Insert a sample Workout
-    await db.insert('Workout', {
-      'workout_id': 1,
-      'user_id': 1,
-      'date': '2025-04-08',
+    // Insert a sample Template
+    await db.insert('Template', {
+      'template_id': 1,
+      'template_name': 'Full Body Workout A',
+    });
+
+    // Insert a sample MuscleGroup
+    await db.insert('MuscleGroup', {
+      'muscle_group_id': 1,
+      'Name': 'Chest',
     });
 
     // Insert a sample Exercise
@@ -187,10 +222,25 @@ class DatabaseHelper {
       'exercise_id': 1,
       'muscle_group_id': 1,
       'name': 'Push-Up',
-      'description': 'A basic upper body exercise.',
-      'instructions': 'Keep your back straight and lower yourself to the ground.',
+      'Description': 'A basic upper body exercise.',
       'equipment': 0,
+      'instructions': 'Keep your back straight and lower yourself to the ground.',
       'image_url': 'https://example.com/push-up.png',
+    });
+
+    // Insert a sample TemplateExercise
+    await db.insert('TemplateExercise', {
+      'template_exercise_id': 1,
+      'template_id': 1,
+      'exercise_id': 1,
+    });
+
+    // Insert a sample Workout
+    await db.insert('Workout', {
+      'workout_id': 1,
+      'workout_template_id': 1,
+      'user_id': 1,
+      'date': '2025-04-08',
     });
 
     // Insert a sample WorkoutExercise
@@ -200,7 +250,7 @@ class DatabaseHelper {
       'exercise_id': 1,
       'sets': 3,
       'reps': 12,
-      'weight': 0,
+      'weight': 0.0,
     });
 
     // Insert a sample BodyMeasurement
@@ -208,14 +258,7 @@ class DatabaseHelper {
       'body_measurement_id': 1,
       'user_id': 1,
       'date': '2025-04-08',
-      'weight': 75,
-    });
-
-    // Insert a sample MuscleGroup
-    await db.insert('MuscleGroup', {
-      'muscle_group_id': 1,
-      'Name': 'Chest',
-      'KeyField': 'chest',
+      'weight': 75.5, // Using a REAL value
     });
 
     if (kDebugMode) {
