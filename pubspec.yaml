@@ -14,9 +14,9 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  sqflite: ^2.2.8 # Add this line to include the sqflite package
-  path: ^1.8.3    # Add this line to include the path package (used for file paths)
-  flutter_platform_widgets: ^2.0.0
+  sqflite: ^2.2.8
+  path: ^1.8.3
+  flutter_platform_widgets: ^2.2.6
 
 dev_dependencies:
   flutter_test:
