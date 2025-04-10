@@ -1,35 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
 
   const BottomNavBar({
-    super.key,
+    Key? key,
     required this.currentIndex,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
+    return PlatformNavBar(
       currentIndex: currentIndex,
-      onTap: (index) {
+      itemChanged: (index) {
         _onTabTapped(context, index);
       },
-      items: const [
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.dashboard),
+          icon: const Icon(Icons.dashboard),
           label: 'Dashboard',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.history),
+          icon: const Icon(Icons.history),
           label: 'History',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.bar_chart),
+          icon: const Icon(Icons.bar_chart),
           label: 'Statistics',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.account_circle),
+          icon: const Icon(Icons.account_circle),
           label: 'Account',
         ),
       ],
