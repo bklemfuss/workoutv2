@@ -1,6 +1,7 @@
 import 'dart:io' as io;
 import 'package:flutter/foundation.dart';
 import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -16,7 +17,7 @@ import 'src/login_screen.dart';
 import 'src/options_screen.dart';
 import 'src/start_workout_screen.dart';
 import 'src/theme/app_theme.dart'; // Import the theme file
-import 'src/widgets/colors.dart';
+import 'src/theme/app_theme.dart'; // Import the theme file
 import 'src/general_settings_screen.dart';
 import 'src/appearance_settings_screen.dart';
 import 'src/preferences_settings_screen.dart';
