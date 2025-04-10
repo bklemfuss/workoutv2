@@ -49,12 +49,12 @@ class WorkoutApp extends StatelessWidget {
         '/profile': (context) => const AccountScreen(),
         '/login': (context) => const LoginScreen(),
         '/start_workout': (context) => const StartWorkoutScreen(),
-        '/database_test': (context) => const DatabaseTestScreen(),
       },
     );
   }
 }
-
+// Dead code database test - delete when not needed
+/*
 class DatabaseTestScreen extends StatelessWidget {
   const DatabaseTestScreen({super.key});
 
@@ -103,3 +103,4 @@ class DatabaseTestScreen extends StatelessWidget {
     );
   }
 }
+*/
