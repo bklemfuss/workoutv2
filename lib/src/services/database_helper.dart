@@ -137,7 +137,7 @@ class DatabaseHelper {
   }
 
   Future<void> insertSampleData(Database db) async {
-    // Insert a sample User
+    // Insert sample Users
     await db.insert('User', {
       'user_id': 1,
       'name': 'John Doe',
@@ -150,19 +150,18 @@ class DatabaseHelper {
       'notification_preferences': 1,
     });
 
-    // Insert a sample Template
-    await db.insert('Template', {
-      'template_id': 1,
-      'template_name': 'Full Body Workout A',
-    });
+    // Insert sample Templates
+    await db.insert('Template', {'template_id': 1, 'template_name': 'Full Body Workout A'});
+    await db.insert('Template', {'template_id': 2, 'template_name': 'Upper Body Strength'});
+    await db.insert('Template', {'template_id': 3, 'template_name': 'Lower Body Endurance'});
+    await db.insert('Template', {'template_id': 4, 'template_name': 'Core Stability'});
 
-    // Insert a sample MuscleGroup
-    await db.insert('MuscleGroup', {
-      'muscle_group_id': 1,
-      'Name': 'Chest',
-    });
+    // Insert sample MuscleGroups
+    await db.insert('MuscleGroup', {'muscle_group_id': 1, 'Name': 'Chest'});
+    await db.insert('MuscleGroup', {'muscle_group_id': 2, 'Name': 'Back'});
+    await db.insert('MuscleGroup', {'muscle_group_id': 3, 'Name': 'Legs'});
 
-    // Insert a sample Exercise
+    // Insert sample Exercises
     await db.insert('Exercise', {
       'exercise_id': 1,
       'muscle_group_id': 1,
@@ -172,23 +171,61 @@ class DatabaseHelper {
       'instructions': 'Keep your back straight and lower yourself to the ground.',
       'image_url': 'https://example.com/push-up.png',
     });
-
-    // Insert a sample TemplateExercise
-    await db.insert('TemplateExercise', {
-      'template_exercise_id': 1,
-      'template_id': 1,
-      'exercise_id': 1,
+    await db.insert('Exercise', {
+      'exercise_id': 2,
+      'muscle_group_id': 2,
+      'name': 'Pull-Up',
+      'Description': 'A basic back and biceps exercise.',
+      'equipment': 0,
+      'instructions': 'Pull yourself up until your chin is above the bar.',
+      'image_url': 'https://example.com/pull-up.png',
+    });
+    await db.insert('Exercise', {
+      'exercise_id': 3,
+      'muscle_group_id': 3,
+      'name': 'Squat',
+      'Description': 'A basic lower body exercise.',
+      'equipment': 0,
+      'instructions': 'Lower your hips until your thighs are parallel to the ground.',
+      'image_url': 'https://example.com/squat.png',
+    });
+    await db.insert('Exercise', {
+      'exercise_id': 4,
+      'muscle_group_id': 1,
+      'name': 'Bench Press',
+      'Description': 'A chest exercise using a barbell.',
+      'equipment': 1,
+      'instructions': 'Lower the barbell to your chest and press it back up.',
+      'image_url': 'https://example.com/bench-press.png',
     });
 
-    // Insert a sample Workout
+    // Insert sample TemplateExercises
+    await db.insert('TemplateExercise', {'template_exercise_id': 1, 'template_id': 1, 'exercise_id': 1});
+    await db.insert('TemplateExercise', {'template_exercise_id': 2, 'template_id': 1, 'exercise_id': 2});
+    await db.insert('TemplateExercise', {'template_exercise_id': 3, 'template_id': 2, 'exercise_id': 3});
+    await db.insert('TemplateExercise', {'template_exercise_id': 4, 'template_id': 3, 'exercise_id': 4});
+
+    // Insert sample Workouts
     await db.insert('Workout', {
       'workout_id': 1,
       'workout_template_id': 1,
       'user_id': 1,
       'date': '2025-04-08',
     });
+    await db.insert('Workout', {
+      'workout_id': 2,
+      'workout_template_id': 2,
+      'user_id': 1,
+      'date': '2025-04-09',
+    });
+    await db.insert('Workout', {
+      'workout_id': 3,
+      'workout_template_id': 3,
+      'user_id': 1,
+      'date': '2025-04-10',
+    });
 
-    // Insert a sample WorkoutExercise
+    // Insert sample WorkoutExercises
     await db.insert('WorkoutExercise', {
       'workout_exercise_id': 1,
       'workout_id': 1,
@@ -197,13 +234,43 @@ class DatabaseHelper {
       'reps': 12,
       'weight': 0.0,
     });
+    await db.insert('WorkoutExercise', {
+      'workout_exercise_id': 2,
+      'workout_id': 1,
+      'exercise_id': 2,
+      'sets': 3,
+      'reps': 10,
+      'weight': 0.0,
+    });
+    await db.insert('WorkoutExercise', {
+      'workout_exercise_id': 3,
+      'workout_id': 2,
+      'exercise_id': 3,
+      'sets': 4,
+      'reps': 8,
+      'weight': 50.0,
+    });
+    await db.insert('WorkoutExercise', {
+      'workout_exercise_id': 4,
+      'workout_id': 3,
+      'exercise_id': 4,
+      'sets': 5,
+      'reps': 6,
+      'weight': 70.0,
+    });
 
-    // Insert a sample BodyMeasurement
+    // Insert sample BodyMeasurements
     await db.insert('BodyMeasurement', {
       'body_measurement_id': 1,
       'user_id': 1,
       'date': '2025-04-08',
-      'weight': 75.5, // Using a REAL value
+      'weight': 75.5,
+    });
+    await db.insert('BodyMeasurement', {
+      'body_measurement_id': 2,
+      'user_id': 1,
+      'date': '2025-04-09',
+      'weight': 76.0,
     });
 
     if (kDebugMode) {
