@@ -1,7 +1,6 @@
 import 'dart:io' as io;
 import 'package:flutter/foundation.dart'; // For kIsWeb and defaultTargetPlatform
-import 'dart:io';
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -15,8 +14,8 @@ import 'src/statistics_screen.dart';
 import 'src/account_screen.dart';
 import 'src/login_screen.dart';
 import 'src/options_screen.dart';
-import 'src/start_workout_screen.dart';
 import 'src/theme/app_theme.dart'; // Import the theme file
+import 'src/widgets/colors.dart';
 import 'src/general_settings_screen.dart';
 import 'src/appearance_settings_screen.dart';
 import 'src/preferences_settings_screen.dart';
@@ -33,7 +32,8 @@ void main() async {
   // Initialize the database factory
   if (kIsWeb) {
     databaseFactory = databaseFactoryFfiWeb; // Use web-specific factory
-  } else if (io.Platform.isLinux || io.Platform.isWindows || io.Platform.isMacOS) {
+  } else if (
+    .Platform.isLinux || io.Platform.isWindows || io.Platform.isMacOS) {
     sqfliteFfiInit(); // Initialize FFI for desktop platforms
     databaseFactory = databaseFactoryFfi;
   }
@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
       theme: theme,
       initialRoute: '/',
       routes: {
-        '/': (context) => const OptionsScreen(),
+        '/': (context) => const Dashboard(),
         '/history': (context) => const HistoryScreen(),
         '/statistics': (context) => const StatisticsScreen(),
         '/options': (context) => const OptionsScreen(),
@@ -140,3 +140,4 @@ class DatabaseTestScreen extends StatelessWidget {
   }
 }
 */
+

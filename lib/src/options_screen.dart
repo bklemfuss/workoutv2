@@ -10,7 +10,6 @@ class OptionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context); // Access the current theme
-
     final options = [
       {'title': 'General', 'route': '/general_settings'},
       {'title': 'Appearance', 'route': '/appearance_settings'},
