@@ -24,22 +24,6 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     String path = await _getDatabasePath();
 
-    // Check if the database already exists
-    bool exists = await databaseExists(path);
-
-    if (!exists) {
-      // Copy the database from assets if it doesn't exist
-      try {
-        ByteData data = await rootBundle.load('assets/workout_db_test.db');
-        List<int> bytes = data.buffer.asUint8List();
-        await File(path).writeAsBytes(bytes);
-      } catch (e) {
-        if (kDebugMode) {
-          print('Error copying database: $e');
-        }
-      }
-    }
-
     return await openDatabase(
       path,
       version: 1,
