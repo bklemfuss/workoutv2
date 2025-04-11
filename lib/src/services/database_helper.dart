@@ -185,7 +185,17 @@ class DatabaseHelper {
     final db = await database;
     return await db.delete('Workout', where: 'workout_id = ?', whereArgs: [id]);
   }
-// #######################################################
+
+  Future<String> getFirstTemplateName() async {
+    final db = await database;
+    final result = await db.query('Template', limit: 1);
+    if (result.isNotEmpty) {
+      return result.first['template_name'] as String;
+    }
+    return 'No Template Found';
+  }
+
+  // #######################################################
   // Adding example data here until database is in assets
   // #######################################################
 
