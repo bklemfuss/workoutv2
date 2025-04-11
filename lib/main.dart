@@ -17,6 +17,11 @@ import 'src/options_screen.dart';
 import 'src/start_workout_screen.dart';
 import 'src/theme/app_theme.dart'; // Import the theme file
 import 'src/widgets/colors.dart';
+import 'src/general_settings_screen.dart';
+import 'src/appearance_settings_screen.dart';
+import 'src/preferences_settings_screen.dart';
+import 'src/goals_settings_screen.dart';
+import 'src/about_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,7 +47,7 @@ class MyApp extends StatelessWidget {
       theme: Platform.isIOS ? iosTheme : androidTheme, // Apply theme based on OS
       initialRoute: '/',
       routes: {
-        '/': (context) => const Dashboard(),
+        '/': (context) => const OptionsScreen(),
         '/history': (context) => const HistoryScreen(),
         '/statistics': (context) => const StatisticsScreen(),
         '/options': (context) => const OptionsScreen(),
@@ -51,6 +56,11 @@ class MyApp extends StatelessWidget {
         '/start_workout': (context) => StartWorkoutScreen(
               templateId: ModalRoute.of(context)!.settings.arguments as int,
             ),
+        '/general_settings': (context) => const GeneralSettingsScreen(),
+        '/appearance_settings': (context) => const AppearanceSettingsScreen(),
+        '/preferences_settings': (context) => const PreferencesSettingsScreen(),
+        '/goals_settings': (context) => const GoalsSettingsScreen(),
+        '/about_settings': (context) => const AboutScreen(),
       },
     );
   }
