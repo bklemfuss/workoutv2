@@ -1,8 +1,7 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart'; // For kIsWeb
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
-import 'dart:io';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart'; // For non-web platforms
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -21,8 +20,7 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    String databasesPath = await getDatabasesPath();
-    String path = join(databasesPath, 'workout_db_test.db');
+    String path = await _getDatabasePath();
 
     // Check if the database already exists
     bool exists = await databaseExists(path);
@@ -45,6 +43,15 @@ class DatabaseHelper {
       version: 1,
       onCreate: _onCreate,
     );
+  }
+
+  Future<String> _getDatabasePath() async {
+    if (kIsWeb) {
+      return 'my_web_database.db'; // Web uses IndexedDB
+    } else {
+      final appDocumentsDir = await getApplicationDocumentsDirectory();
+      return p.join(appDocumentsDir.path, 'workout_db_test.db');
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
