@@ -64,7 +64,10 @@ class MyApp extends StatelessWidget {
         '/preferences_settings': (context) => const PreferencesSettingsScreen(),
         '/goals_settings': (context) => const GoalsSettingsScreen(),
         '/about_settings': (context) => const AboutScreen(),
-        '/edit_profile': (context) => const EditProfileScreen(),
+        '/edit_profile': (context) {
+          final user = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return EditProfileScreen(user: user);
+        },
         '/change_password': (context) => const ChangePasswordScreen(),
         '/manage_account': (context) => const ManageAccountScreen(),
       },
