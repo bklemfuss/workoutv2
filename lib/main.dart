@@ -1,11 +1,6 @@
 import 'dart:io' as io;
 import 'package:flutter/foundation.dart'; // For kIsWeb and defaultTargetPlatform
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'src/dashboard.dart';
@@ -15,7 +10,6 @@ import 'src/account_screen.dart';
 import 'src/login_screen.dart';
 import 'src/options_screen.dart';
 import 'src/theme/app_theme.dart'; // Import the theme file
-import 'src/theme/colors.dart';
 import 'src/general_settings_screen.dart';
 import 'src/appearance_settings_screen.dart';
 import 'src/preferences_settings_screen.dart';
