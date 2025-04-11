@@ -6,22 +6,23 @@ import 'widgets/bottom_nav_bar.dart';
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
 
+  Future<List<Map<String, dynamic>>> _fetchTemplates() async {
+    return await DatabaseHelper().getTemplates();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const AppToolbar(title: 'Dashboard'),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // Calculate the available height excluding the AppBar and BottomNavBar
-          final availableHeight = constraints.maxHeight;
-
           return Column(
             children: [
               // Top Section (25% of available height)
               Expanded(
-                flex: 1, // 1 out of 4 parts (25%)
+                flex: 1,
                 child: Container(
-                  color: Colors.blue[100], // Placeholder color
+                  color: Colors.blue[100],
                   child: const Center(
                     child: Text(
                       'Top Section (ring widgets)',
@@ -32,108 +33,82 @@ class Dashboard extends StatelessWidget {
               ),
               // Middle Section (60% of available height)
               Expanded(
-                flex: 3, // 3 out of 5 parts (60%)
+                flex: 3,
                 child: Container(
-                  color: Colors.blue[200], // Placeholder color
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: constraints.maxWidth, // Ensure tiles fit within the screen width
-                          child: LayoutBuilder(
-                            builder: (context, middleConstraints) {
-                              // Calculate dynamic vertical spacing based on the middle section height
-                              final dynamicVerticalSpacing =
-                                  (middleConstraints.maxHeight * 0.05).clamp(8.0, 24.0);
-
-                              return Wrap(
-                                spacing: 16, // Static horizontal spacing
-                                runSpacing: dynamicVerticalSpacing, // Dynamic vertical spacing
-                                alignment: WrapAlignment.start,
-                                children: List.generate(6, (index) {
-                                  if (index == 0) {
-                                    return SizedBox(
-                                      width: constraints.maxWidth / 3 - 24,
-                                      height: middleConstraints.maxHeight / 2 - dynamicVerticalSpacing,
-                                      child: Card(
-                                        color: Colors.orange[100],
-                                        elevation: 4,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Center(
-                                          child: FutureBuilder<String>(
-                                            future: DatabaseHelper().getFirstTemplateName(),
-                                            builder: (context, snapshot) {
-                                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                                return const CircularProgressIndicator();
-                                              } else if (snapshot.hasError) {
-                                                return const Text('Error');
-                                              } else {
-                                                return Text(
-                                                  snapshot.data ?? 'No Template Found',
-                                                  textAlign: TextAlign.center,
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                );
-                                              }
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  } else {
-                                    return SizedBox(
-                                      width: constraints.maxWidth / 3 - 24,
-                                      height: middleConstraints.maxHeight / 2 - dynamicVerticalSpacing,
-                                      child: Card(
-                                        color: Colors.orange[100],
-                                        elevation: 4,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            'Workout ${index + 1}',
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                }),
-                              );
-                            },
+                  color: Colors.blue[200],
+                  child: FutureBuilder<List<Map<String, dynamic>>>(
+                    future: _fetchTemplates(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return const Center(child: Text('Error loading templates.'));
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Center(child: Text('No templates found.'));
+                      } else {
+                        final templates = snapshot.data!;
+                        return GridView.builder(
+                          padding: const EdgeInsets.all(16),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2, // Number of tiles per row
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 3 / 2, // Adjust the aspect ratio of tiles
                           ),
-                        ),
-                      ],
-                    ),
+                          itemCount: templates.length,
+                          itemBuilder: (context, index) {
+                            final template = templates[index];
+                            return GestureDetector(
+                              onTap: () {
+                                // Navigate to StartWorkoutScreen with the selected template_id
+                                Navigator.pushNamed(
+                                  context,
+                                  '/start_workout',
+                                  arguments: template['template_id'],
+                                );
+                              },
+                              child: Card(
+                                color: Colors.orange[100],
+                                elevation: 4,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    template['template_name'] ?? 'Unknown Template',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }
+                    },
                   ),
                 ),
               ),
               // Bottom Section (15% of available height)
               Expanded(
-                flex: 1, // 1 out of 5 parts (15%)
+                flex: 1,
                 child: Container(
-                  color: Colors.blue[300], // Placeholder color
+                  color: Colors.blue[300],
                   child: Center(
                     child: SizedBox(
-                      width: constraints.maxWidth * 0.7, // 70% of the screen width
-                      height: availableHeight * 0.15 * 0.4, // 40% of the bottom section height
+                      width: constraints.maxWidth * 0.7,
+                      height: constraints.maxHeight * 0.15 * 0.4,
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/start_workout');
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange, // Customize button color
+                          backgroundColor: Colors.orange,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12), // Rounded corners
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: const Text(

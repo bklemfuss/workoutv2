@@ -27,11 +27,11 @@ void main() async {
     databaseFactory = databaseFactoryFfi;
   }
 
-  runApp(const WorkoutApp());
+  runApp(const MyApp());
 }
 
-class WorkoutApp extends StatelessWidget {
-  const WorkoutApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -52,13 +52,15 @@ class WorkoutApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => Dashboard(),
+        '/': (context) => const Dashboard(),
         '/history': (context) => const HistoryScreen(),
         '/statistics': (context) => const StatisticsScreen(),
         '/options': (context) => const OptionsScreen(),
         '/profile': (context) => const AccountScreen(),
         '/login': (context) => const LoginScreen(),
-        '/start_workout': (context) => const StartWorkoutScreen(),
+        '/start_workout': (context) => StartWorkoutScreen(
+              templateId: ModalRoute.of(context)!.settings.arguments as int,
+            ),
       },
     );
   }
