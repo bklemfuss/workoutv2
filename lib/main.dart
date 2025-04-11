@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
       theme: Platform.isIOS ? iosTheme : androidTheme, // Apply theme based on OS
       initialRoute: '/',
       routes: {
-        '/': (context) => const OptionsScreen(),
+        '/': (context) => const Dashboard(),
         '/history': (context) => const HistoryScreen(),
         '/statistics': (context) => const StatisticsScreen(),
         '/options': (context) => const OptionsScreen(),
