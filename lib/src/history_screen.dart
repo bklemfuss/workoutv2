@@ -18,24 +18,20 @@ class HistoryScreen extends StatelessWidget {
       body: Column(
         children: [
           // Top Section (10% of the screen height)
-          LayoutBuilder(
-            builder: (context, constraints) {
-              return Container(
-                height: constraints.maxHeight * 0.1,
-                color: Colors.blue[100], // Placeholder color
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.calendar_today, size: 28),
-                      onPressed: () {
-                        // Add functionality for calendar icon if needed
-                      },
-                    ),
-                  ],
+          Container(
+            height: MediaQuery.of(context).size.height * 0.1,
+            color: Colors.blue[100], // Placeholder color
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.calendar_today, size: 28),
+                  onPressed: () {
+                    // Add functionality for calendar icon if needed
+                  },
                 ),
-              );
-            },
+              ],
+            ),
           ),
           // Remaining Section (90% of the screen height)
           Expanded(
@@ -80,10 +76,10 @@ class HistoryScreen extends StatelessWidget {
           ),
         ],
       ),
+      floatingActionButton: const FloatingStartNewWorkoutButton(), // Use the custom FAB widget
       bottomNavigationBar: const BottomNavBar(
         currentIndex: 1,
       ),
-      floatingActionButton: const FloatingStartNewWorkoutButton(),
     );
   }
 }
