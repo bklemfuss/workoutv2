@@ -15,9 +15,11 @@ final ThemeData androidTheme = ThemeData(
     ),
   ),
   bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-    selectedItemColor: AppColors.secondary,
-    unselectedItemColor: AppColors.textSecondary,
+    selectedItemColor: AppColors.primary,
+    unselectedItemColor: AppColors.secondary,
     backgroundColor: AppColors.background,
+    elevation: 8, // Optional: Add elevation for a shadow effect
+    type: BottomNavigationBarType.fixed,
   ),
   textTheme: const TextTheme(
     bodyLarge: TextStyle(fontSize: 16, color: AppColors.textPrimary),
@@ -40,7 +42,7 @@ final ThemeData iosTheme = ThemeData(
   ),
   bottomNavigationBarTheme: const BottomNavigationBarThemeData(
     selectedItemColor: AppColors.primary,
-    unselectedItemColor: AppColors.textSecondary,
+    unselectedItemColor: AppColors.secondary,
     backgroundColor: AppColors.background,
   ),
   textTheme: const TextTheme(
