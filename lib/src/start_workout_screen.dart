@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'services/database_helper.dart';
 
 class StartWorkoutScreen extends StatelessWidget {
-  const StartWorkoutScreen({Key? key}) : super(key: key);
+  final int templateId;
+
+  const StartWorkoutScreen({Key? key, required this.templateId}) : super(key: key);
+
+  Future<List<Map<String, dynamic>>> _fetchExercises() async {
+    return await DatabaseHelper().getExercisesByTemplateId(templateId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -9,11 +16,68 @@ class StartWorkoutScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Start Workout'),
       ),
-      body: const Center(
-        child: Text(
-          'This is the Start Workout Screen',
-          style: TextStyle(fontSize: 18),
-        ),
+      body: Column(
+        children: [
+          // Scrollable list of exercises (90% of the screen height)
+          Expanded(
+            flex: 9,
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: _fetchExercises(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(child: Text('Error loading exercises.'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No exercises found.'));
+                } else {
+                  final exercises = snapshot.data!;
+                  return ListView.builder(
+                    itemCount: exercises.length,
+                    itemBuilder: (context, index) {
+                      final exercise = exercises[index];
+                      return ListTile(
+                        title: Text(exercise['name'] ?? 'Unknown Exercise'),
+                        subtitle: Text(exercise['Description'] ?? 'No description available'),
+                        onTap: () {
+                          // Add functionality for tapping an exercise if needed
+                        },
+                      );
+                    },
+                  );
+                }
+              },
+            ),
+          ),
+          // Bottom section with "Start Workout" button (10% of the screen height)
+          Expanded(
+            flex: 1,
+            child: Container(
+              color: Colors.blue[100], // Optional background color
+              child: Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Add functionality for starting the workout
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Workout Started!')),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Start Workout',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
