@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
       theme: theme,
       initialRoute: '/',
       routes: {
-        '/': (context) => const Dashboard(),
+        '/': (context) => const OptionsScreen(),
         '/history': (context) => const HistoryScreen(),
         '/statistics': (context) => const StatisticsScreen(),
         '/options': (context) => const OptionsScreen(),
