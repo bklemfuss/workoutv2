@@ -300,6 +300,17 @@ class DatabaseHelper {
     return await db.delete('User', where: 'user_id = ?', whereArgs: [id]);
   }
 
+  Future<Map<String, dynamic>> getUserById(int userId) async {
+    final db = await database;
+    final result = await db.query(
+      'User',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+      limit: 1,
+    );
+    return result.isNotEmpty ? result.first : {};
+  }
+
   // Example CRUD methods for the Workout table
   Future<int> insertWorkout(Map<String, dynamic> workout) async {
     final db = await database;
