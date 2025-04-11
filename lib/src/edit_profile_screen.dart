@@ -12,18 +12,18 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController nameController;
-  late TextEditingController heightController;
   late TextEditingController dobController;
   late int gender; // 1 for Male, 0 for Female
+  late int selectedHeight; // Height in inches
 
   @override
   void initState() {
     super.initState();
     // Initialize controllers with the user's data
     nameController = TextEditingController(text: widget.user['name']);
-    heightController = TextEditingController(text: widget.user['height']?.toString());
     dobController = TextEditingController(text: widget.user['date_of_birth']);
     gender = widget.user['gender'] ?? 1; // Default to Male if null
+    selectedHeight = widget.user['height'] ?? 60; // Default to 60 inches if null
   }
 
   Future<void> _saveProfile() async {
@@ -31,7 +31,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     await DatabaseHelper().updateUser({
       'user_id': 1, // Assuming user_id is always 1
       'name': nameController.text,
-      'height': int.tryParse(heightController.text) ?? widget.user['height'],
+      'height': selectedHeight,
       'date_of_birth': dobController.text,
       'gender': gender,
     });
@@ -39,6 +39,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     // Navigate back to the AccountScreen
     if (mounted) {
       Navigator.pop(context, true); // Pass true to indicate data was updated
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.tryParse(dobController.text) ?? DateTime(2000),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        dobController.text = pickedDate.toIso8601String().split('T').first; // Format as YYYY-MM-DD
+      });
     }
   }
 
@@ -63,17 +77,45 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               style: TextStyle(fontSize: screenHeight * 0.02),
             ),
             SizedBox(height: screenHeight * 0.02),
-            TextField(
-              controller: heightController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Height (cm)'),
-              style: TextStyle(fontSize: screenHeight * 0.02),
+            Row(
+              children: [
+                const Text('Height:', style: TextStyle(fontSize: 16)),
+                SizedBox(width: screenWidth * 0.05),
+                DropdownButton<int>(
+                  value: selectedHeight,
+                  items: List.generate(
+                    52, // 48 to 99 inches
+                    (index) => DropdownMenuItem(
+                      value: 48 + index,
+                      child: Text('${48 + index} inches'),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedHeight = value!;
+                    });
+                  },
+                ),
+              ],
             ),
             SizedBox(height: screenHeight * 0.02),
-            TextField(
-              controller: dobController,
-              decoration: const InputDecoration(labelText: 'Date of Birth (YYYY-MM-DD)'),
-              style: TextStyle(fontSize: screenHeight * 0.02),
+            Row(
+              children: [
+                const Text('Date of Birth:', style: TextStyle(fontSize: 16)),
+                SizedBox(width: screenWidth * 0.05),
+                Expanded(
+                  child: TextField(
+                    controller: dobController,
+                    readOnly: true,
+                    onTap: () => _selectDate(context),
+                    decoration: const InputDecoration(
+                      hintText: 'Select Date',
+                      suffixIcon: Icon(Icons.calendar_today),
+                    ),
+                    style: TextStyle(fontSize: screenHeight * 0.02),
+                  ),
+                ),
+              ],
             ),
             SizedBox(height: screenHeight * 0.02),
             Row(
@@ -111,20 +153,38 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ],
             ),
             SizedBox(height: screenHeight * 0.04),
-            Center(
-              child: ElevatedButton(
-                onPressed: _saveProfile,
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(
-                    vertical: screenHeight * 0.015,
-                    horizontal: screenWidth * 0.1,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context, false); // Return without saving
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      vertical: screenHeight * 0.015,
+                      horizontal: screenWidth * 0.1,
+                    ),
+                  ),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(fontSize: screenHeight * 0.02),
                   ),
                 ),
-                child: Text(
-                  'Save',
-                  style: TextStyle(fontSize: screenHeight * 0.02),
+                ElevatedButton(
+                  onPressed: _saveProfile,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      vertical: screenHeight * 0.015,
+                      horizontal: screenWidth * 0.1,
+                    ),
+                  ),
+                  child: Text(
+                    'Save',
+                    style: TextStyle(fontSize: screenHeight * 0.02),
+                  ),
                 ),
-              ),
+              ],
             ),
           ],
         ),
