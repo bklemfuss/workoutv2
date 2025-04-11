@@ -60,7 +60,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         radius: screenHeight * 0.05, // Dynamic radius
                         backgroundImage: user['profile_picture'] != null
                             ? NetworkImage(user['profile_picture'])
-                            : const AssetImage('assets/default_profile.png') as ImageProvider,
+                            : const AssetImage('assets/flutter_logo.png') as ImageProvider,
                       ),
                     ],
                   ),
@@ -91,8 +91,15 @@ class _AccountScreenState extends State<AccountScreen> {
                         ),
                         SizedBox(height: screenHeight * 0.03), // Dynamic spacing
                         ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/edit_profile');
+                          onPressed: () async {
+                            final updated = await Navigator.pushNamed(
+                              context,
+                              '/edit_profile',
+                              arguments: user, // Pass user data as arguments
+                            );
+                            if (updated == true) {
+                              _loadUserData(); // Reload user data if it was updated
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.symmetric(
