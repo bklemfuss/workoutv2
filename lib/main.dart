@@ -1,6 +1,5 @@
 import 'dart:io' as io;
-import 'package:flutter/foundation.dart';
-import 'dart:io';
+import 'package:flutter/foundation.dart'; // For kIsWeb and defaultTargetPlatform
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
@@ -16,7 +15,6 @@ import 'src/account_screen.dart';
 import 'src/login_screen.dart';
 import 'src/options_screen.dart';
 import 'src/start_workout_screen.dart';
-import 'src/theme/app_theme.dart'; // Import the theme file
 import 'src/theme/app_theme.dart'; // Import the theme file
 import 'src/general_settings_screen.dart';
 import 'src/appearance_settings_screen.dart';
@@ -47,9 +45,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine the theme based on the platform
+    final ThemeData theme;
+    if (kIsWeb) {
+      theme = androidTheme; // Use Android theme for web
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      theme = iosTheme;
+    } else {
+      theme = androidTheme;
+    }
+
     return MaterialApp(
       title: 'Workout App',
-      theme: Platform.isIOS ? iosTheme : androidTheme, // Apply theme based on OS
+      theme: theme,
       initialRoute: '/',
       routes: {
         '/': (context) => const Dashboard(),
