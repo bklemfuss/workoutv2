@@ -346,4 +346,19 @@ class DatabaseHelper {
     }
     return 'No Template Found';
   }
+
+  Future<List<Map<String, dynamic>>> getWorkoutsWithDetails() async {
+    final db = await database;
+    return await db.rawQuery('''
+      SELECT 
+        w.workout_id,
+        w.date,
+        t.template_name,
+        u.name AS user_name
+      FROM Workout w
+      INNER JOIN Template t ON w.workout_template_id = t.template_id
+      INNER JOIN User u ON w.user_id = u.user_id
+      ORDER BY w.date DESC
+    ''');
+  }
 }
