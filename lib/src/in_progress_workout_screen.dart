@@ -1,0 +1,158 @@
+import 'package:flutter/material.dart';
+
+class InProgressWorkoutScreen extends StatelessWidget {
+  final List<Map<String, dynamic>> exercises;
+
+  const InProgressWorkoutScreen({super.key, required this.exercises});
+
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('In Progress Workout')),
+      body: Column(
+        children: [
+          // Top Section (5% of the screen height)
+          Container(
+            height: screenHeight * 0.05,
+            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+            color: Colors.blue[100], // Optional background color
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Timer Placeholder',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('Finish Workout'),
+                          content: const Text('Are you sure you want to finish the workout?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Confirm'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    if (confirm == true) {
+                      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: EdgeInsets.symmetric(
+                      vertical: screenHeight * 0.01,
+                      horizontal: screenWidth * 0.05,
+                    ),
+                  ),
+                  child: const Text(
+                    'Finish Workout',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Scrollable List of Exercises (95% of the screen height)
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
+              itemCount: exercises.length,
+              itemBuilder: (context, index) {
+                final exercise = exercises[index];
+                return Card(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.05,
+                    vertical: screenHeight * 0.01,
+                  ),
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(screenWidth * 0.04),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Exercise Name
+                        Text(
+                          exercise['name'] ?? 'Unknown Exercise',
+                          style: TextStyle(
+                            fontSize: screenHeight * 0.02,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.01),
+                        // Input Fields for Weight, Sets, Reps
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _buildInputField(
+                              context,
+                              label: 'Weight',
+                              initialValue: exercise['weight']?.toString() ?? '',
+                            ),
+                            _buildInputField(
+                              context,
+                              label: 'Sets',
+                              initialValue: exercise['sets']?.toString() ?? '',
+                            ),
+                            _buildInputField(
+                              context,
+                              label: 'Reps',
+                              initialValue: exercise['reps']?.toString() ?? '',
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputField(BuildContext context,
+      {required String label, required String initialValue}) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: screenHeight * 0.015),
+        ),
+        SizedBox(
+          width: screenWidth * 0.15,
+          child: TextField(
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+              border: OutlineInputBorder(),
+            ),
+            controller: TextEditingController(text: initialValue),
+          ),
+        ),
+      ],
+    );
+  }
+}
