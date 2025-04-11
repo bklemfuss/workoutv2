@@ -112,7 +112,7 @@ class Dashboard extends StatelessWidget {
                           ),
                         ),
                         child: const Text(
-                          'Start New Workout',
+                          'Create New Workout',
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
