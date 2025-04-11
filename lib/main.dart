@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const OptionsScreen(),
+        '/': (context) => const Dashboard(),
         '/history': (context) => const HistoryScreen(),
         '/statistics': (context) => const StatisticsScreen(),
         '/options': (context) => const OptionsScreen(),
