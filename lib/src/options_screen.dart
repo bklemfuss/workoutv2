@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'widgets/floating_start_new_workout_button.dart';
+import 'theme/colors.dart'; // Import AppColors for custom colors
 
 class OptionsScreen extends StatelessWidget {
   const OptionsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Access the current theme
     final options = [
       {'title': 'General', 'route': '/general_settings'},
       {'title': 'Appearance', 'route': '/appearance_settings'},
@@ -26,15 +28,22 @@ class OptionsScreen extends StatelessWidget {
           return Card(
             elevation: 4,
             margin: const EdgeInsets.symmetric(vertical: 8),
+            color: AppColors.secondary, // Use secondary color for card background
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
             child: ListTile(
               title: Text(
                 option['title']!,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary, // Use primary text color
+                ),
               ),
-              trailing: const Icon(Icons.arrow_forward),
+              trailing: const Icon(
+                Icons.arrow_forward,
+                color: AppColors.textPrimary, // Use primary text color for the icon
+              ),
               onTap: () {
                 Navigator.pushNamed(context, option['route']!);
               },

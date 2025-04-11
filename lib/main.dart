@@ -1,4 +1,5 @@
 import 'dart:io' as io;
+import 'package:flutter/foundation.dart'; // For kIsWeb and defaultTargetPlatform
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
@@ -13,8 +14,8 @@ import 'src/statistics_screen.dart';
 import 'src/account_screen.dart';
 import 'src/login_screen.dart';
 import 'src/options_screen.dart';
-import 'src/start_workout_screen.dart';
-import 'src/widgets/colors.dart';
+import 'src/theme/app_theme.dart'; // Import the theme file
+import 'src/theme/colors.dart';
 import 'src/general_settings_screen.dart';
 import 'src/appearance_settings_screen.dart';
 import 'src/preferences_settings_screen.dart';
@@ -24,6 +25,7 @@ import 'src/edit_profile_screen.dart';
 import 'src/change_password_screen.dart';
 import 'src/manage_account_screen.dart';
 import 'src/in_progress_workout_screen.dart';
+import 'src/start_workout_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +33,8 @@ void main() async {
   // Initialize the database factory
   if (kIsWeb) {
     databaseFactory = databaseFactoryFfiWeb; // Use web-specific factory
-  } else if (io.Platform.isLinux || io.Platform.isWindows || io.Platform.isMacOS) {
+  } else if (
+    io.Platform.isLinux || io.Platform.isWindows || io.Platform.isMacOS) {
     sqfliteFfiInit(); // Initialize FFI for desktop platforms
     databaseFactory = databaseFactoryFfi;
   }
@@ -44,21 +47,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine the theme based on the platform
+    final ThemeData theme;
+    if (kIsWeb) {
+      theme = androidTheme; // Use Android theme for web
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      theme = iosTheme;
+    } else {
+      theme = androidTheme;
+    }
+
     return MaterialApp(
       title: 'Workout App',
-      theme: ThemeData(
-        primaryColor: AppColors.primary,
-        scaffoldBackgroundColor: AppColors.background,
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(fontSize: 16, color: AppColors.textPrimary),
-          bodyMedium: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-        ),
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          selectedItemColor: AppColors.secondary, // Color for selected items
-          unselectedItemColor: AppColors.primary, // Color for unselected items
-          backgroundColor: AppColors.background, // Background color of the BottomNavBar
-        ),
-      ),
+      theme: theme,
       initialRoute: '/',
       routes: {
         '/': (context) => const Dashboard(),
@@ -140,3 +141,4 @@ class DatabaseTestScreen extends StatelessWidget {
   }
 }
 */
+
