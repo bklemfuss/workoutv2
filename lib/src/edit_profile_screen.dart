@@ -23,7 +23,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     nameController = TextEditingController(text: widget.user['name']);
     dobController = TextEditingController(text: widget.user['date_of_birth']);
     gender = widget.user['gender'] ?? 1; // Default to Male if null
+
+    // Ensure selectedHeight is within the valid range (48 to 99 inches)
     selectedHeight = widget.user['height'] ?? 60; // Default to 60 inches if null
+    if (selectedHeight < 48 || selectedHeight > 99) {
+      selectedHeight = 60; // Reset to default if out of range
+    }
   }
 
   Future<void> _saveProfile() async {
