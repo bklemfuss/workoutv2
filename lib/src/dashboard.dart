@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'services/database_helper.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
-import 'widgets/floating_start_new_workout_button.dart';
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
@@ -31,9 +30,9 @@ class Dashboard extends StatelessWidget {
                   ),
                 ),
               ),
-              // Middle Section (50% of available height)
+              // Middle Section (60% of available height)
               Expanded(
-                flex: 2, // 2 out of 4 parts (50%)
+                flex: 3, // 3 out of 5 parts (60%)
                 child: Container(
                   color: Colors.blue[200], // Placeholder color
                   child: SingleChildScrollView(
@@ -118,15 +117,15 @@ class Dashboard extends StatelessWidget {
                   ),
                 ),
               ),
-              // Bottom Section (25% of available height)
+              // Bottom Section (15% of available height)
               Expanded(
-                flex: 1, // 1 out of 4 parts (25%)
+                flex: 1, // 1 out of 5 parts (15%)
                 child: Container(
                   color: Colors.blue[300], // Placeholder color
                   child: Center(
                     child: SizedBox(
                       width: constraints.maxWidth * 0.7, // 70% of the screen width
-                      height: availableHeight * 0.25 * 0.4, // 40% of the bottom section height
+                      height: availableHeight * 0.15 * 0.4, // 40% of the bottom section height
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/pre_workout');
@@ -153,7 +152,6 @@ class Dashboard extends StatelessWidget {
       bottomNavigationBar: const BottomNavBar(
         currentIndex: 0,
       ),
-      floatingActionButton: const FloatingStartNewWorkoutButton(),
     );
   }
 }
