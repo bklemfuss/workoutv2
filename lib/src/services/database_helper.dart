@@ -361,4 +361,23 @@ class DatabaseHelper {
       ORDER BY w.date DESC
     ''');
   }
+
+  Future<List<Map<String, dynamic>>> getExercisesByTemplateId(int templateId) async {
+    final db = await database;
+    return await db.rawQuery('''
+      SELECT 
+        e.exercise_id, 
+        e.name, 
+        e.Description, 
+        e.instructions 
+      FROM TemplateExercise te
+      INNER JOIN Exercise e ON te.exercise_id = e.exercise_id
+      WHERE te.template_id = ?
+    ''', [templateId]);
+  }
+
+  Future<List<Map<String, dynamic>>> getTemplates() async {
+    final db = await database;
+    return await db.query('Template');
+  }
 }
