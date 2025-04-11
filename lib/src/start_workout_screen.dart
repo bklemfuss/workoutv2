@@ -57,10 +57,14 @@ class StartWorkoutScreen extends StatelessWidget {
               child: Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    // Add functionality for starting the workout
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Workout Started!')),
-                    );
+                    // Ensure exercises is fetched and passed correctly
+                    _fetchExercises().then((exercises) {
+                      Navigator.pushNamed(
+                        context,
+                        '/in_progress_workout',
+                        arguments: exercises, // Pass the exercises list as arguments
+                      );
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
