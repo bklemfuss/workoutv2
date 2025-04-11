@@ -24,22 +24,6 @@ class DatabaseHelper {
     String databasesPath = await getDatabasesPath();
     String path = join(databasesPath, 'workout_db_test.db');
 
-    // Check if the database already exists
-    bool exists = await databaseExists(path);
-
-    if (!exists) {
-      // Copy the database from assets if it doesn't exist
-      try {
-        ByteData data = await rootBundle.load('assets/workout_db_test.db');
-        List<int> bytes = data.buffer.asUint8List();
-        await File(path).writeAsBytes(bytes);
-      } catch (e) {
-        if (kDebugMode) {
-          print('Error copying database: $e');
-        }
-      }
-    }
-
     return await openDatabase(
       path,
       version: 1,
@@ -140,68 +124,12 @@ class DatabaseHelper {
         FOREIGN KEY (user_id) REFERENCES User(user_id)
       )
     ''');
+
+    // Populate the database with sample data
+    await insertSampleData(db);
   }
 
-  // Example CRUD methods for the User table
-  Future<int> insertUser(Map<String, dynamic> user) async {
-    final db = await database;
-    return await db.insert('User', user);
-  }
-
-  Future<List<Map<String, dynamic>>> getUsers() async {
-    final db = await database;
-    return await db.query('User');
-  }
-
-  Future<int> updateUser(Map<String, dynamic> user) async {
-    final db = await database;
-    int id = user['user_id'];
-    return await db.update('User', user, where: 'user_id = ?', whereArgs: [id]);
-  }
-
-  Future<int> deleteUser(int id) async {
-    final db = await database;
-    return await db.delete('User', where: 'user_id = ?', whereArgs: [id]);
-  }
-
-  // Example CRUD methods for the Workout table
-  Future<int> insertWorkout(Map<String, dynamic> workout) async {
-    final db = await database;
-    return await db.insert('Workout', workout);
-  }
-
-  Future<List<Map<String, dynamic>>> getWorkouts() async {
-    final db = await database;
-    return await db.query('Workout');
-  }
-
-  Future<int> updateWorkout(Map<String, dynamic> workout) async {
-    final db = await database;
-    int id = workout['workout_id'];
-    return await db.update('Workout', workout, where: 'workout_id = ?', whereArgs: [id]);
-  }
-
-  Future<int> deleteWorkout(int id) async {
-    final db = await database;
-    return await db.delete('Workout', where: 'workout_id = ?', whereArgs: [id]);
-  }
-
-  Future<String> getFirstTemplateName() async {
-    final db = await database;
-    final result = await db.query('Template', limit: 1);
-    if (result.isNotEmpty) {
-      return result.first['template_name'] as String;
-    }
-    return 'No Template Found';
-  }
-
-  // #######################################################
-  // Adding example data here until database is in assets
-  // #######################################################
-
-  Future<void> insertSampleData() async {
-    final db = await database;
-
+  Future<void> insertSampleData(Database db) async {
     // Insert a sample User
     await db.insert('User', {
       'user_id': 1,
@@ -275,5 +203,57 @@ class DatabaseHelper {
       print('Sample data inserted successfully.');
     }
   }
-  // #######################################################
+
+  // Example CRUD methods for the User table
+  Future<int> insertUser(Map<String, dynamic> user) async {
+    final db = await database;
+    return await db.insert('User', user);
+  }
+
+  Future<List<Map<String, dynamic>>> getUsers() async {
+    final db = await database;
+    return await db.query('User');
+  }
+
+  Future<int> updateUser(Map<String, dynamic> user) async {
+    final db = await database;
+    int id = user['user_id'];
+    return await db.update('User', user, where: 'user_id = ?', whereArgs: [id]);
+  }
+
+  Future<int> deleteUser(int id) async {
+    final db = await database;
+    return await db.delete('User', where: 'user_id = ?', whereArgs: [id]);
+  }
+
+  // Example CRUD methods for the Workout table
+  Future<int> insertWorkout(Map<String, dynamic> workout) async {
+    final db = await database;
+    return await db.insert('Workout', workout);
+  }
+
+  Future<List<Map<String, dynamic>>> getWorkouts() async {
+    final db = await database;
+    return await db.query('Workout');
+  }
+
+  Future<int> updateWorkout(Map<String, dynamic> workout) async {
+    final db = await database;
+    int id = workout['workout_id'];
+    return await db.update('Workout', workout, where: 'workout_id = ?', whereArgs: [id]);
+  }
+
+  Future<int> deleteWorkout(int id) async {
+    final db = await database;
+    return await db.delete('Workout', where: 'workout_id = ?', whereArgs: [id]);
+  }
+
+  Future<String> getFirstTemplateName() async {
+    final db = await database;
+    final result = await db.query('Template', limit: 1);
+    if (result.isNotEmpty) {
+      return result.first['template_name'] as String;
+    }
+    return 'No Template Found';
+  }
 }
