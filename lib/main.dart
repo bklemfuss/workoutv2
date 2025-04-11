@@ -20,6 +20,9 @@ import 'src/appearance_settings_screen.dart';
 import 'src/preferences_settings_screen.dart';
 import 'src/goals_settings_screen.dart';
 import 'src/about_screen.dart';
+import 'src/edit_profile_screen.dart';
+import 'src/change_password_screen.dart';
+import 'src/manage_account_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,6 +74,12 @@ class MyApp extends StatelessWidget {
         '/preferences_settings': (context) => const PreferencesSettingsScreen(),
         '/goals_settings': (context) => const GoalsSettingsScreen(),
         '/about_settings': (context) => const AboutScreen(),
+        '/edit_profile': (context) {
+          final user = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return EditProfileScreen(user: user);
+        },
+        '/change_password': (context) => const ChangePasswordScreen(),
+        '/manage_account': (context) => const ManageAccountScreen(),
       },
     );
   }
