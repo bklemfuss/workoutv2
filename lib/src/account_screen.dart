@@ -60,7 +60,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         radius: screenHeight * 0.05, // Dynamic radius
                         backgroundImage: user['profile_picture'] != null
                             ? NetworkImage(user['profile_picture'])
-                            : const AssetImage('assets/flutter_logo.png') as ImageProvider,
+                            : const AssetImage('assets/images/flutter_logo.png') as ImageProvider,
                       ),
                     ],
                   ),
