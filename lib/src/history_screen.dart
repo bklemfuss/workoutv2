@@ -3,6 +3,7 @@ import 'services/database_helper.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'widgets/floating_start_new_workout_button.dart';
+import 'theme/colors.dart'; // Import AppColors for custom colors
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
@@ -13,6 +14,8 @@ class HistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Access the current theme
+
     return Scaffold(
       appBar: const AppToolbar(title: 'History'),
       body: Column(
@@ -20,12 +23,16 @@ class HistoryScreen extends StatelessWidget {
           // Top Section (10% of the screen height)
           Container(
             height: MediaQuery.of(context).size.height * 0.1,
-            color: Colors.blue[100], // Placeholder color
+            color: theme.appBarTheme.backgroundColor, // Use theme's app bar background color
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.calendar_today, size: 28),
+                  icon: Icon(
+                    Icons.calendar_today,
+                    size: 28,
+                    color: AppColors.textPrimary, // Use primary text color
+                  ),
                   onPressed: () {
                     // Add functionality for calendar icon if needed
                   },
@@ -41,32 +48,53 @@ class HistoryScreen extends StatelessWidget {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return const Center(child: Text('Error loading workouts.'));
+                  return Center(
+                    child: Text(
+                      'Error loading workouts.',
+                      style: theme.textTheme.bodyLarge, // Use theme's text style
+                    ),
+                  );
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No workouts found.'));
+                  return Center(
+                    child: Text(
+                      'No workouts found.',
+                      style: theme.textTheme.bodyLarge, // Use theme's text style
+                    ),
+                  );
                 } else {
                   final workouts = snapshot.data!;
                   return ListView.builder(
                     itemCount: workouts.length,
                     itemBuilder: (context, index) {
                       final workout = workouts[index];
-                      return ListTile(
-                        title: Text(workout['template_name'] ?? 'Unknown Template'),
-                        subtitle: Text(
-                          'Date: ${workout['date']}\nUser: ${workout['user_name'] ?? 'Unknown User'}',
+                      return Card(
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        color: AppColors.secondary, // Use secondary color for cards
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        trailing: const Icon(Icons.arrow_forward),
-                        onTap: () {
-                          // Navigate to workout summary screen
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => WorkoutSummaryScreen(
-                                workoutId: workout['workout_id'],
-                              ),
-                            ),
-                          );
-                        },
+                        child: ListTile(
+                          title: Text(
+                            workout['template_name'] ?? 'Unknown Template',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ), // Use theme's text style
+                          ),
+                          subtitle: Text(
+                            'Date: ${workout['date']}\nUser: ${workout['user_name'] ?? 'Unknown User'}',
+                            style: theme.textTheme.bodyMedium, // Use theme's text style
+                          ),
+                          trailing: const Icon(Icons.arrow_forward),
+                          onTap: () {
+                            // Navigate to workout summary screen
+                            Navigator.pushNamed(
+                              context,
+                              '/workout_summary',
+                              arguments: workout['workout_id'],
+                            );
+                          },
+                        ),
                       );
                     },
                   );

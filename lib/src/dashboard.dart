@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'services/database_helper.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
+import 'theme/colors.dart'; // Import AppColors for custom colors
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
@@ -12,6 +13,8 @@ class Dashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Access the current theme
+
     return Scaffold(
       appBar: const AppToolbar(title: 'Dashboard'),
       body: LayoutBuilder(
@@ -22,7 +25,7 @@ class Dashboard extends StatelessWidget {
               Expanded(
                 flex: 1,
                 child: Container(
-                  color: Colors.blue[100],
+                  color: AppColors.background, // Use background color from AppColors
                   child: const Center(
                     child: Text(
                       'Top Section (ring widgets)',
@@ -35,7 +38,7 @@ class Dashboard extends StatelessWidget {
               Expanded(
                 flex: 3,
                 child: Container(
-                  color: Colors.blue[200],
+                  color: AppColors.background, // Use secondary color from AppColors
                   child: FutureBuilder<List<Map<String, dynamic>>>(
                     future: _fetchTemplates(),
                     builder: (context, snapshot) {
@@ -68,7 +71,7 @@ class Dashboard extends StatelessWidget {
                                 );
                               },
                               child: Card(
-                                color: Colors.orange[100],
+                                color: AppColors.primary, // Use primary color from AppColors
                                 elevation: 4,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -77,10 +80,9 @@ class Dashboard extends StatelessWidget {
                                   child: Text(
                                     template['template_name'] ?? 'Unknown Template',
                                     textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontSize: 16,
+                                    style: theme.textTheme.bodyLarge?.copyWith(
                                       fontWeight: FontWeight.bold,
-                                    ),
+                                    ), // Use text style from theme
                                   ),
                                 ),
                               ),
@@ -96,7 +98,7 @@ class Dashboard extends StatelessWidget {
               Expanded(
                 flex: 1,
                 child: Container(
-                  color: Colors.blue[300],
+                  color: AppColors.background, // Use background color from AppColors
                   child: Center(
                     child: SizedBox(
                       width: constraints.maxWidth * 0.7,
@@ -106,7 +108,7 @@ class Dashboard extends StatelessWidget {
                           Navigator.pushNamed(context, '/start_workout');
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
+                          backgroundColor: AppColors.primary, // Use primary color
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
