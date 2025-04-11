@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'services/database_helper.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'widgets/floating_start_new_workout_button.dart';
@@ -52,26 +53,61 @@ class Dashboard extends StatelessWidget {
                                 runSpacing: dynamicVerticalSpacing, // Dynamic vertical spacing
                                 alignment: WrapAlignment.start,
                                 children: List.generate(6, (index) {
-                                  return SizedBox(
-                                    width: constraints.maxWidth / 3 - 24, // 3 tiles per row
-                                    height: middleConstraints.maxHeight / 2 - dynamicVerticalSpacing, // 2 rows
-                                    child: Card(
-                                      color: Colors.orange[100],
-                                      elevation: 4,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          'Workout ${index + 1}',
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
+                                  if (index == 0) {
+                                    return SizedBox(
+                                      width: constraints.maxWidth / 3 - 24,
+                                      height: middleConstraints.maxHeight / 2 - dynamicVerticalSpacing,
+                                      child: Card(
+                                        color: Colors.orange[100],
+                                        elevation: 4,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Center(
+                                          child: FutureBuilder<String>(
+                                            future: DatabaseHelper().getFirstTemplateName(),
+                                            builder: (context, snapshot) {
+                                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                                return const CircularProgressIndicator();
+                                              } else if (snapshot.hasError) {
+                                                return const Text('Error');
+                                              } else {
+                                                return Text(
+                                                  snapshot.data ?? 'No Template Found',
+                                                  textAlign: TextAlign.center,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                );
+                                              }
+                                            },
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  );
+                                    );
+                                  } else {
+                                    return SizedBox(
+                                      width: constraints.maxWidth / 3 - 24,
+                                      height: middleConstraints.maxHeight / 2 - dynamicVerticalSpacing,
+                                      child: Card(
+                                        color: Colors.orange[100],
+                                        elevation: 4,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            'Workout ${index + 1}',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
                                 }),
                               );
                             },
