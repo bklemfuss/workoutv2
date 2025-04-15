@@ -7,6 +7,7 @@ class ExerciseListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Access the current theme
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -21,6 +22,7 @@ class ExerciseListWidget extends StatelessWidget {
             vertical: screenHeight * 0.01,
           ),
           elevation: 4,
+          color: theme.cardColor, // Use the theme's card color
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -32,10 +34,9 @@ class ExerciseListWidget extends StatelessWidget {
                 // Exercise Name
                 Text(
                   exercise['name'] ?? 'Unknown Exercise',
-                  style: TextStyle(
-                    fontSize: screenHeight * 0.02,
+                  style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                  ),
+                  ), // Use the theme's text style
                 ),
                 SizedBox(height: screenHeight * 0.01),
                 // Input Fields for Weight, Sets, Reps
@@ -46,16 +47,19 @@ class ExerciseListWidget extends StatelessWidget {
                       context,
                       label: 'Weight',
                       initialValue: exercise['weight']?.toString() ?? '',
+                      theme: theme,
                     ),
                     _buildInputField(
                       context,
                       label: 'Sets',
                       initialValue: exercise['sets']?.toString() ?? '',
+                      theme: theme,
                     ),
                     _buildInputField(
                       context,
                       label: 'Reps',
                       initialValue: exercise['reps']?.toString() ?? '',
+                      theme: theme,
                     ),
                   ],
                 ),
@@ -67,8 +71,12 @@ class ExerciseListWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildInputField(BuildContext context,
-      {required String label, required String initialValue}) {
+  Widget _buildInputField(
+    BuildContext context, {
+    required String label,
+    required String initialValue,
+    required ThemeData theme,
+  }) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -77,16 +85,19 @@ class ExerciseListWidget extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: screenHeight * 0.015),
+          style: theme.textTheme.bodyMedium, // Use the theme's text style
         ),
         SizedBox(
           width: screenWidth * 0.15,
           child: TextField(
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+              border: const OutlineInputBorder(),
+              filled: true,
+              fillColor: theme.inputDecorationTheme.fillColor, // Use theme's input field color
             ),
+            style: theme.textTheme.bodyMedium, // Use the theme's text style
             controller: TextEditingController(text: initialValue),
           ),
         ),

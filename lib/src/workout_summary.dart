@@ -52,37 +52,9 @@ class WorkoutSummaryScreen extends StatelessWidget {
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
-                // Display the list of exercises
+                // Display the list of exercises using ExerciseListWidget
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: workoutExercises.length,
-                    itemBuilder: (context, index) {
-                      final exercise = workoutExercises[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                exercise['exercise_name'] ?? 'Unknown Exercise',
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 8),
-                              Text('Sets: ${exercise['sets']}'),
-                              Text('Reps: ${exercise['reps']}'),
-                              Text('Weight: ${exercise['weight']} kg'),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                  child: ExerciseListWidget(exercises: workoutExercises),
                 ),
               ],
             );
