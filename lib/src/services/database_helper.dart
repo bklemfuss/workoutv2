@@ -402,4 +402,33 @@ class DatabaseHelper {
       });
     }
   }
+
+  Future<Map<String, dynamic>> getWorkoutDetails(int workoutId) async {
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT 
+        w.workout_id,
+        t.template_name
+      FROM Workout w
+      INNER JOIN Template t ON w.template_id = t.template_id
+      WHERE w.workout_id = ?
+    ''', [workoutId]);
+
+    return result.isNotEmpty ? result.first : {};
+  }
+
+  Future<List<Map<String, dynamic>>> getWorkoutExercises(int workoutId) async {
+    final db = await database;
+    return await db.rawQuery('''
+      SELECT 
+        we.workout_exercise_id,
+        e.name AS exercise_name,
+        we.sets,
+        we.reps,
+        we.weight
+      FROM WorkoutExercise we
+      INNER JOIN Exercise e ON we.exercise_id = e.exercise_id
+      WHERE we.workout_id = ?
+    ''', [workoutId]);
+  }
 }
