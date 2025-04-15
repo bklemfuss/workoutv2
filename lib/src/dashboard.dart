@@ -122,9 +122,12 @@ class Dashboard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Create New Workout',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
