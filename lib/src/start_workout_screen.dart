@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'services/database_helper.dart';
+import 'widgets/bottom_nav_bar.dart';
 
 class StartWorkoutScreen extends StatelessWidget {
   final int templateId;
@@ -85,6 +86,9 @@ class StartWorkoutScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: const BottomNavBar(
+        currentIndex: 0, // Set the appropriate index for this screen
       ),
     );
   }
