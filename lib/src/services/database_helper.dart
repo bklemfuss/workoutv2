@@ -353,10 +353,16 @@ class DatabaseHelper {
         w.workout_id,
         w.date,
         t.template_name,
-        u.name AS user_name
+        u.name AS user_name,
+        e.name AS exercise_name,
+        we.sets,
+        we.reps,
+        we.weight
       FROM Workout w
       INNER JOIN Template t ON w.template_id = t.template_id
       INNER JOIN User u ON w.user_id = u.user_id
+      INNER JOIN WorkoutExercise we ON w.workout_id = we.workout_id
+      INNER JOIN Exercise e ON we.exercise_id = e.exercise_id
       ORDER BY w.date DESC
     ''');
   }
