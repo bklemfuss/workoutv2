@@ -379,4 +379,27 @@ class DatabaseHelper {
     final db = await database;
     return await db.query('Template');
   }
+
+  Future<int> createWorkout(int templateId, int userId) async {
+    final db = await database;
+    final workoutId = await db.insert('Workout', {
+      'template_id': templateId,
+      'user_id': userId,
+      'date': DateTime.now().toIso8601String(), // Store the current date and time
+    });
+    return workoutId; // Return the newly created workout ID
+  }
+
+  Future<void> createWorkoutExercises(int workoutId, List<Map<String, dynamic>> exercises) async {
+    final db = await database;
+    for (final exercise in exercises) {
+      await db.insert('WorkoutExercise', {
+        'workout_id': workoutId,
+        'exercise_id': exercise['exercise_id'],
+        'sets': exercise['sets'],
+        'reps': exercise['reps'],
+        'weight': exercise['weight'],
+      });
+    }
+  }
 }

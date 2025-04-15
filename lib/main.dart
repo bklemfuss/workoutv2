@@ -62,9 +62,10 @@ class MyApp extends StatelessWidget {
         '/options': (context) => const OptionsScreen(),
         '/profile': (context) => const AccountScreen(),
         '/login': (context) => const LoginScreen(),
-        '/start_workout': (context) => StartWorkoutScreen(
-              templateId: ModalRoute.of(context)!.settings.arguments as int,
-            ),
+        '/start_workout': (context) {
+          final templateId = ModalRoute.of(context)!.settings.arguments as int;
+          return StartWorkoutScreen(templateId: templateId);
+        },
         '/general_settings': (context) => const GeneralSettingsScreen(),
         '/appearance_settings': (context) => const AppearanceSettingsScreen(),
         '/preferences_settings': (context) => const PreferencesSettingsScreen(),
@@ -77,62 +78,13 @@ class MyApp extends StatelessWidget {
         '/change_password': (context) => const ChangePasswordScreen(),
         '/manage_account': (context) => const ManageAccountScreen(),
         '/in_progress_workout': (context) {
-          final exercises = ModalRoute.of(context)!.settings.arguments as List<Map<String, dynamic>>;
-          return InProgressWorkoutScreen(exercises: exercises);
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final templateId = args['template_id'] as int;
+          final exercises = args['exercises'] as List<Map<String, dynamic>>;
+          return InProgressWorkoutScreen(templateId: templateId, exercises: exercises);
         },
       },
     );
   }
 }
-// Dead code database test - delete when not needed
-/*
-class DatabaseTestScreen extends StatelessWidget {
-  const DatabaseTestScreen({super.key});
-
-  Future<void> _testDatabase() async {
-    final dbPath = await _getDatabasePath();
-    final db = await databaseFactory.openDatabase(dbPath);
-
-    // Create a table
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS Product (
-        id INTEGER PRIMARY KEY,
-        title TEXT
-      )
-    ''');
-
-    // Insert data
-    await db.insert('Product', {'title': 'Product 1'});
-    await db.insert('Product', {'title': 'Product 2'});
-
-    // Query data
-    final result = await db.query('Product');
-    print(result);
-
-    await db.close();
-  }
-
-  Future<String> _getDatabasePath() async {
-    if (kIsWeb) {
-      return 'my_web_database.db'; // Web uses IndexedDB
-    } else {
-      final appDocumentsDir = await getApplicationDocumentsDirectory();
-      return p.join(appDocumentsDir.path, 'my_database.db');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Database Test')),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: _testDatabase,
-          child: const Text('Test Database'),
-        ),
-      ),
-    );
-  }
-}
-*/
 

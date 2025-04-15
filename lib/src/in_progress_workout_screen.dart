@@ -1,10 +1,35 @@
 import 'package:flutter/material.dart';
-import 'widgets/exercise_list_widget.dart'; // Import the new widget
+import 'services/database_helper.dart';
+import 'widgets/exercise_list_widget.dart';
 
 class InProgressWorkoutScreen extends StatelessWidget {
   final List<Map<String, dynamic>> exercises;
+  final int templateId;
 
-  const InProgressWorkoutScreen({super.key, required this.exercises});
+  const InProgressWorkoutScreen({super.key, required this.exercises, required this.templateId});
+
+  Future<void> _finishWorkout(BuildContext context) async {
+    final dbHelper = DatabaseHelper();
+
+    // Step 1: Create a new workout
+    final workoutId = await dbHelper.createWorkout(templateId, 1); // Use user_id = 1 for now
+
+    // Step 2: Prepare exercise data
+    final workoutExercises = exercises.map((exercise) {
+      return {
+        'exercise_id': exercise['exercise_id'],
+        'sets': exercise['sets'],
+        'reps': exercise['reps'],
+        'weight': exercise['weight'],
+      };
+    }).toList();
+
+    // Step 3: Create workout exercises
+    await dbHelper.createWorkoutExercises(workoutId, workoutExercises);
+
+    // Step 4: Navigate back to the dashboard
+    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +44,7 @@ class InProgressWorkoutScreen extends StatelessWidget {
           Container(
             height: screenHeight * 0.05,
             padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-            color: Colors.blue[100], // Optional background color
+            color: Colors.blue[100],
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -49,7 +74,7 @@ class InProgressWorkoutScreen extends StatelessWidget {
                       },
                     );
                     if (confirm == true) {
-                      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+                      await _finishWorkout(context);
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -69,7 +94,7 @@ class InProgressWorkoutScreen extends StatelessWidget {
           ),
           // Scrollable List of Exercises (95% of the screen height)
           Expanded(
-            child: ExerciseListWidget(exercises: exercises), // Use the new widget
+            child: ExerciseListWidget(exercises: exercises),
           ),
         ],
       ),
