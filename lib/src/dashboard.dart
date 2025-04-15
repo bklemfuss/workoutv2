@@ -9,11 +9,7 @@ class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
 
   Future<List<Map<String, dynamic>>> _fetchTemplates() async {
-    // Simulate fetching templates from the database
-    return [
-      {'template_id': 1, 'template_name': 'Full Body Workout'},
-      {'template_id': 2, 'template_name': 'Leg Day'},
-    ];
+    return await DatabaseHelper().getTemplates();
   }
 
   @override
