@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'services/database_helper.dart';
-import 'widgets/exercise_list_widget.dart';
+import 'widgets/exercise_input_card.dart';
 
 class InProgressWorkoutScreen extends StatelessWidget {
   final List<Map<String, dynamic>> exercises;
@@ -94,7 +94,19 @@ class InProgressWorkoutScreen extends StatelessWidget {
           ),
           // Scrollable List of Exercises (95% of the screen height)
           Expanded(
-            child: ExerciseListWidget(exercises: exercises),
+            child: ListView.builder(
+              itemCount: exercises.length,
+              itemBuilder: (context, index) {
+                final exercise = exercises[index];
+                return ExerciseInputCard(
+                  exercise: exercise,
+                  onChanged: (updatedExercise) {
+                    // Update the exercise in the list
+                    exercises[index] = updatedExercise;
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
