@@ -87,7 +87,6 @@ class HistoryScreen extends StatelessWidget {
                           ),
                           trailing: const Icon(Icons.arrow_forward),
                           onTap: () {
-                            // Navigate to workout summary screen
                             Navigator.pushNamed(
                               context,
                               '/workout_summary',
@@ -107,27 +106,6 @@ class HistoryScreen extends StatelessWidget {
       floatingActionButton: const FloatingStartNewWorkoutButton(), // Use the custom FAB widget
       bottomNavigationBar: const BottomNavBar(
         currentIndex: 1,
-      ),
-    );
-  }
-}
-
-class WorkoutSummaryScreen extends StatelessWidget {
-  final int workoutId;
-
-  const WorkoutSummaryScreen({super.key, required this.workoutId});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Workout Summary (ID: $workoutId)'),
-      ),
-      body: Center(
-        child: Text(
-          'Details for Workout ID: $workoutId',
-          style: const TextStyle(fontSize: 18),
-        ),
       ),
     );
   }

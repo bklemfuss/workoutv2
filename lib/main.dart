@@ -20,6 +20,7 @@ import 'src/change_password_screen.dart';
 import 'src/manage_account_screen.dart';
 import 'src/in_progress_workout_screen.dart';
 import 'src/start_workout_screen.dart';
+import 'src/workout_summary.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -82,6 +83,10 @@ class MyApp extends StatelessWidget {
           final templateId = args['template_id'] as int;
           final exercises = args['exercises'] as List<Map<String, dynamic>>;
           return InProgressWorkoutScreen(templateId: templateId, exercises: exercises);
+        },
+        '/workout_summary': (context) {
+          final workoutId = ModalRoute.of(context)!.settings.arguments as int;
+          return WorkoutSummaryScreen(workoutId: workoutId);
         },
       },
     );
