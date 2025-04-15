@@ -4,6 +4,11 @@ import 'colors.dart'; // Import your colors
 final ThemeData androidTheme = ThemeData(
   primaryColor: AppColors.primary,
   scaffoldBackgroundColor: AppColors.background,
+  cardColor: AppColors.primary, 
+  inputDecorationTheme: const InputDecorationTheme(
+    fillColor: AppColors.background, // Input field background color
+    filled: true,
+  ),
   appBarTheme: const AppBarTheme(
     backgroundColor: AppColors.primary,
     foregroundColor: AppColors.textPrimary,
