@@ -3,12 +3,17 @@ import 'services/database_helper.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'theme/colors.dart'; // Import AppColors for custom colors
+import 'start_workout_screen.dart';
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
 
   Future<List<Map<String, dynamic>>> _fetchTemplates() async {
-    return await DatabaseHelper().getTemplates();
+    // Simulate fetching templates from the database
+    return [
+      {'template_id': 1, 'template_name': 'Full Body Workout'},
+      {'template_id': 2, 'template_name': 'Leg Day'},
+    ];
   }
 
   @override
@@ -63,11 +68,19 @@ class Dashboard extends StatelessWidget {
                             final template = templates[index];
                             return GestureDetector(
                               onTap: () {
-                                // Navigate to StartWorkoutScreen with the selected template_id
-                                Navigator.pushNamed(
-                                  context,
-                                  '/start_workout',
-                                  arguments: template['template_id'],
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                                  ),
+                                  builder: (context) {
+                                    return FractionallySizedBox(
+                                      heightFactor: 0.9,
+                                      widthFactor: 0.9,
+                                      child: StartWorkoutScreen(templateId: template['template_id']),
+                                    );
+                                  },
                                 );
                               },
                               child: Card(
