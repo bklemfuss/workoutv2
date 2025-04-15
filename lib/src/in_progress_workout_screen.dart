@@ -31,6 +31,11 @@ class InProgressWorkoutScreen extends StatelessWidget {
     Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
   }
 
+  Future<void> _discardWorkout(BuildContext context) async {
+    // Simply navigate back to the dashboard without saving anything
+    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -54,27 +59,37 @@ class InProgressWorkoutScreen extends StatelessWidget {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    final confirm = await showDialog<bool>(
+                    final confirm = await showDialog<int>(
                       context: context,
                       builder: (context) {
                         return AlertDialog(
                           title: const Text('Finish Workout'),
-                          content: const Text('Are you sure you want to finish the workout?'),
+                          content: const Text(
+                              'What would you like to do with this workout?'),
                           actions: [
                             TextButton(
-                              onPressed: () => Navigator.pop(context, false),
+                              onPressed: () => Navigator.pop(context, 0),
                               child: const Text('Cancel'),
                             ),
                             TextButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Confirm'),
+                              onPressed: () => Navigator.pop(context, 1),
+                              child: const Text('Finish and Save'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, 2),
+                              child: const Text('Finish and Discard'),
                             ),
                           ],
                         );
                       },
                     );
-                    if (confirm == true) {
+
+                    if (confirm == 1) {
+                      // Finish and save the workout
                       await _finishWorkout(context);
+                    } else if (confirm == 2) {
+                      // Finish and discard the workout
+                      await _discardWorkout(context);
                     }
                   },
                   style: ElevatedButton.styleFrom(
