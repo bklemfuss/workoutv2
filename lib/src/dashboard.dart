@@ -105,7 +105,7 @@ class Dashboard extends StatelessWidget {
                       height: constraints.maxHeight * 0.15 * 0.4,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/start_workout');
+                          Navigator.pushNamed(context, '/create_workout');
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary, // Use primary color

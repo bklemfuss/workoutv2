@@ -21,6 +21,7 @@ import 'src/manage_account_screen.dart';
 import 'src/in_progress_workout_screen.dart';
 import 'src/start_workout_screen.dart';
 import 'src/workout_summary.dart';
+import 'src/create_workout_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -88,6 +89,7 @@ class MyApp extends StatelessWidget {
           final workoutId = ModalRoute.of(context)!.settings.arguments as int;
           return WorkoutSummaryScreen(workoutId: workoutId);
         },
+        '/create_workout': (context) => const CreateWorkoutScreen(),
       },
     );
   }

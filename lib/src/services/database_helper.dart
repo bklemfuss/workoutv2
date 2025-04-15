@@ -437,4 +437,17 @@ class DatabaseHelper {
       WHERE we.workout_id = ?
     ''', [workoutId]);
   }
+
+  Future<List<Map<String, dynamic>>> getExercisesByMuscleGroup(String? muscleGroup) async {
+    final db = await database;
+    if (muscleGroup == null || muscleGroup == 'All') {
+      return await db.query('Exercise');
+    } else {
+      return await db.rawQuery('''
+        SELECT * FROM Exercise e
+        INNER JOIN MuscleGroup mg ON e.muscle_group_id = mg.muscle_group_id
+        WHERE mg.Name = ?
+      ''', [muscleGroup]);
+    }
+  }
 }
