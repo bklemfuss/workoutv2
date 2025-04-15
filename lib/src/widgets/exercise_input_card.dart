@@ -55,7 +55,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
           children: [
             // Exercise Name
             Text(
-              widget.exercise['exercise_name'] ?? 'Unknown Exercise',
+              widget.exercise['exercise_name'] ?? widget.exercise['name'] ?? 'Unknown Exercise',
               style: theme.textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ), // Use the theme's text style

@@ -33,7 +33,7 @@ class ExerciseListWidget extends StatelessWidget {
               children: [
                 // Exercise Name
                 Text(
-                  exercise['exercise_name'] ?? 'Unknown Exercise', // Use exercise_name
+                  exercise['exercise_name'] ?? exercise['name'] ?? 'Unknown Exercise', // Use exercise_name
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ), // Use the theme's text style
