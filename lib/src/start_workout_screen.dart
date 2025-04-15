@@ -57,12 +57,15 @@ class StartWorkoutScreen extends StatelessWidget {
               child: Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    // Ensure exercises is fetched and passed correctly
+                    // Ensure exercises are fetched and passed correctly
                     _fetchExercises().then((exercises) {
                       Navigator.pushNamed(
                         context,
                         '/in_progress_workout',
-                        arguments: exercises, // Pass the exercises list as arguments
+                        arguments: {
+                          'template_id': templateId, // Pass the template_id
+                          'exercises': exercises,    // Pass the exercises list
+                        },
                       );
                     });
                   },

@@ -99,10 +99,10 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE Workout (
         workout_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        workout_template_id INTEGER,
+        template_id INTEGER,
         user_id INTEGER,
         date TEXT,
-        FOREIGN KEY (workout_template_id) REFERENCES Template(template_id),
+        FOREIGN KEY (template_id) REFERENCES Template(template_id),
         FOREIGN KEY (user_id) REFERENCES User(user_id)
       )
     ''');
@@ -208,19 +208,19 @@ class DatabaseHelper {
     // Insert sample Workouts
     await db.insert('Workout', {
       'workout_id': 1,
-      'workout_template_id': 1,
+      'template_id': 1,
       'user_id': 1,
       'date': '2025-04-08',
     });
     await db.insert('Workout', {
       'workout_id': 2,
-      'workout_template_id': 2,
+      'template_id': 2,
       'user_id': 1,
       'date': '2025-04-09',
     });
     await db.insert('Workout', {
       'workout_id': 3,
-      'workout_template_id': 3,
+      'template_id': 3,
       'user_id': 1,
       'date': '2025-04-10',
     });
@@ -355,7 +355,7 @@ class DatabaseHelper {
         t.template_name,
         u.name AS user_name
       FROM Workout w
-      INNER JOIN Template t ON w.workout_template_id = t.template_id
+      INNER JOIN Template t ON w.template_id = t.template_id
       INNER JOIN User u ON w.user_id = u.user_id
       ORDER BY w.date DESC
     ''');
@@ -378,5 +378,28 @@ class DatabaseHelper {
   Future<List<Map<String, dynamic>>> getTemplates() async {
     final db = await database;
     return await db.query('Template');
+  }
+
+  Future<int> createWorkout(int templateId, int userId) async {
+    final db = await database;
+    final workoutId = await db.insert('Workout', {
+      'template_id': templateId,
+      'user_id': userId,
+      'date': DateTime.now().toIso8601String(), // Store the current date and time
+    });
+    return workoutId; // Return the newly created workout ID
+  }
+
+  Future<void> createWorkoutExercises(int workoutId, List<Map<String, dynamic>> exercises) async {
+    final db = await database;
+    for (final exercise in exercises) {
+      await db.insert('WorkoutExercise', {
+        'workout_id': workoutId,
+        'exercise_id': exercise['exercise_id'],
+        'sets': exercise['sets'],
+        'reps': exercise['reps'],
+        'weight': exercise['weight'],
+      });
+    }
   }
 }
