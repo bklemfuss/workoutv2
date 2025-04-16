@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/unit_provider.dart'; // Import UnitProvider
 
 class ExerciseListWidget extends StatelessWidget {
   final List<Map<String, dynamic>> exercises;
@@ -10,12 +12,16 @@ class ExerciseListWidget extends StatelessWidget {
     final theme = Theme.of(context); // Access the current theme
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+    final unitProvider = Provider.of<UnitProvider>(context); // Access UnitProvider
+    final isMetric = unitProvider.unitSystem == 'Metric'; // Check the unit system
 
     return ListView.builder(
       padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
       itemCount: exercises.length,
       itemBuilder: (context, index) {
         final exercise = exercises[index];
+        final weightUnit = isMetric ? 'kg' : 'lbs'; // Determine the unit label
+
         return Card(
           margin: EdgeInsets.symmetric(
             horizontal: screenWidth * 0.05,
@@ -49,7 +55,7 @@ class ExerciseListWidget extends StatelessWidget {
                   style: theme.textTheme.bodyMedium,
                 ),
                 Text(
-                  'Weight: ${exercise['weight']} kg',
+                  'Weight: ${exercise['weight']} $weightUnit', // Dynamically update the unit label
                   style: theme.textTheme.bodyMedium,
                 ),
               ],

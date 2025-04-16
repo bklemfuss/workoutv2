@@ -19,6 +19,7 @@ import 'src/start_workout_screen.dart';
 import 'src/workout_summary.dart';
 import 'src/create_workout_screen.dart';
 import 'src/providers/theme_provider.dart';
+import 'src/providers/unit_provider.dart'; // Import UnitProvider
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,8 +34,11 @@ void main() async {
   }
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ThemeProvider()..loadPreferences(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ThemeProvider()..loadPreferences()),
+        ChangeNotifierProvider(create: (context) => UnitProvider()..loadPreferences()),
+      ],
       child: const MyApp(),
     ),
   );
