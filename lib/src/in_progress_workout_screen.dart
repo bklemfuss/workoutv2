@@ -6,7 +6,11 @@ class InProgressWorkoutScreen extends StatelessWidget {
   final List<Map<String, dynamic>> exercises;
   final int templateId;
 
-  const InProgressWorkoutScreen({super.key, required this.exercises, required this.templateId});
+  InProgressWorkoutScreen({
+    Key? key,
+    required List<Map<String, dynamic>> exercises,
+    required this.templateId,
+  }) : exercises = exercises.toList(); // Create a mutable copy of the list
 
   Future<void> _finishWorkout(BuildContext context) async {
     final dbHelper = DatabaseHelper();
