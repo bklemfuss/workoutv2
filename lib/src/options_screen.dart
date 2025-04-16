@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/theme_provider.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'theme/colors.dart'; // Import AppColors for custom colors
@@ -21,6 +23,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
       appBar: const AppToolbar(title: 'Options'),
@@ -82,36 +85,15 @@ class _OptionsScreenState extends State<OptionsScreen> {
 
           // Appearance Section
           _buildSectionHeader('Appearance', theme),
-          ListTile(
+          SwitchListTile(
             title: Text(
-              'Theme',
+              'Dark Mode',
               style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
             ),
-            trailing: DropdownButton<String>(
-              value: selectedTheme,
-              dropdownColor: AppColors.secondary, // Optional: Dropdown background color
-              items: const [
-                DropdownMenuItem(
-                  value: 'Light',
-                  child: Text(
-                    'Light',
-                    style: TextStyle(color: AppColors.textPrimary),
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: 'Dark',
-                  child: Text(
-                    'Dark',
-                    style: TextStyle(color: AppColors.textPrimary),
-                  ),
-                ),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  selectedTheme = value!;
-                });
-              },
-            ),
+            value: themeProvider.isDarkMode,
+            onChanged: (value) {
+              themeProvider.toggleDarkMode(value);
+            },
           ),
           ListTile(
             title: Text(
@@ -119,15 +101,13 @@ class _OptionsScreenState extends State<OptionsScreen> {
               style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
             ),
             subtitle: Slider(
-              value: fontSize,
+              value: themeProvider.fontSize,
               min: 12.0,
               max: 24.0,
               divisions: 6,
-              label: '${fontSize.toInt()}',
+              label: '${themeProvider.fontSize.toInt()}',
               onChanged: (value) {
-                setState(() {
-                  fontSize = value;
-                });
+                themeProvider.updateFontSize(value);
               },
             ),
           ),

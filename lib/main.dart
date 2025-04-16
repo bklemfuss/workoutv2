@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart'; // For kIsWeb and defaultTargetPlatfor
 import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+import 'package:provider/provider.dart';
 import 'src/dashboard.dart';
 import 'src/history_screen.dart';
 import 'src/statistics_screen.dart';
@@ -17,6 +18,7 @@ import 'src/in_progress_workout_screen.dart';
 import 'src/start_workout_screen.dart';
 import 'src/workout_summary.dart';
 import 'src/create_workout_screen.dart';
+import 'src/providers/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +32,12 @@ void main() async {
     databaseFactory = databaseFactoryFfi;
   }
 
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeProvider()..loadPreferences(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -38,19 +45,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine the theme based on the platform
-    final ThemeData theme;
-    if (kIsWeb) {
-      theme = androidTheme; // Use Android theme for web
-    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      theme = iosTheme;
-    } else {
-      theme = androidTheme;
-    }
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
       title: 'Workout App',
-      theme: theme,
+      theme: themeProvider.currentTheme,
       initialRoute: '/',
       routes: {
         '/': (context) => const Dashboard(),
