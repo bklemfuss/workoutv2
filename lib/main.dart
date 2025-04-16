@@ -10,11 +10,6 @@ import 'src/account_screen.dart';
 import 'src/login_screen.dart';
 import 'src/options_screen.dart';
 import 'src/theme/app_theme.dart'; // Import the theme file
-import 'src/general_settings_screen.dart';
-import 'src/appearance_settings_screen.dart';
-import 'src/preferences_settings_screen.dart';
-import 'src/goals_settings_screen.dart';
-import 'src/about_screen.dart';
 import 'src/edit_profile_screen.dart';
 import 'src/change_password_screen.dart';
 import 'src/manage_account_screen.dart';
@@ -68,11 +63,6 @@ class MyApp extends StatelessWidget {
           final templateId = ModalRoute.of(context)!.settings.arguments as int;
           return StartWorkoutScreen(templateId: templateId);
         },
-        '/general_settings': (context) => const GeneralSettingsScreen(),
-        '/appearance_settings': (context) => const AppearanceSettingsScreen(),
-        '/preferences_settings': (context) => const PreferencesSettingsScreen(),
-        '/goals_settings': (context) => const GoalsSettingsScreen(),
-        '/about_settings': (context) => const AboutScreen(),
         '/edit_profile': (context) {
           final user = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return EditProfileScreen(user: user);
