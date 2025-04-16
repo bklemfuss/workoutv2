@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'services/database_helper.dart';
 import 'widgets/exercise_input_card.dart';
+import 'package:provider/provider.dart';
+import 'providers/unit_provider.dart';
 
 class InProgressWorkoutScreen extends StatelessWidget {
   final List<Map<String, dynamic>> exercises;
@@ -42,6 +44,8 @@ class InProgressWorkoutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final unitProvider = Provider.of<UnitProvider>(context);
+    final isMetric = unitProvider.unitSystem == 'Metric';
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -125,6 +129,12 @@ class InProgressWorkoutScreen extends StatelessWidget {
                   },
                 );
               },
+            ),
+          ),
+          Center(
+            child: Text(
+              'Weight: ${isMetric ? 'kg' : 'lbs'}',
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
           ),
         ],

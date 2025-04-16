@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/unit_provider.dart'; // Import UnitProvider
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'theme/colors.dart'; // Import AppColors for custom colors
@@ -24,6 +25,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final unitProvider = Provider.of<UnitProvider>(context); // Access UnitProvider
 
     return Scaffold(
       appBar: const AppToolbar(title: 'Options'),
@@ -116,30 +118,32 @@ class _OptionsScreenState extends State<OptionsScreen> {
           _buildSectionHeader('Preferences', theme),
           ListTile(
             title: Text(
-              'Workout Units',
+              'Units',
               style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
             ),
             trailing: DropdownButton<String>(
-              value: 'Kilograms',
+              value: unitProvider.unitSystem, // Get the current unit system
               dropdownColor: AppColors.secondary, // Optional: Dropdown background color
               items: const [
                 DropdownMenuItem(
-                  value: 'Kilograms',
+                  value: 'Imperial',
                   child: Text(
-                    'Kilograms',
+                    'Imperial',
                     style: TextStyle(color: AppColors.textPrimary),
                   ),
                 ),
                 DropdownMenuItem(
-                  value: 'Pounds',
+                  value: 'Metric',
                   child: Text(
-                    'Pounds',
+                    'Metric',
                     style: TextStyle(color: AppColors.textPrimary),
                   ),
                 ),
               ],
               onChanged: (value) {
-                // Handle unit change
+                if (value != null) {
+                  unitProvider.setUnitSystem(value); // Update the unit system
+                }
               },
             ),
           ),
