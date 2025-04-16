@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/theme_provider.dart';
-import 'providers/unit_provider.dart'; // Import UnitProvider
+import 'providers/unit_provider.dart';
+import 'providers/goal_provider.dart'; // Import GoalProvider
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'theme/colors.dart'; // Import AppColors for custom colors
@@ -19,13 +20,13 @@ class _OptionsScreenState extends State<OptionsScreen> {
   String selectedLanguage = 'English';
   String selectedTheme = 'Light';
   double fontSize = 16.0;
-  int weeklyGoal = 5;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
     final unitProvider = Provider.of<UnitProvider>(context); // Access UnitProvider
+    final goalProvider = Provider.of<GoalProvider>(context); // Access GoalProvider
 
     return Scaffold(
       appBar: const AppToolbar(title: 'Options'),
@@ -156,15 +157,13 @@ class _OptionsScreenState extends State<OptionsScreen> {
               style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
             ),
             subtitle: Slider(
-              value: weeklyGoal.toDouble(),
+              value: goalProvider.weeklyGoal.toDouble(),
               min: 1,
-              max: 10,
-              divisions: 9,
-              label: '$weeklyGoal workouts',
+              max: 7,
+              divisions: 6,
+              label: '${goalProvider.weeklyGoal} workouts',
               onChanged: (value) {
-                setState(() {
-                  weeklyGoal = value.toInt();
-                });
+                goalProvider.setWeeklyGoal(value.toInt()); // Save the goal
               },
             ),
           ),

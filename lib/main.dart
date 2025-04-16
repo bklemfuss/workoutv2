@@ -19,6 +19,7 @@ import 'src/workout_summary.dart';
 import 'src/create_workout_screen.dart';
 import 'src/providers/theme_provider.dart';
 import 'src/providers/unit_provider.dart'; // Import UnitProvider
+import 'src/providers/goal_provider.dart'; // Import GoalProvider
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,6 +38,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => ThemeProvider()..loadPreferences()),
         ChangeNotifierProvider(create: (context) => UnitProvider()..loadPreferences()),
+        ChangeNotifierProvider(create: (context) => GoalProvider()..loadPreferences()),
       ],
       child: const MyApp(),
     ),
