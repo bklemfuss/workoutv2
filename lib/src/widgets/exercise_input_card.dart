@@ -93,8 +93,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
     required TextEditingController controller,
     required VoidCallback onChanged,
   }) {
-    final theme = Theme.of(context); // Access the current theme
-    final screenHeight = MediaQuery.of(context).size.height;
+    final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Column(

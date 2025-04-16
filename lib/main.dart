@@ -10,7 +10,6 @@ import 'src/statistics_screen.dart';
 import 'src/account_screen.dart';
 import 'src/login_screen.dart';
 import 'src/options_screen.dart';
-import 'src/theme/app_theme.dart'; // Import the theme file
 import 'src/edit_profile_screen.dart';
 import 'src/change_password_screen.dart';
 import 'src/manage_account_screen.dart';
