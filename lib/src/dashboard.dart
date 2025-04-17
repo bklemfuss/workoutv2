@@ -4,12 +4,25 @@ import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'theme/colors.dart'; // Import AppColors for custom colors
 import 'start_workout_screen.dart';
+import 'create_workout_screen.dart';
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
 
   Future<List<Map<String, dynamic>>> _fetchTemplates() async {
     return await DatabaseHelper().getTemplates();
+  }
+
+  void _navigateToCreateWorkoutScreen(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CreateWorkoutScreen()),
+    );
+
+    if (result == true) {
+      // Refresh the dashboard data
+      (context as Element).reassemble(); // Force widget tree to rebuild
+    }
   }
 
   @override
@@ -114,7 +127,7 @@ class Dashboard extends StatelessWidget {
                       height: constraints.maxHeight * 0.15 * 0.4,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/create_workout');
+                          _navigateToCreateWorkoutScreen(context); // Navigate to CreateWorkoutScreen
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary, // Use primary color
