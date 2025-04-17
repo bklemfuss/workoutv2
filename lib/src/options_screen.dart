@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/unit_provider.dart';
-import 'providers/goal_provider.dart'; // Import GoalProvider
+import 'providers/goal_provider.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
-import 'theme/colors.dart'; // Import AppColors for custom colors
 
 class OptionsScreen extends StatefulWidget {
   const OptionsScreen({super.key});
@@ -15,18 +14,15 @@ class OptionsScreen extends StatefulWidget {
 }
 
 class _OptionsScreenState extends State<OptionsScreen> {
-  // State variables for toggles, dropdowns, etc.
   bool notificationsEnabled = true;
   String selectedLanguage = 'English';
-  String selectedTheme = 'Light';
-  double fontSize = 16.0;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final unitProvider = Provider.of<UnitProvider>(context); // Access UnitProvider
-    final goalProvider = Provider.of<GoalProvider>(context); // Access GoalProvider
+    final unitProvider = Provider.of<UnitProvider>(context);
+    final goalProvider = Provider.of<GoalProvider>(context);
 
     return Scaffold(
       appBar: const AppToolbar(title: 'Options'),
@@ -38,7 +34,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
           SwitchListTile(
             title: Text(
               'Enable Notifications',
-              style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+              style: theme.textTheme.bodyMedium,
             ),
             value: notificationsEnabled,
             onChanged: (value) {
@@ -50,33 +46,15 @@ class _OptionsScreenState extends State<OptionsScreen> {
           ListTile(
             title: Text(
               'Language',
-              style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+              style: theme.textTheme.bodyMedium,
             ),
             trailing: DropdownButton<String>(
               value: selectedLanguage,
-              dropdownColor: AppColors.secondary, // Optional: Dropdown background color
+              dropdownColor: theme.cardColor, // Use cardColor for dropdown background
               items: const [
-                DropdownMenuItem(
-                  value: 'English',
-                  child: Text(
-                    'English',
-                    style: TextStyle(color: AppColors.textPrimary),
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: 'Spanish',
-                  child: Text(
-                    'Spanish',
-                    style: TextStyle(color: AppColors.textPrimary),
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: 'French',
-                  child: Text(
-                    'French',
-                    style: TextStyle(color: AppColors.textPrimary),
-                  ),
-                ),
+                DropdownMenuItem(value: 'English', child: Text('English')),
+                DropdownMenuItem(value: 'Spanish', child: Text('Spanish')),
+                DropdownMenuItem(value: 'French', child: Text('French')),
               ],
               onChanged: (value) {
                 setState(() {
@@ -91,7 +69,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
           SwitchListTile(
             title: Text(
               'Dark Mode',
-              style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+              style: theme.textTheme.bodyMedium,
             ),
             value: themeProvider.isDarkMode,
             onChanged: (value) {
@@ -101,7 +79,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
           ListTile(
             title: Text(
               'Font Size',
-              style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+              style: theme.textTheme.bodyMedium,
             ),
             subtitle: Slider(
               value: themeProvider.fontSize,
@@ -120,30 +98,18 @@ class _OptionsScreenState extends State<OptionsScreen> {
           ListTile(
             title: Text(
               'Units',
-              style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+              style: theme.textTheme.bodyMedium,
             ),
             trailing: DropdownButton<String>(
-              value: unitProvider.unitSystem, // Get the current unit system
-              dropdownColor: AppColors.secondary, // Optional: Dropdown background color
+              value: unitProvider.unitSystem,
+              dropdownColor: theme.cardColor,
               items: const [
-                DropdownMenuItem(
-                  value: 'Imperial',
-                  child: Text(
-                    'Imperial',
-                    style: TextStyle(color: AppColors.textPrimary),
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: 'Metric',
-                  child: Text(
-                    'Metric',
-                    style: TextStyle(color: AppColors.textPrimary),
-                  ),
-                ),
+                DropdownMenuItem(value: 'Imperial', child: Text('Imperial')),
+                DropdownMenuItem(value: 'Metric', child: Text('Metric')),
               ],
               onChanged: (value) {
                 if (value != null) {
-                  unitProvider.setUnitSystem(value); // Update the unit system
+                  unitProvider.setUnitSystem(value);
                 }
               },
             ),
@@ -154,7 +120,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
           ListTile(
             title: Text(
               'Weekly Goal',
-              style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+              style: theme.textTheme.bodyMedium,
             ),
             subtitle: Slider(
               value: goalProvider.weeklyGoal.toDouble(),
@@ -163,7 +129,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
               divisions: 6,
               label: '${goalProvider.weeklyGoal} workouts',
               onChanged: (value) {
-                goalProvider.setWeeklyGoal(value.toInt()); // Save the goal
+                goalProvider.setWeeklyGoal(value.toInt());
               },
             ),
           ),
@@ -173,17 +139,17 @@ class _OptionsScreenState extends State<OptionsScreen> {
           ListTile(
             title: Text(
               'App Version',
-              style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+              style: theme.textTheme.bodyMedium,
             ),
             subtitle: Text(
               '1.0.0',
-              style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+              style: theme.textTheme.bodyMedium,
             ),
           ),
           ListTile(
             title: Text(
               'Privacy Policy',
-              style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+              style: theme.textTheme.bodyMedium,
             ),
             onTap: () {
               // Handle privacy policy tap
@@ -197,16 +163,12 @@ class _OptionsScreenState extends State<OptionsScreen> {
     );
   }
 
-  // Helper method to build section headers
   Widget _buildSectionHeader(String title, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Text(
         title,
-        style: theme.textTheme.headlineSmall?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: AppColors.textPrimary,
-        ),
+        style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
       ),
     );
   }

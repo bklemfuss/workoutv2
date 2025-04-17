@@ -129,19 +129,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     onDaySelected: _onDateSelected,
                     calendarStyle: CalendarStyle(
                       defaultDecoration: BoxDecoration(
-                        color: AppColors.primary, // Dates without workouts
+                        color: theme.cardColor, // Dates without workouts
                         shape: BoxShape.circle,
                       ),
                       todayDecoration: BoxDecoration(
-                        color: AppColors.textPrimary, // Highlight today's date
+                        color: theme.primaryColor, // Highlight today's date
                         shape: BoxShape.circle,
                       ),
                       selectedDecoration: BoxDecoration(
-                        color: AppColors.secondary, // Selected date
+                        color: theme.colorScheme.secondary, // Selected date
                         shape: BoxShape.circle,
                       ),
                       markerDecoration: BoxDecoration(
-                        color: AppColors.secondary, // Dates with workouts
+                        color: theme.colorScheme.secondary, // Dates with workouts
                         shape: BoxShape.circle,
                       ),
                     ),

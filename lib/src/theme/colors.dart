@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  // Existing dark mode colors
   static const primary = Color.fromARGB(222, 245, 133, 81);
   static const secondary = Color.fromARGB(210, 248, 104, 37);
   static const background = Color.fromARGB(212, 29, 43, 59);
-  static const textPrimary = Color.fromARGB(255, 250, 250, 250);
-  static const textSecondary = Color.fromARGB(255, 255, 255, 255);
+
+  // Improved text colors for dark mode
+  static const textPrimaryDark = Color.fromARGB(255, 220, 220, 220); // A slightly softer white
+  static const textSecondaryDark = Color.fromARGB(255, 170, 170, 170); // A light gray for less emphasis
+
+  // Light mode colors
+  static const backgroundLight = Color.fromARGB(255, 242, 242, 242); // A light gray background
+  static const textPrimaryLight = Color.fromARGB(255, 30, 30, 30);   // A dark gray for good contrast
+  static const textSecondaryLight = Color.fromARGB(255, 90, 90, 90);  // A medium gray for less emphasis
 }

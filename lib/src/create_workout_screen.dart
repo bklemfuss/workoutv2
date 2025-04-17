@@ -189,17 +189,18 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                     vertical: screenHeight * 0.01,
                   ),
                   elevation: 4,
-                  color: theme.cardColor,
+                  color: theme.cardColor, // Use cardColor from AppTheme
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: ListTile(
                     title: Text(
                       exercise['name'],
-                      style: theme.textTheme.bodyLarge,
+                      style: theme.textTheme.bodyLarge, // Use textTheme from AppTheme
                     ),
                     trailing: IconButton(
                       icon: const Icon(Icons.add),
+                      color: theme.primaryColor, // Use primaryColor from AppTheme
                       onPressed: () {
                         setState(() {
                           selectedExerciseIds.add(exercise['exercise_id']);
