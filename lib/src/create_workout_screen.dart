@@ -10,6 +10,7 @@ class CreateWorkoutScreen extends StatefulWidget {
 
 class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
   final TextEditingController searchController = TextEditingController();
+  final TextEditingController workoutNameController = TextEditingController(); // Controller for workout name
   String selectedMuscleGroup = 'All';
   List<Map<String, dynamic>> exercises = [];
   List<int> selectedExerciseIds = [];
@@ -35,6 +36,88 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
               exercise['name'].toLowerCase().contains(query.toLowerCase()))
           .toList();
     });
+  }
+
+  void _showSaveDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Save Workout'),
+          content: TextField(
+            controller: workoutNameController,
+            decoration: const InputDecoration(
+              hintText: 'Enter workout name',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final workoutName = workoutNameController.text.trim();
+
+                if (workoutName.isEmpty) {
+                  // Show an error if the workout name is empty
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Workout name cannot be empty!'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                } else if (selectedExerciseIds.isEmpty) {
+                  // Show an error if no exercises are selected
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Can't create an empty workout template!"),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                } else {
+                  try {
+                    // Save the workout template and exercises
+                    final dbHelper = DatabaseHelper();
+                    await dbHelper.saveWorkoutTemplate(
+                      workoutName: workoutName,
+                      exerciseIds: selectedExerciseIds,
+                    );
+
+                    // Show success message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Workout "$workoutName" saved successfully!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+
+                    // Clear the inputs
+                    workoutNameController.clear();
+                    selectedExerciseIds.clear();
+
+                    // Close the dialog and return to the dashboard with a result
+                    Navigator.pop(context); // Close the dialog
+                    Navigator.pop(context, true); // Return to the dashboard with a success result
+                  } catch (e) {
+                    // Show an error if saving fails
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to save workout: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -94,7 +177,7 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
               ],
             ),
           ),
-          // Exercise List (Remaining 85%)
+          // Exercise List (Remaining 75%)
           Expanded(
             child: ListView.builder(
               itemCount: exercises.length,
@@ -128,6 +211,32 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
               },
             ),
           ),
+          // Bottom Buttons (10%)
+          Container(
+            height: screenHeight * 0.1,
+            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Navigate back to the dashboard
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red, // Cancel button color
+                  ),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: _showSaveDialog, // Show the save dialog
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green, // Save button color
+                  ),
+                  child: const Text('Save'),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -136,6 +245,7 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
   @override
   void dispose() {
     searchController.dispose();
+    workoutNameController.dispose(); // Dispose the workout name controller
     super.dispose();
   }
 }

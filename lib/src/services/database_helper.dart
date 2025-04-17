@@ -450,4 +450,27 @@ class DatabaseHelper {
       ''', [muscleGroup]);
     }
   }
+
+  Future<void> saveWorkoutTemplate({
+    required String workoutName,
+    required List<int> exerciseIds,
+  }) async {
+    final db = await database;
+
+    // Start a transaction to ensure atomicity
+    await db.transaction((txn) async {
+      // Insert the template into the Template table
+      final templateId = await txn.insert('Template', {
+        'template_name': workoutName,
+      });
+
+      // Insert each exercise into the TemplateExercise table
+      for (final exerciseId in exerciseIds) {
+        await txn.insert('TemplateExercise', {
+          'template_id': templateId,
+          'exercise_id': exerciseId,
+        });
+      }
+    });
+  }
 }
