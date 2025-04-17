@@ -57,7 +57,8 @@ class MyApp extends StatelessWidget {
       theme: themeProvider.currentTheme,
       initialRoute: '/',
       routes: {
-        '/': (context) => const Dashboard(),
+        '/': (context) => const Dashboard(), // Initial route for the Dashboard
+        '/dashboard': (context) => const Dashboard(), // Explicit named route for the Dashboard
         '/history': (context) => const HistoryScreen(),
         '/statistics': (context) => const StatisticsScreen(),
         '/options': (context) => const OptionsScreen(),
