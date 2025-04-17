@@ -28,12 +28,41 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<List<Map<String, dynamic>>> _fetchWorkouts() async {
-    final workouts = await _dbHelper.getWorkoutsWithDetails();
-    _workoutDates = {
-      for (var workout in workouts)
-        DateFormat('yyyy-MM-dd').format(DateTime.parse(workout['date'])): workout['workout_id'],
-    };
-    return workouts;
+    try {
+      final workouts = await _dbHelper.getWorkoutsWithDetails();
+
+      // Filter out invalid data
+      final validWorkouts = workouts.where((workout) {
+        final date = workout['date'];
+        final workoutId = workout['workout_id'];
+        if (date == null || workoutId == null) {
+          debugPrint('Invalid workout data: $workout');
+          return false;
+        }
+        return true;
+      }).toList();
+
+      // Sort by date
+      validWorkouts.sort((a, b) {
+        try {
+          return DateTime.parse(b['date']).compareTo(DateTime.parse(a['date']));
+        } catch (e) {
+          debugPrint('Error parsing date: ${b['date']} or ${a['date']}');
+          return 0;
+        }
+      });
+
+      // Map workout dates to workout IDs
+      _workoutDates = {
+        for (var workout in validWorkouts)
+          DateFormat('yyyy-MM-dd').format(DateTime.parse(workout['date'])): workout['workout_id'],
+      };
+
+      return validWorkouts;
+    } catch (e) {
+      debugPrint('Error in _fetchWorkouts: $e');
+      rethrow;
+    }
   }
 
   void _onDateSelected(DateTime selectedDate, DateTime focusedDate) {
@@ -71,52 +100,92 @@ class _HistoryScreenState extends State<HistoryScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
+            // Display the error message
             return Center(
               child: Text(
-                'Error loading workouts.',
+                'Error: ${snapshot.error}',
+                style: theme.textTheme.bodyLarge,
+              ),
+            );
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(
+              child: Text(
+                'No workouts found.',
                 style: theme.textTheme.bodyLarge,
               ),
             );
           } else {
+            final workouts = snapshot.data!;
             return Column(
               children: [
-                // Calendar Section
-                TableCalendar(
-                  firstDay: DateTime(2000),
-                  lastDay: DateTime.now(),
-                  focusedDay: _focusedDate,
-                  selectedDayPredicate: (day) => isSameDay(_selectedDate, day),
-                  onDaySelected: _onDateSelected,
-                  calendarStyle: CalendarStyle(
-                    defaultDecoration: BoxDecoration(
-                      color: AppColors.primary, // Dates without workouts
-                      shape: BoxShape.circle,
+                // Calendar Section (40% of the screen height)
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.4,
+                  child: TableCalendar(
+                    firstDay: DateTime(2000),
+                    lastDay: DateTime.now(),
+                    focusedDay: _focusedDate,
+                    selectedDayPredicate: (day) => isSameDay(_selectedDate, day),
+                    onDaySelected: _onDateSelected,
+                    calendarStyle: CalendarStyle(
+                      defaultDecoration: BoxDecoration(
+                        color: AppColors.primary, // Dates without workouts
+                        shape: BoxShape.circle,
+                      ),
+                      todayDecoration: BoxDecoration(
+                        color: AppColors.textPrimary, // Highlight today's date
+                        shape: BoxShape.circle,
+                      ),
+                      selectedDecoration: BoxDecoration(
+                        color: AppColors.secondary, // Selected date
+                        shape: BoxShape.circle,
+                      ),
+                      markerDecoration: BoxDecoration(
+                        color: AppColors.secondary, // Dates with workouts
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                    todayDecoration: BoxDecoration(
-                      color: AppColors.textPrimary, // Highlight today's date
-                      shape: BoxShape.circle,
-                    ),
-                    selectedDecoration: BoxDecoration(
-                      color: AppColors.secondary, // Selected date
-                      shape: BoxShape.circle,
-                    ),
-                    markerDecoration: BoxDecoration(
-                      color: AppColors.secondary, // Dates with workouts
-                      shape: BoxShape.circle,
-                    ),
+                    eventLoader: (day) {
+                      final formattedDate = DateFormat('yyyy-MM-dd').format(day);
+                      return _workoutDates.containsKey(formattedDate) ? [true] : [];
+                    },
                   ),
-                  eventLoader: (day) {
-                    final formattedDate = DateFormat('yyyy-MM-dd').format(day);
-                    return _workoutDates.containsKey(formattedDate) ? [true] : [];
-                  },
                 ),
-                // Remaining Section
+                // Scrollable List of Workouts (60% of the screen height)
                 Expanded(
-                  child: Center(
-                    child: Text(
-                      'Select a date to view workout details.',
-                      style: theme.textTheme.bodyLarge,
-                    ),
+                  child: ListView.builder(
+                    itemCount: workouts.length,
+                    itemBuilder: (context, index) {
+                      final workout = workouts[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        color: AppColors.secondary, // Use secondary color for cards
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ListTile(
+                          title: Text(
+                            workout['template_name'] ?? 'Unknown Template',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ), // Use theme's text style
+                          ),
+                          subtitle: Text(
+                            'Date: ${workout['date']}',
+                            style: theme.textTheme.bodyMedium, // Use theme's text style
+                          ),
+                          trailing: const Icon(Icons.arrow_forward),
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/workout_summary',
+                              arguments: workout['workout_id'],
+                            );
+                          },
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
