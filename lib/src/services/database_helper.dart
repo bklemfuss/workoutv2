@@ -473,4 +473,24 @@ class DatabaseHelper {
       }
     });
   }
+
+  Future<void> deleteTemplate(int templateId) async {
+    final db = await database;
+
+    await db.transaction((txn) async {
+      // Delete associated TemplateExercise entries
+      await txn.delete(
+        'TemplateExercise',
+        where: 'template_id = ?',
+        whereArgs: [templateId],
+      );
+
+      // Delete the template itself
+      await txn.delete(
+        'Template',
+        where: 'template_id = ?',
+        whereArgs: [templateId],
+      );
+    });
+  }
 }
