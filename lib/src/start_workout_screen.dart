@@ -16,9 +16,9 @@ class StartWorkoutScreen extends StatelessWidget {
     try {
       await dbHelper.deleteTemplate(templateId);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Template deleted successfully!'),
-          backgroundColor: Colors.green,
+        SnackBar(
+          content: const Text('Template deleted successfully!'),
+          backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
       Navigator.pop(context, true); // Pass true to indicate successful deletion
@@ -26,7 +26,7 @@ class StartWorkoutScreen extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to delete template: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -34,9 +34,13 @@ class StartWorkoutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Access the current theme
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Start Workout'),
+        backgroundColor: theme.appBarTheme.backgroundColor, // Use theme app bar color
+        foregroundColor: theme.appBarTheme.foregroundColor, // Use theme app bar text color
         actions: [
           IconButton(
             icon: const Icon(Icons.delete),
@@ -79,9 +83,19 @@ class StartWorkoutScreen extends StatelessWidget {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return const Center(child: Text('Error loading exercises.'));
+                  return Center(
+                    child: Text(
+                      'Error loading exercises.',
+                      style: theme.textTheme.bodyLarge, // Use theme text style
+                    ),
+                  );
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No exercises found.'));
+                  return Center(
+                    child: Text(
+                      'No exercises found.',
+                      style: theme.textTheme.bodyLarge, // Use theme text style
+                    ),
+                  );
                 } else {
                   final exercises = snapshot.data!;
                   return ListView.builder(
@@ -89,8 +103,14 @@ class StartWorkoutScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final exercise = exercises[index];
                       return ListTile(
-                        title: Text(exercise['name'] ?? 'Unknown Exercise'),
-                        subtitle: Text(exercise['Description'] ?? 'No description available'),
+                        title: Text(
+                          exercise['name'] ?? 'Unknown Exercise',
+                          style: theme.textTheme.bodyLarge, // Use theme text style
+                        ),
+                        subtitle: Text(
+                          exercise['Description'] ?? 'No description available',
+                          style: theme.textTheme.bodyMedium, // Use theme text style
+                        ),
                         onTap: () {
                           // Add functionality for tapping an exercise if needed
                         },
@@ -105,7 +125,7 @@ class StartWorkoutScreen extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Container(
-              color: Colors.blue[100], // Optional background color
+              color: theme.colorScheme.surfaceVariant, // Use theme surface variant color
               child: Center(
                 child: ElevatedButton(
                   onPressed: () {
@@ -122,15 +142,17 @@ class StartWorkoutScreen extends StatelessWidget {
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: theme.colorScheme.primary, // Use theme primary color
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Start Workout',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onPrimary, // Use theme onPrimary color
+                    ),
                   ),
                 ),
               ),
