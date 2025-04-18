@@ -183,6 +183,8 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
               itemCount: exercises.length,
               itemBuilder: (context, index) {
                 final exercise = exercises[index];
+                final isSelected = selectedExerciseIds.contains(exercise['exercise_id']); // Check if the exercise is selected
+
                 return Card(
                   margin: EdgeInsets.symmetric(
                     horizontal: screenWidth * 0.05,
@@ -199,11 +201,17 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                       style: theme.textTheme.bodyLarge, // Use textTheme from AppTheme
                     ),
                     trailing: IconButton(
-                      icon: const Icon(Icons.add),
+                      icon: Icon(isSelected ? Icons.remove : Icons.add), // Toggle icon
                       color: theme.primaryColor, // Use primaryColor from AppTheme
                       onPressed: () {
                         setState(() {
-                          selectedExerciseIds.add(exercise['exercise_id']);
+                          if (isSelected) {
+                            // If already selected, remove from the list
+                            selectedExerciseIds.remove(exercise['exercise_id']);
+                          } else {
+                            // If not selected, add to the list
+                            selectedExerciseIds.add(exercise['exercise_id']);
+                          }
                         });
                       },
                     ),

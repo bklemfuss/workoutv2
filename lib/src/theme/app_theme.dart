@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'colors.dart'; // Assuming your AppColors class is in colors.dart
+import 'colors.dart';
 
 class AppTheme {
   static ThemeData lightTheme(double fontSize) {
