@@ -24,9 +24,13 @@ class WorkoutSummaryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Access the current theme
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Workout Summary'),
+        backgroundColor: theme.appBarTheme.backgroundColor, // Use theme app bar color
+        foregroundColor: theme.appBarTheme.foregroundColor, // Use theme app bar text color
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _fetchWorkoutSummary(),
@@ -34,9 +38,19 @@ class WorkoutSummaryScreen extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return const Center(child: Text('Error loading workout summary.'));
+            return Center(
+              child: Text(
+                'Error loading workout summary.',
+                style: theme.textTheme.bodyLarge, // Use theme text style
+              ),
+            );
           } else if (!snapshot.hasData) {
-            return const Center(child: Text('No workout summary found.'));
+            return Center(
+              child: Text(
+                'No workout summary found.',
+                style: theme.textTheme.bodyLarge, // Use theme text style
+              ),
+            );
           } else {
             final workoutDetails = snapshot.data!['workoutDetails'] as Map<String, dynamic>;
             final workoutExercises = snapshot.data!['workoutExercises'] as List<Map<String, dynamic>>;
@@ -46,10 +60,12 @@ class WorkoutSummaryScreen extends StatelessWidget {
                 // Display the template name
                 Container(
                   padding: const EdgeInsets.all(16),
-                  color: Colors.blue[100],
+                  color: theme.cardColor, // Use theme card color
                   child: Text(
                     workoutDetails['template_name'] ?? 'Unknown Template',
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ), // Use theme text style
                   ),
                 ),
                 // Display the list of exercises using ExerciseListWidget
