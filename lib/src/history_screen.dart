@@ -6,6 +6,7 @@ import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'widgets/floating_start_new_workout_button.dart';
 import 'theme/colors.dart';
+import 'workout_summary.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -73,15 +74,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
     if (_workoutDates.containsKey(formattedDate)) {
-      // Navigate to WorkoutSummaryScreen if a workout exists for the selected date
+      // Show WorkoutSummaryScreen in a BottomModalSheet
       final workoutId = _workoutDates[formattedDate];
-      Navigator.pushNamed(
-        context,
-        '/workout_summary',
-        arguments: workoutId,
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        builder: (context) {
+          return FractionallySizedBox(
+            heightFactor: 0.9, // Adjust the height of the modal sheet
+            child: WorkoutSummaryScreen(workoutId: workoutId ?? -1),
+          );
+        },
       );
     } else {
-      // Do nothing if no workout exists for the selected date
+      // Show a SnackBar if no workout exists for the selected date
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No workout found for this date.')),
       );
@@ -159,7 +168,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       final workout = workouts[index];
                       return Card(
                         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        color: AppColors.secondary, // Use secondary color for cards
+                        color: theme.cardColor, // Use theme card color
                         elevation: 4,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -177,10 +186,29 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           ),
                           trailing: const Icon(Icons.arrow_forward),
                           onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/workout_summary',
-                              arguments: workout['workout_id'],
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                              ),
+                              builder: (context) {
+                                return FractionallySizedBox(
+                                  heightFactor: 0.9, // Adjust the height of the modal sheet
+                                  child: Navigator(
+                                    onGenerateRoute: (settings) {
+                                      if (settings.name == '/workout_summary') {
+                                        final workoutId = workout['workout_id'];
+                                        return MaterialPageRoute(
+                                          builder: (context) => WorkoutSummaryScreen(workoutId: workoutId),
+                                        );
+                                      }
+                                      return null;
+                                    },
+                                    initialRoute: '/workout_summary',
+                                  ),
+                                );
+                              },
                             );
                           },
                         ),
