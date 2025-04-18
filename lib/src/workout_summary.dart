@@ -10,7 +10,7 @@ class WorkoutSummaryScreen extends StatelessWidget {
   Future<Map<String, dynamic>> _fetchWorkoutSummary() async {
     final dbHelper = DatabaseHelper();
 
-    // Fetch the workout details (template name)
+    // Fetch the workout details (template name and workout timer)
     final workoutDetails = await dbHelper.getWorkoutDetails(workoutId);
 
     // Fetch the exercises for the workout
@@ -20,6 +20,17 @@ class WorkoutSummaryScreen extends StatelessWidget {
       'workoutDetails': workoutDetails,
       'workoutExercises': workoutExercises,
     };
+  }
+
+  String _formatWorkoutTime(int workoutTimer) {
+    final hours = workoutTimer ~/ 3600;
+    final minutes = (workoutTimer % 3600) ~/ 60;
+
+    if (hours > 0) {
+      return '$hours hours $minutes minutes';
+    } else {
+      return '$minutes minutes';
+    }
   }
 
   @override
@@ -55,17 +66,32 @@ class WorkoutSummaryScreen extends StatelessWidget {
             final workoutDetails = snapshot.data!['workoutDetails'] as Map<String, dynamic>;
             final workoutExercises = snapshot.data!['workoutExercises'] as List<Map<String, dynamic>>;
 
+            final workoutTimer = workoutDetails['workout_timer'] as int? ?? 0; // Default to 0 if null
+            final formattedTime = _formatWorkoutTime(workoutTimer);
+
             return Column(
               children: [
-                // Display the template name
+                // Display the template name and workout time
                 Container(
                   padding: const EdgeInsets.all(16),
                   color: theme.cardColor, // Use theme card color
-                  child: Text(
-                    workoutDetails['template_name'] ?? 'Unknown Template',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ), // Use theme text style
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        workoutDetails['template_name'] ?? 'Unknown Template',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ), // Use theme text style
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        formattedTime,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.secondary,
+                        ), // Use theme text style
+                      ),
+                    ],
                   ),
                 ),
                 // Display the list of exercises using ExerciseListWidget
