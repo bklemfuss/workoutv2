@@ -30,7 +30,7 @@ class AppTheme {
       ),
       textTheme: TextTheme(
         bodyLarge: TextStyle(fontSize: fontSize, color: AppColors.textPrimaryLight),
-        bodyMedium: TextStyle(fontSize: fontSize - 2, color: AppColors.textSecondaryLight),
+        bodyMedium: TextStyle(fontSize: fontSize - 2, color: const Color.fromARGB(255, 204, 204, 204)),
       ),
     );
   }
