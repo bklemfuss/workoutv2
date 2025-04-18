@@ -6,11 +6,48 @@ import 'theme/colors.dart'; // Import AppColors for custom colors
 import 'start_workout_screen.dart';
 import 'create_workout_screen.dart';
 
-class Dashboard extends StatelessWidget {
+class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
+
+  @override
+  State<Dashboard> createState() => _DashboardState();
+}
+
+class _DashboardState extends State<Dashboard> {
+  late Future<List<Map<String, dynamic>>> _templatesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _templatesFuture = _fetchTemplates();
+  }
 
   Future<List<Map<String, dynamic>>> _fetchTemplates() async {
     return await DatabaseHelper().getTemplates();
+  }
+
+  void _showStartWorkoutScreen(BuildContext context, int templateId) async {
+    final result = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 0.9,
+          widthFactor: 0.9,
+          child: StartWorkoutScreen(templateId: templateId),
+        );
+      },
+    );
+
+    if (result == true) {
+      // Refresh the dashboard data
+      setState(() {
+        _templatesFuture = _fetchTemplates();
+      });
+    }
   }
 
   void _navigateToCreateWorkoutScreen(BuildContext context) async {
@@ -21,7 +58,9 @@ class Dashboard extends StatelessWidget {
 
     if (result == true) {
       // Refresh the dashboard data
-      (context as Element).reassemble(); // Force widget tree to rebuild
+      setState(() {
+        _templatesFuture = _fetchTemplates();
+      });
     }
   }
 
@@ -54,7 +93,7 @@ class Dashboard extends StatelessWidget {
                 child: Container(
                   color: AppColors.background, // Use secondary color from AppColors
                   child: FutureBuilder<List<Map<String, dynamic>>>(
-                    future: _fetchTemplates(),
+                    future: _templatesFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
@@ -77,20 +116,7 @@ class Dashboard extends StatelessWidget {
                             final template = templates[index];
                             return GestureDetector(
                               onTap: () {
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                                  ),
-                                  builder: (context) {
-                                    return FractionallySizedBox(
-                                      heightFactor: 0.9,
-                                      widthFactor: 0.9,
-                                      child: StartWorkoutScreen(templateId: template['template_id']),
-                                    );
-                                  },
-                                );
+                                _showStartWorkoutScreen(context, template['template_id']);
                               },
                               child: Card(
                                 color: AppColors.primary, // Use primary color from AppColors

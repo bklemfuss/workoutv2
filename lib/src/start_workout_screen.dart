@@ -11,11 +11,62 @@ class StartWorkoutScreen extends StatelessWidget {
     return await DatabaseHelper().getExercisesByTemplateId(templateId);
   }
 
+  Future<void> _deleteTemplate(BuildContext context) async {
+    final dbHelper = DatabaseHelper();
+    try {
+      await dbHelper.deleteTemplate(templateId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Template deleted successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context, true); // Pass true to indicate successful deletion
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete template: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Start Workout'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Text('Delete Template'),
+                    content: const Text('Are you sure you want to delete this template?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false), // Cancel
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true), // Confirm
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  );
+                },
+              );
+
+              if (confirm == true) {
+                await _deleteTemplate(context);
+              }
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
