@@ -66,7 +66,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
-  void _onDateSelected(DateTime selectedDate, DateTime focusedDate) {
+  void _onDateSelected(DateTime selectedDate, DateTime focusedDate) async {
     setState(() {
       _selectedDate = selectedDate;
       _focusedDate = focusedDate;
@@ -76,7 +76,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (_workoutDates.containsKey(formattedDate)) {
       // Show WorkoutSummaryScreen in a BottomModalSheet
       final workoutId = _workoutDates[formattedDate];
-      showModalBottomSheet(
+      final result = await showModalBottomSheet<bool>(
         context: context,
         isScrollControlled: true,
         shape: const RoundedRectangleBorder(
@@ -84,11 +84,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
         builder: (context) {
           return FractionallySizedBox(
-            heightFactor: 0.9, // Adjust the height of the modal sheet
+            heightFactor: 0.9,
             child: WorkoutSummaryScreen(workoutId: workoutId ?? -1),
           );
         },
       );
+
+      // Refresh the history screen if a workout was deleted
+      if (result == true) {
+        setState(() {
+          _workoutsFuture = _fetchWorkouts();
+        });
+      }
     } else {
       // Show a SnackBar if no workout exists for the selected date
       ScaffoldMessenger.of(context).showSnackBar(
@@ -185,8 +192,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             style: theme.textTheme.bodyMedium, // Use theme's text style
                           ),
                           trailing: const Icon(Icons.arrow_forward),
-                          onTap: () {
-                            showModalBottomSheet(
+                          onTap: () async {
+                            // Show WorkoutSummaryScreen in a BottomModalSheet
+                            final result = await showModalBottomSheet<bool>(
                               context: context,
                               isScrollControlled: true,
                               shape: const RoundedRectangleBorder(
@@ -195,21 +203,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               builder: (context) {
                                 return FractionallySizedBox(
                                   heightFactor: 0.9, // Adjust the height of the modal sheet
-                                  child: Navigator(
-                                    onGenerateRoute: (settings) {
-                                      if (settings.name == '/workout_summary') {
-                                        final workoutId = workout['workout_id'];
-                                        return MaterialPageRoute(
-                                          builder: (context) => WorkoutSummaryScreen(workoutId: workoutId),
-                                        );
-                                      }
-                                      return null;
-                                    },
-                                    initialRoute: '/workout_summary',
-                                  ),
+                                  child: WorkoutSummaryScreen(workoutId: workout['workout_id']),
                                 );
                               },
                             );
+
+                            // Refresh the history screen if a workout was deleted
+                            if (result == true) {
+                              setState(() {
+                                _workoutsFuture = _fetchWorkouts();
+                              });
+                            }
                           },
                         ),
                       );

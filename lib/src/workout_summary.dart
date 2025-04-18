@@ -7,6 +7,34 @@ class WorkoutSummaryScreen extends StatelessWidget {
 
   const WorkoutSummaryScreen({super.key, required this.workoutId});
 
+  Future<void> _deleteWorkout(BuildContext context) async {
+    final dbHelper = DatabaseHelper();
+
+    try {
+      // Delete the workout and associated workout exercises
+      await dbHelper.deleteWorkout(workoutId);
+
+      // Show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Workout deleted successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Close the modal and return `true` to indicate deletion
+      Navigator.pop(context, true);
+    } catch (e) {
+      // Show an error message if deletion fails
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete workout: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   Future<Map<String, dynamic>> _fetchWorkoutSummary() async {
     final dbHelper = DatabaseHelper();
 
@@ -42,6 +70,36 @@ class WorkoutSummaryScreen extends StatelessWidget {
         title: const Text('Workout Summary'),
         backgroundColor: theme.appBarTheme.backgroundColor, // Use theme app bar color
         foregroundColor: theme.appBarTheme.foregroundColor, // Use theme app bar text color
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Text('Delete Workout'),
+                    content: const Text('Are you sure you want to delete this workout?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false), // Cancel
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true), // Confirm
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  );
+                },
+              );
+
+              if (confirm == true) {
+                await _deleteWorkout(context);
+              }
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _fetchWorkoutSummary(),
