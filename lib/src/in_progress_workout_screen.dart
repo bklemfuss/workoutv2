@@ -1,27 +1,63 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'services/database_helper.dart';
 import 'widgets/exercise_input_card.dart';
 import 'package:provider/provider.dart';
 import 'providers/unit_provider.dart';
 
-class InProgressWorkoutScreen extends StatelessWidget {
+class InProgressWorkoutScreen extends StatefulWidget {
   final List<Map<String, dynamic>> exercises;
   final int templateId;
 
-  InProgressWorkoutScreen({
+  const InProgressWorkoutScreen({
     Key? key,
-    required List<Map<String, dynamic>> exercises,
+    required this.exercises,
     required this.templateId,
-  }) : exercises = exercises.toList(); // Create a mutable copy of the list
+  }) : super(key: key);
+
+  @override
+  State<InProgressWorkoutScreen> createState() => _InProgressWorkoutScreenState();
+}
+
+class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
+  late Timer _timer;
+  int _elapsedSeconds = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _elapsedSeconds++;
+      });
+    });
+  }
+
+  String _formatTime(int seconds) {
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+    final secs = seconds % 60;
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+  }
 
   Future<void> _finishWorkout(BuildContext context) async {
     final dbHelper = DatabaseHelper();
 
     // Step 1: Create a new workout
-    final workoutId = await dbHelper.createWorkout(templateId, 1); // Use user_id = 1 for now
+    final workoutId = await dbHelper.createWorkout(widget.templateId, 1); // Use user_id = 1 for now
 
     // Step 2: Prepare exercise data
-    final workoutExercises = exercises.map((exercise) {
+    final workoutExercises = widget.exercises.map((exercise) {
       return {
         'exercise_id': exercise['exercise_id'],
         'sets': exercise['sets'],
@@ -33,7 +69,10 @@ class InProgressWorkoutScreen extends StatelessWidget {
     // Step 3: Create workout exercises
     await dbHelper.createWorkoutExercises(workoutId, workoutExercises);
 
-    // Step 4: Navigate back to the dashboard
+    // Step 4: Save the workout timer in the database
+    await dbHelper.updateWorkoutTimer(workoutId, _elapsedSeconds);
+
+    // Step 5: Navigate back to the dashboard
     Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
   }
 
@@ -61,9 +100,9 @@ class InProgressWorkoutScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Timer Placeholder',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                Text(
+                  _formatTime(_elapsedSeconds), // Display the timer
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -118,14 +157,14 @@ class InProgressWorkoutScreen extends StatelessWidget {
           // Scrollable List of Exercises (95% of the screen height)
           Expanded(
             child: ListView.builder(
-              itemCount: exercises.length,
+              itemCount: widget.exercises.length,
               itemBuilder: (context, index) {
-                final exercise = exercises[index];
+                final exercise = widget.exercises[index];
                 return ExerciseInputCard(
                   exercise: exercise,
                   onChanged: (updatedExercise) {
                     // Update the exercise in the list
-                    exercises[index] = updatedExercise;
+                    widget.exercises[index] = updatedExercise;
                   },
                 );
               },

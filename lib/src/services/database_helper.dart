@@ -51,7 +51,8 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE Template (
         template_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        template_name TEXT
+        template_name TEXT,
+        template_premade INTEGER -- 0 for false, 1 for true
       )
     ''');
 
@@ -102,6 +103,7 @@ class DatabaseHelper {
         template_id INTEGER,
         user_id INTEGER,
         date TEXT,
+        workout_timer INTEGER,
         FOREIGN KEY (template_id) REFERENCES Template(template_id),
         FOREIGN KEY (user_id) REFERENCES User(user_id)
       )
@@ -151,10 +153,10 @@ class DatabaseHelper {
     });
 
     // Insert sample Templates
-    await db.insert('Template', {'template_id': 1, 'template_name': 'Full Body Workout A'});
-    await db.insert('Template', {'template_id': 2, 'template_name': 'Upper Body Strength'});
-    await db.insert('Template', {'template_id': 3, 'template_name': 'Lower Body Endurance'});
-    await db.insert('Template', {'template_id': 4, 'template_name': 'Core Stability'});
+    await db.insert('Template', {'template_id': 1, 'template_name': 'Full Body Workout A', 'template_premade': 1});
+    await db.insert('Template', {'template_id': 2, 'template_name': 'Upper Body Strength', 'template_premade': 1});
+    await db.insert('Template', {'template_id': 3, 'template_name': 'Lower Body Endurance', 'template_premade': 1});
+    await db.insert('Template', {'template_id': 4, 'template_name': 'Core Stability', 'template_premade': 1});
 
     // Insert sample MuscleGroups
     await db.insert('MuscleGroup', {'muscle_group_id': 1, 'Name': 'Chest'});
@@ -211,18 +213,21 @@ class DatabaseHelper {
       'template_id': 1,
       'user_id': 1,
       'date': '2025-04-08',
+      'workout_timer': 3600, // 1 hour
     });
     await db.insert('Workout', {
       'workout_id': 2,
       'template_id': 2,
       'user_id': 1,
       'date': '2025-04-09',
+      'workout_timer': 2700, // 45 minutes
     });
     await db.insert('Workout', {
       'workout_id': 3,
       'template_id': 3,
       'user_id': 1,
       'date': '2025-04-10',
+      'workout_timer': 1800, // 30 minutes
     });
 
     // Insert sample WorkoutExercises
@@ -414,7 +419,8 @@ class DatabaseHelper {
     final result = await db.rawQuery('''
       SELECT 
         w.workout_id,
-        t.template_name
+        t.template_name,
+        w.workout_timer
       FROM Workout w
       INNER JOIN Template t ON w.template_id = t.template_id
       WHERE w.workout_id = ?
@@ -492,5 +498,15 @@ class DatabaseHelper {
         whereArgs: [templateId],
       );
     });
+  }
+
+  Future<void> updateWorkoutTimer(int workoutId, int workoutTimer) async {
+    final db = await database;
+    await db.update(
+      'Workout',
+      {'workout_timer': workoutTimer},
+      where: 'workout_id = ?',
+      whereArgs: [workoutId],
+    );
   }
 }
