@@ -337,11 +337,6 @@ class DatabaseHelper {
     return await db.update('Workout', workout, where: 'workout_id = ?', whereArgs: [id]);
   }
 
-  Future<int> deleteWorkout(int id) async {
-    final db = await database;
-    return await db.delete('Workout', where: 'workout_id = ?', whereArgs: [id]);
-  }
-
   Future<String> getFirstTemplateName() async {
     final db = await database;
     final result = await db.query('Template', limit: 1);
@@ -508,5 +503,25 @@ class DatabaseHelper {
       where: 'workout_id = ?',
       whereArgs: [workoutId],
     );
+  }
+
+  Future<void> deleteWorkout(int workoutId) async {
+    final db = await database;
+
+    await db.transaction((txn) async {
+      // Delete associated WorkoutExercises
+      await txn.delete(
+        'WorkoutExercise',
+        where: 'workout_id = ?',
+        whereArgs: [workoutId],
+      );
+
+      // Delete the workout itself
+      await txn.delete(
+        'Workout',
+        where: 'workout_id = ?',
+        whereArgs: [workoutId],
+      );
+    });
   }
 }
