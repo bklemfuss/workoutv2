@@ -42,9 +42,9 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
     try {
       await dbHelper.deleteTemplate(widget.templateId);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Template deleted successfully!'),
-          backgroundColor: Colors.green,
+        SnackBar(
+          content: const Text('Template deleted successfully!'),
+          backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
       Navigator.pop(context, true); // Pass true to indicate successful deletion
@@ -52,7 +52,7 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to delete template: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -60,9 +60,13 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Access the current theme
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Start Workout'),
+        backgroundColor: theme.appBarTheme.backgroundColor, // Use theme app bar color
+        foregroundColor: theme.appBarTheme.foregroundColor, // Use theme app bar text color
         actions: [
           // Trash can icon to delete the template
           IconButton(
@@ -122,9 +126,19 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return const Center(child: Text('Error loading exercises.'));
+                  return Center(
+                    child: Text(
+                      'Error loading exercises.',
+                      style: theme.textTheme.bodyLarge, // Use theme text style
+                    ),
+                  );
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No exercises found.'));
+                  return Center(
+                    child: Text(
+                      'No exercises found.',
+                      style: theme.textTheme.bodyLarge, // Use theme text style
+                    ),
+                  );
                 } else {
                   final exercises = snapshot.data!;
                   return ListView.builder(
@@ -165,7 +179,7 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
           Expanded(
             flex: 1,
             child: Container(
-              color: Colors.blue[100], // Optional background color
+              color: theme.colorScheme.surfaceVariant, // Use theme surface variant color
               child: Center(
                 child: ElevatedButton(
                   onPressed: () {
@@ -182,15 +196,17 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: theme.colorScheme.primary, // Use theme primary color
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Start Workout',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onPrimary, // Use theme onPrimary color
+                    ),
                   ),
                 ),
               ),
