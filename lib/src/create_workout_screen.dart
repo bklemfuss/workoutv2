@@ -69,15 +69,8 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                       backgroundColor: Colors.red,
                     ),
                   );
-                } else if (selectedExerciseIds.isEmpty) {
-                  // Show an error if no exercises are selected
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Can't create an empty workout template!"),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                } else {
+                } 
+                else {
                   try {
                     // Save the workout template and exercises
                     final dbHelper = DatabaseHelper();
@@ -237,7 +230,19 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                   child: const Text('Cancel'),
                 ),
                 ElevatedButton(
-                  onPressed: _showSaveDialog, // Show the save dialog
+                  onPressed: () {
+                    if (selectedExerciseIds.isEmpty) {
+                      // Show an error if no exercises are selected
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Can't create an empty workout template!"),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    } else {
+                      _showSaveDialog(); // Show the save dialog if exercises are selected
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green, // Save button color
                   ),
