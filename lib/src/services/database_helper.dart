@@ -514,15 +514,6 @@ class DatabaseHelper {
     );
   }
 
-  Future<void> deleteExerciseFromTemplate(int templateId, int exerciseId) async {
-    final db = await database;
-    await db.delete(
-      'TemplateExercise',
-      where: 'template_id = ? AND exercise_id = ?',
-      whereArgs: [templateId, exerciseId],
-    );
-  }
-
   Future<void> deleteWorkout(int workoutId) async {
     final db = await database;
 
