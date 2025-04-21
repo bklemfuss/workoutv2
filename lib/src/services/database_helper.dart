@@ -348,23 +348,24 @@ class DatabaseHelper {
 
   Future<List<Map<String, dynamic>>> getWorkoutsWithDetails() async {
     final db = await database;
-    return await db.rawQuery('''
+    final results = await db.rawQuery('''
       SELECT 
         w.workout_id,
         w.date,
         t.template_name,
         u.name AS user_name,
-        e.name AS exercise_name,
-        we.sets,
-        we.reps,
-        we.weight
+        GROUP_CONCAT(e.name, ', ') AS exercise_names,
+        w.workout_timer
       FROM Workout w
       INNER JOIN Template t ON w.template_id = t.template_id
       INNER JOIN User u ON w.user_id = u.user_id
       INNER JOIN WorkoutExercise we ON w.workout_id = we.workout_id
       INNER JOIN Exercise e ON we.exercise_id = e.exercise_id
+      GROUP BY w.workout_id
       ORDER BY w.date DESC
     ''');
+    debugPrint('Grouped query results: $results');
+    return results;
   }
 
   Future<List<Map<String, dynamic>>> getExercisesByTemplateId(int templateId) async {
