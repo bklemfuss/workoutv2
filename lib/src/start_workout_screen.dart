@@ -1,20 +1,47 @@
 import 'package:flutter/material.dart';
 import 'services/database_helper.dart';
 import 'widgets/bottom_nav_bar.dart';
+import 'add_exercises_screen.dart'; // Import the new AddExercisesScreen
 
-class StartWorkoutScreen extends StatelessWidget {
+class StartWorkoutScreen extends StatefulWidget {
   final int templateId;
 
   const StartWorkoutScreen({Key? key, required this.templateId}) : super(key: key);
 
+  @override
+  State<StartWorkoutScreen> createState() => _StartWorkoutScreenState();
+}
+
+class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
+  late Future<List<Map<String, dynamic>>> _exercisesFuture;
+  bool _isEditing = false; // Tracks whether the user is in edit mode
+  final List<int> _exercisesToRemove = []; // Tracks exercises marked for removal
+
+  @override
+  void initState() {
+    super.initState();
+    _exercisesFuture = _fetchExercises();
+  }
+
   Future<List<Map<String, dynamic>>> _fetchExercises() async {
-    return await DatabaseHelper().getExercisesByTemplateId(templateId);
+    return await DatabaseHelper().getExercisesByTemplateId(widget.templateId);
+  }
+
+  Future<void> _removeExercisesFromTemplate() async {
+    final dbHelper = DatabaseHelper();
+    for (final exerciseId in _exercisesToRemove) {
+      await dbHelper.deleteExerciseFromTemplate(widget.templateId, exerciseId);
+    }
+    setState(() {
+      _exercisesFuture = _fetchExercises(); // Refresh the list after deletion
+      _exercisesToRemove.clear(); // Clear the list of removed exercises
+    });
   }
 
   Future<void> _deleteTemplate(BuildContext context) async {
     final dbHelper = DatabaseHelper();
     try {
-      await dbHelper.deleteTemplate(templateId);
+      await dbHelper.deleteTemplate(widget.templateId);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Template deleted successfully!'),
@@ -42,6 +69,7 @@ class StartWorkoutScreen extends StatelessWidget {
         backgroundColor: theme.appBarTheme.backgroundColor, // Use theme app bar color
         foregroundColor: theme.appBarTheme.foregroundColor, // Use theme app bar text color
         actions: [
+          // Trash can icon to delete the template
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: () async {
@@ -70,6 +98,22 @@ class StartWorkoutScreen extends StatelessWidget {
               }
             },
           ),
+          // Edit/Done toggle button
+          TextButton(
+            onPressed: () async {
+              if (_isEditing) {
+                // If toggling back to "Done", remove exercises from the template
+                await _removeExercisesFromTemplate();
+              }
+              setState(() {
+                _isEditing = !_isEditing; // Toggle edit mode
+              });
+            },
+            child: Text(
+              _isEditing ? 'Done' : 'Edit',
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
         ],
       ),
       body: Column(
@@ -78,7 +122,7 @@ class StartWorkoutScreen extends StatelessWidget {
           Expanded(
             flex: 9,
             child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: _fetchExercises(),
+              future: _exercisesFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -102,18 +146,30 @@ class StartWorkoutScreen extends StatelessWidget {
                     itemCount: exercises.length,
                     itemBuilder: (context, index) {
                       final exercise = exercises[index];
+                      final exerciseId = exercise['exercise_id'];
+                      final isMarkedForRemoval = _exercisesToRemove.contains(exerciseId);
+
                       return ListTile(
-                        title: Text(
-                          exercise['name'] ?? 'Unknown Exercise',
-                          style: theme.textTheme.bodyLarge, // Use theme text style
-                        ),
-                        subtitle: Text(
-                          exercise['Description'] ?? 'No description available',
-                          style: theme.textTheme.bodyMedium, // Use theme text style
-                        ),
-                        onTap: () {
-                          // Add functionality for tapping an exercise if needed
-                        },
+
+                        title: Text(exercise['name'] ?? 'Unknown Exercise'),
+                        subtitle: Text(exercise['Description'] ?? 'No description available'),
+                        trailing: _isEditing
+                            ? IconButton(
+                                icon: Icon(
+                                  isMarkedForRemoval ? Icons.add : Icons.remove,
+                                  color: isMarkedForRemoval ? Colors.green : Colors.red,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    if (isMarkedForRemoval) {
+                                      _exercisesToRemove.remove(exerciseId);
+                                    } else {
+                                      _exercisesToRemove.add(exerciseId);
+                                    }
+                                  });
+                                },
+                              )
+                            : null,
                       );
                     },
                   );
@@ -121,43 +177,85 @@ class StartWorkoutScreen extends StatelessWidget {
               },
             ),
           ),
-          // Bottom section with "Start Workout" button (10% of the screen height)
-          Expanded(
-            flex: 1,
-            child: Container(
-              color: theme.colorScheme.surfaceVariant, // Use theme surface variant color
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Ensure exercises are fetched and passed correctly
-                    _fetchExercises().then((exercises) {
-                      Navigator.pushNamed(
+          // Bottom section with "Add Exercises" button in edit mode
+          if (_isEditing)
+            Expanded(
+              flex: 1,
+              child: Container(
+                color: theme.colorScheme.surfaceVariant, // Use theme surface variant color
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      // Navigate to AddExercisesScreen
+                      final result = await Navigator.push(
                         context,
-                        '/in_progress_workout',
-                        arguments: {
-                          'template_id': templateId, // Pass the template_id
-                          'exercises': exercises,    // Pass the exercises list
-                        },
+                        MaterialPageRoute(
+                          builder: (context) => AddExercisesScreen(templateId: widget.templateId),
+                        ),
                       );
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary, // Use theme primary color
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+
+                      // Refresh the exercises list if new exercises were added
+                      if (result == true) {
+                        setState(() {
+                          _exercisesFuture = _fetchExercises();
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary, // Use theme primary color
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    'Start Workout',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.onPrimary, // Use theme onPrimary color
+                    child: Text(
+                      'Add Exercises',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.onPrimary, // Use theme onPrimary color
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
+          // Bottom section with "Start Workout" button (10% of the screen height)
+          if (!_isEditing)
+            Expanded(
+              flex: 1,
+              child: Container(
+                color: theme.colorScheme.surfaceVariant, // Use theme surface variant color
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Ensure exercises are fetched and passed correctly
+                      _fetchExercises().then((exercises) {
+                        Navigator.pushNamed(
+                          context,
+                          '/in_progress_workout',
+                          arguments: {
+                            'template_id': widget.templateId, // Pass the template_id
+                            'exercises': exercises, // Pass the exercises list
+                          },
+                        );
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary, // Use theme primary color
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'Start Workout',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.onPrimary, // Use theme onPrimary color
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
       bottomNavigationBar: const BottomNavBar(
