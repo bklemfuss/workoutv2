@@ -5,6 +5,7 @@ import 'widgets/bottom_nav_bar.dart';
 import 'theme/colors.dart'; // Import AppColors for custom colors
 import 'start_workout_screen.dart';
 import 'create_workout_screen.dart';
+import 'widgets/dashboard_template_card.dart'; // Import the reusable card widget
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -114,26 +115,11 @@ class _DashboardState extends State<Dashboard> {
                           itemCount: templates.length,
                           itemBuilder: (context, index) {
                             final template = templates[index];
-                            return GestureDetector(
+                            return DashboardTemplateCard(
+                              templateName: template['template_name'] ?? 'Unknown Template',
                               onTap: () {
                                 _showStartWorkoutScreen(context, template['template_id']);
                               },
-                              child: Card(
-                                color: AppColors.primary, // Use primary color from AppColors
-                                elevation: 4,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    template['template_name'] ?? 'Unknown Template',
-                                    textAlign: TextAlign.center,
-                                    style: theme.textTheme.bodyLarge?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ), // Use text style from theme
-                                  ),
-                                ),
-                              ),
                             );
                           },
                         );
