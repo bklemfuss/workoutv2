@@ -364,7 +364,6 @@ class DatabaseHelper {
       GROUP BY w.workout_id
       ORDER BY w.date DESC
     ''');
-    debugPrint('Grouped query results: $results');
     return results;
   }
 
