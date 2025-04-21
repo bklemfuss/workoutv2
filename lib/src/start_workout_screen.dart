@@ -150,6 +150,7 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
                       final isMarkedForRemoval = _exercisesToRemove.contains(exerciseId);
 
                       return ListTile(
+
                         title: Text(exercise['name'] ?? 'Unknown Exercise'),
                         subtitle: Text(exercise['Description'] ?? 'No description available'),
                         trailing: _isEditing
