@@ -533,4 +533,29 @@ class DatabaseHelper {
       );
     });
   }
+
+  Future<List<Map<String, dynamic>>> getAllExercises() async {
+    final db = await database;
+    return await db.query('Exercise');
+  }
+
+  Future<void> addExerciseToTemplate(int templateId, int exerciseId) async {
+    final db = await database;
+    await db.insert('TemplateExercise', {
+      'template_id': templateId,
+      'exercise_id': exerciseId,
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getExercisesNotInTemplate(int templateId) async {
+    final db = await database;
+
+    // Query to fetch exercises not in the current template
+    return await db.rawQuery('''
+      SELECT * FROM Exercise
+      WHERE exercise_id NOT IN (
+        SELECT exercise_id FROM TemplateExercise WHERE template_id = ?
+      )
+    ''', [templateId]);
+  }
 }

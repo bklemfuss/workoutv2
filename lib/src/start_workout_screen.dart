@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'services/database_helper.dart';
 import 'widgets/bottom_nav_bar.dart';
+import 'add_exercises_screen.dart'; // Import the new AddExercisesScreen
 
 class StartWorkoutScreen extends StatefulWidget {
   final int templateId;
@@ -175,43 +176,85 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
               },
             ),
           ),
-          // Bottom section with "Start Workout" button (10% of the screen height)
-          Expanded(
-            flex: 1,
-            child: Container(
-              color: theme.colorScheme.surfaceVariant, // Use theme surface variant color
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Ensure exercises are fetched and passed correctly
-                    _fetchExercises().then((exercises) {
-                      Navigator.pushNamed(
+          // Bottom section with "Add Exercises" button in edit mode
+          if (_isEditing)
+            Expanded(
+              flex: 1,
+              child: Container(
+                color: theme.colorScheme.surfaceVariant, // Use theme surface variant color
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      // Navigate to AddExercisesScreen
+                      final result = await Navigator.push(
                         context,
-                        '/in_progress_workout',
-                        arguments: {
-                          'template_id': widget.templateId, // Pass the template_id
-                          'exercises': exercises, // Pass the exercises list
-                        },
+                        MaterialPageRoute(
+                          builder: (context) => AddExercisesScreen(templateId: widget.templateId),
+                        ),
                       );
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary, // Use theme primary color
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+
+                      // Refresh the exercises list if new exercises were added
+                      if (result == true) {
+                        setState(() {
+                          _exercisesFuture = _fetchExercises();
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary, // Use theme primary color
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    'Start Workout',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.onPrimary, // Use theme onPrimary color
+                    child: Text(
+                      'Add Exercises',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.onPrimary, // Use theme onPrimary color
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
+          // Bottom section with "Start Workout" button (10% of the screen height)
+          if (!_isEditing)
+            Expanded(
+              flex: 1,
+              child: Container(
+                color: theme.colorScheme.surfaceVariant, // Use theme surface variant color
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Ensure exercises are fetched and passed correctly
+                      _fetchExercises().then((exercises) {
+                        Navigator.pushNamed(
+                          context,
+                          '/in_progress_workout',
+                          arguments: {
+                            'template_id': widget.templateId, // Pass the template_id
+                            'exercises': exercises, // Pass the exercises list
+                          },
+                        );
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary, // Use theme primary color
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'Start Workout',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.onPrimary, // Use theme onPrimary color
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
       bottomNavigationBar: const BottomNavBar(
