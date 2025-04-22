@@ -24,8 +24,9 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2, // Increment the version number
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -39,11 +40,13 @@ class DatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
-    // Create MuscleGroup table
+    // Create MuscleGroup table with a foreign key for exercise_id
     await db.execute('''
       CREATE TABLE MuscleGroup (
         muscle_group_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        Name TEXT
+        Name TEXT,
+        exercise_id INTEGER,
+        FOREIGN KEY (exercise_id) REFERENCES Exercise(exercise_id)
       )
     ''');
 
@@ -138,31 +141,26 @@ class DatabaseHelper {
     await insertSampleData(db);
   }
 
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Add exercise_id column to MuscleGroup table
+      await db.execute('ALTER TABLE MuscleGroup ADD COLUMN exercise_id INTEGER');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS Exercise (
+          exercise_id INTEGER PRIMARY KEY AUTOINCREMENT,
+          muscle_group_id INTEGER,
+          name TEXT,
+          Description TEXT,
+          equipment INTEGER,
+          instructions TEXT,
+          image_url TEXT,
+          FOREIGN KEY (muscle_group_id) REFERENCES MuscleGroup(muscle_group_id)
+        )
+      ''');
+    }
+  }
+
   Future<void> insertSampleData(Database db) async {
-    // Insert sample Users
-    await db.insert('User', {
-      'user_id': 1,
-      'name': 'John Doe',
-      'email': 'john.doe@example.com',
-      'password': 'password123',
-      'height': 180,
-      'weight': 75,
-      'date_of_birth': '1990-01-01',
-      'gender': 1,
-      'notification_preferences': 1,
-    });
-
-    // Insert sample Templates
-    await db.insert('Template', {'template_id': 1, 'template_name': 'Full Body Workout A', 'template_premade': 1});
-    await db.insert('Template', {'template_id': 2, 'template_name': 'Upper Body Strength', 'template_premade': 1});
-    await db.insert('Template', {'template_id': 3, 'template_name': 'Lower Body Endurance', 'template_premade': 1});
-    await db.insert('Template', {'template_id': 4, 'template_name': 'Core Stability', 'template_premade': 1});
-
-    // Insert sample MuscleGroups
-    await db.insert('MuscleGroup', {'muscle_group_id': 1, 'Name': 'Chest'});
-    await db.insert('MuscleGroup', {'muscle_group_id': 2, 'Name': 'Back'});
-    await db.insert('MuscleGroup', {'muscle_group_id': 3, 'Name': 'Legs'});
-
     // Insert sample Exercises
     await db.insert('Exercise', {
       'exercise_id': 1,
@@ -200,6 +198,30 @@ class DatabaseHelper {
       'instructions': 'Lower the barbell to your chest and press it back up.',
       'image_url': 'https://example.com/bench-press.png',
     });
+
+    // Insert sample MuscleGroups with exercise_id as a foreign key
+    await db.insert('MuscleGroup', {'muscle_group_id': 1, 'Name': 'Chest', 'exercise_id': 1});
+    await db.insert('MuscleGroup', {'muscle_group_id': 2, 'Name': 'Back', 'exercise_id': 2});
+    await db.insert('MuscleGroup', {'muscle_group_id': 3, 'Name': 'Legs', 'exercise_id': 3});
+
+    // Insert sample Users
+    await db.insert('User', {
+      'user_id': 1,
+      'name': 'John Doe',
+      'email': 'john.doe@example.com',
+      'password': 'password123',
+      'height': 180,
+      'weight': 75,
+      'date_of_birth': '1990-01-01',
+      'gender': 1,
+      'notification_preferences': 1,
+    });
+
+    // Insert sample Templates
+    await db.insert('Template', {'template_id': 1, 'template_name': 'Full Body Workout A', 'template_premade': 1});
+    await db.insert('Template', {'template_id': 2, 'template_name': 'Upper Body Strength', 'template_premade': 1});
+    await db.insert('Template', {'template_id': 3, 'template_name': 'Lower Body Endurance', 'template_premade': 1});
+    await db.insert('Template', {'template_id': 4, 'template_name': 'Core Stability', 'template_premade': 1});
 
     // Insert sample TemplateExercises
     await db.insert('TemplateExercise', {'template_exercise_id': 1, 'template_id': 1, 'exercise_id': 1});
