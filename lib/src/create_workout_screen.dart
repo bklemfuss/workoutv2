@@ -12,7 +12,8 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
   final TextEditingController searchController = TextEditingController();
   final TextEditingController workoutNameController = TextEditingController(); // Controller for workout name
   String selectedMuscleGroup = 'All';
-  List<Map<String, dynamic>> exercises = [];
+  List<Map<String, dynamic>> allExercises = []; // Original unfiltered list
+  List<Map<String, dynamic>> exercises = []; // Filtered list
   List<int> selectedExerciseIds = [];
 
   @override
@@ -25,16 +26,23 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
     final dbHelper = DatabaseHelper();
     final fetchedExercises = await dbHelper.getExercisesByMuscleGroup(muscleGroup);
     setState(() {
-      exercises = fetchedExercises;
+      allExercises = fetchedExercises; // Store the original data
+      exercises = List.from(allExercises); // Initialize the filtered list
     });
   }
 
   void _onSearchChanged(String query) {
     setState(() {
-      exercises = exercises
-          .where((exercise) =>
-              exercise['name'].toLowerCase().contains(query.toLowerCase()))
-          .toList();
+      if (query.isEmpty) {
+        // If the query is empty, restore the original list
+        exercises = List.from(allExercises);
+      } else {
+        // Filter the original list
+        exercises = allExercises
+            .where((exercise) =>
+                exercise['name'].toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
     });
   }
 
