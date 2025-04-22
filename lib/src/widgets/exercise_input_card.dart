@@ -43,10 +43,11 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
         horizontal: screenWidth * 0.05,
         vertical: screenHeight * 0.01,
       ),
-      elevation: 4,
+      elevation: 6,
+      shadowColor: Colors.black.withOpacity(0.2), // Add subtle shadow
       color: theme.cardColor, // Use the theme's card color
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16), // Increase border radius for a modern look
       ),
       child: Padding(
         padding: EdgeInsets.all(screenWidth * 0.04),

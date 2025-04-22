@@ -80,10 +80,12 @@ class _DashboardState extends State<Dashboard> {
                 flex: 1,
                 child: Container(
                   color: AppColors.background, // Use background color from AppColors
-                  child: const Center(
+                  child: Center(
                     child: Text(
                       'Top Section (ring widgets)',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),

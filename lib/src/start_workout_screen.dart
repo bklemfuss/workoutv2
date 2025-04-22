@@ -125,7 +125,9 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
                       },
                       child: Text(
                         _isEditing ? 'Done' : 'Edit',
-                        style: const TextStyle(color: Colors.white),
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onPrimary, // Ensure consistent text color
+                        ),
                       ),
                     ),
                   ],
