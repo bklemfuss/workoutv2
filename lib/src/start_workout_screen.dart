@@ -16,15 +16,21 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
   late Future<List<Map<String, dynamic>>> _exercisesFuture;
   bool _isEditing = false; // Tracks whether the user is in edit mode
   final List<int> _exercisesToRemove = []; // Tracks exercises marked for removal
+  late Future<int> _templatePremadeStatus;
 
   @override
   void initState() {
     super.initState();
+    _templatePremadeStatus = _fetchTemplatePremadeStatus();
     _exercisesFuture = _fetchExercises();
   }
 
   Future<List<Map<String, dynamic>>> _fetchExercises() async {
     return await DatabaseHelper().getExercisesByTemplateId(widget.templateId);
+  }
+
+  Future<int> _fetchTemplatePremadeStatus() async {
+    return await DatabaseHelper().getTemplatePremadeStatus(widget.templateId);
   }
 
   Future<void> _removeExercisesFromTemplate() async {
@@ -69,50 +75,65 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
         backgroundColor: theme.appBarTheme.backgroundColor, // Use theme app bar color
         foregroundColor: theme.appBarTheme.foregroundColor, // Use theme app bar text color
         actions: [
-          // Trash can icon to delete the template
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: const Text('Delete Template'),
-                    content: const Text('Are you sure you want to delete this template?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, false), // Cancel
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, true), // Confirm
-                        child: const Text('Delete'),
-                      ),
-                    ],
-                  );
-                },
-              );
+          FutureBuilder<int>(
+            future: _templatePremadeStatus,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SizedBox.shrink(); // Show nothing while loading
+              }
 
-              if (confirm == true) {
-                await _deleteTemplate(context);
+              if (snapshot.hasData && snapshot.data == 0) {
+                // Show edit and delete options only if template_premade is 0
+                return Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Delete Template'),
+                              content: const Text('Are you sure you want to delete this template?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, false),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Delete'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        if (confirm == true) {
+                          await _deleteTemplate(context);
+                        }
+                      },
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        if (_isEditing) {
+                          await _removeExercisesFromTemplate();
+                        }
+                        setState(() {
+                          _isEditing = !_isEditing;
+                        });
+                      },
+                      child: Text(
+                        _isEditing ? 'Done' : 'Edit',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                );
               }
+
+              return const SizedBox.shrink(); // Hide options if template_premade is 1
             },
-          ),
-          // Edit/Done toggle button
-          TextButton(
-            onPressed: () async {
-              if (_isEditing) {
-                // If toggling back to "Done", remove exercises from the template
-                await _removeExercisesFromTemplate();
-              }
-              setState(() {
-                _isEditing = !_isEditing; // Toggle edit mode
-              });
-            },
-            child: Text(
-              _isEditing ? 'Done' : 'Edit',
-              style: const TextStyle(color: Colors.white),
-            ),
           ),
         ],
       ),
