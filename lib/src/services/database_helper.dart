@@ -460,9 +460,10 @@ class DatabaseHelper {
 
     // Start a transaction to ensure atomicity
     await db.transaction((txn) async {
-      // Insert the template into the Template table
+      // Insert the template into the Template table with template_premade set to false
       final templateId = await txn.insert('Template', {
         'template_name': workoutName,
+        'template_premade': 0, // Set to false (0)
       });
 
       // Insert each exercise into the TemplateExercise table
@@ -557,5 +558,17 @@ class DatabaseHelper {
         SELECT exercise_id FROM TemplateExercise WHERE template_id = ?
       )
     ''', [templateId]);
+  }
+
+  Future<int> getTemplatePremadeStatus(int templateId) async {
+    final db = await database;
+    final result = await db.query(
+      'Template',
+      columns: ['template_premade'],
+      where: 'template_id = ?',
+      whereArgs: [templateId],
+      limit: 1,
+    );
+    return result.isNotEmpty ? result.first['template_premade'] as int : 1; // Default to 1 if not found
   }
 }
