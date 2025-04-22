@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'services/database_helper.dart';
+import 'widgets/exercise_details_dialog.dart';
 
 class CreateWorkoutScreen extends StatefulWidget {
   const CreateWorkoutScreen({super.key});
@@ -232,70 +233,6 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
     );
   }
 
-  void _showExerciseDetailsDialog(Map<String, dynamic> exercise) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final theme = Theme.of(context);
-        final screenHeight = MediaQuery.of(context).size.height;
-        final screenWidth = MediaQuery.of(context).size.width;
-
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Container(
-            height: screenHeight * 0.6, // 60% of the screen height
-            padding: EdgeInsets.all(screenWidth * 0.05),
-            child: Column(
-              children: [
-                // Top 40% for the image
-                Container(
-                  height: screenHeight * 0.24, // 40% of the dialog height
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    image: DecorationImage(
-                      image: NetworkImage(exercise['image_url'] ?? ''),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.02), // Spacing
-
-                // Exercise name
-                Text(
-                  exercise['name'] ?? 'Unknown Exercise',
-                  style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: screenHeight * 0.01), // Spacing
-
-                // Exercise description
-                Text(
-                  exercise['Description'] ?? 'No description available.',
-                  style: theme.textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: screenHeight * 0.02), // Spacing
-
-                // Scrollable instructions
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Text(
-                      exercise['instructions'] ?? 'No instructions available.',
-                      style: theme.textTheme.bodyMedium,
-                      textAlign: TextAlign.left,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -373,7 +310,10 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                   ),
                   child: ListTile(
                     onTap: () {
-                      _showExerciseDetailsDialog(exercise); // Show the dialog when tapped
+                      showDialog(
+                        context: context,
+                        builder: (context) => ExerciseDetailsDialog(exercise: exercise),
+                      );
                     },
                     title: Text(
                       exercise['name'] ?? 'Unknown Exercise',
