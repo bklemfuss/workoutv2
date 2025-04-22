@@ -571,4 +571,35 @@ class DatabaseHelper {
     );
     return result.isNotEmpty ? result.first['template_premade'] as int : 1; // Default to 1 if not found
   }
+
+  Future<void> addCustomExercise({
+    required String name,
+    required String description,
+    required String muscleGroup,
+    required bool requiresEquipment,
+  }) async {
+    final db = await database;
+
+    // Get the muscle group ID (default to 1 if not found)
+    final muscleGroupResult = await db.query(
+      'MuscleGroup',
+      columns: ['muscle_group_id'],
+      where: 'Name = ?',
+      whereArgs: [muscleGroup],
+      limit: 1,
+    );
+    final muscleGroupId = muscleGroupResult.isNotEmpty
+        ? muscleGroupResult.first['muscle_group_id'] as int
+        : 1;
+
+    // Insert the custom exercise
+    await db.insert('Exercise', {
+      'muscle_group_id': muscleGroupId,
+      'name': name,
+      'Description': description,
+      'equipment': requiresEquipment ? 1 : 0, // 1 for true, 0 for false
+      'instructions': '', // Optional: Add default or empty instructions
+      'image_url': '', // Optional: Add default or empty image URL
+    });
+  }
 }

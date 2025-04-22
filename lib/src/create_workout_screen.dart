@@ -113,6 +113,117 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
     );
   }
 
+  void _showCreateCustomExerciseDialog() {
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController descriptionController = TextEditingController();
+    String selectedMuscleGroup = 'All';
+    bool requiresEquipment = true;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Create Custom Exercise'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Exercise Name',
+                    hintText: 'Enter exercise name',
+                  ),
+                ),
+                TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Description (Optional)',
+                    hintText: 'Enter exercise description',
+                  ),
+                ),
+                DropdownButtonFormField<String>(
+                  value: selectedMuscleGroup,
+                  items: ['All', 'Chest', 'Back', 'Legs', 'Arms', 'Core']
+                      .map((group) => DropdownMenuItem(
+                            value: group,
+                            child: Text(group),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    selectedMuscleGroup = value!;
+                  },
+                  decoration: const InputDecoration(
+                    labelText: 'Muscle Group',
+                  ),
+                ),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: requiresEquipment,
+                      onChanged: (value) {
+                        requiresEquipment = value!;
+                      },
+                    ),
+                    const Text('Requires Equipment'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final exerciseName = nameController.text.trim();
+                final exerciseDescription = descriptionController.text.trim();
+
+                if (exerciseName.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Exercise name cannot be empty!'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                // Save the custom exercise to the database
+                final dbHelper = DatabaseHelper();
+                await dbHelper.addCustomExercise(
+                  name: exerciseName,
+                  description: exerciseDescription,
+                  muscleGroup: selectedMuscleGroup,
+                  requiresEquipment: requiresEquipment,
+                );
+
+                // Refresh the exercise list
+                _fetchExercises();
+
+                // Close the dialog
+                Navigator.pop(context);
+
+                // Show success message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Custom exercise created successfully!'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -228,6 +339,15 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                     backgroundColor: Colors.red, // Cancel button color
                   ),
                   child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    _showCreateCustomExerciseDialog(); // Show the custom exercise dialog
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue, // Create Custom Exercise button color
+                  ),
+                  child: const Text('Create Custom Exercise'),
                 ),
                 ElevatedButton(
                   onPressed: () {
