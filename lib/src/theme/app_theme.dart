@@ -7,9 +7,13 @@ class AppTheme {
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.backgroundLight,
       cardColor: AppColors.primary,
-      inputDecorationTheme: const InputDecorationTheme(
-        fillColor: AppColors.backgroundLight,
+      inputDecorationTheme: InputDecorationTheme(
+        fillColor: AppColors.inputFieldBackground, // Use the new light grey color
         filled: true,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8), // Rounded corners
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10), // Adjust padding
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primary,
@@ -23,14 +27,14 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.secondary,
+        unselectedItemColor: Color.fromARGB(255, 248, 104, 37),
         backgroundColor: AppColors.backgroundLight,
         elevation: 8,
         type: BottomNavigationBarType.fixed,
       ),
       textTheme: TextTheme(
         bodyLarge: TextStyle(fontSize: fontSize, color: AppColors.textPrimaryLight),
-        bodyMedium: TextStyle(fontSize: fontSize - 2, color: const Color.fromARGB(255, 204, 204, 204)),
+        bodyMedium: TextStyle(fontSize: fontSize - 2, color: const Color.fromARGB(255, 59, 59, 59)),
       ),
     );
   }
@@ -39,10 +43,14 @@ class AppTheme {
     return ThemeData(
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.background,
-      cardColor: AppColors.secondary,
-      inputDecorationTheme: const InputDecorationTheme(
-        fillColor: AppColors.background,
+      cardColor: const Color.fromARGB(255, 248, 104, 37),
+      inputDecorationTheme: InputDecorationTheme(
+        fillColor: const Color.fromARGB(255, 248, 142, 93), // Use the same light grey color for consistency
         filled: true,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8), // Rounded corners
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10), // Adjust padding
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primary,

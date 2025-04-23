@@ -39,60 +39,107 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [theme.primaryColor, theme.cardColor], // Gradient colors
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16), // Match the card's border radius
+      ),
       margin: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.05,
-        vertical: screenHeight * 0.01,
+        vertical: screenHeight * 0.005,
       ),
-      elevation: 6,
-      shadowColor: Colors.black.withOpacity(0.2), // Add subtle shadow
-      color: theme.cardColor, // Use the theme's card color
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16), // Increase border radius for a modern look
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(screenWidth * 0.04),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Exercise Name wrapped in GestureDetector
-            GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => ExerciseDetailsDialog(exercise: widget.exercise),
-                );
-              },
-              child: Text(
-                widget.exercise['exercise_name'] ?? widget.exercise['name'] ?? 'Unknown Exercise',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ), // Use the theme's text style
+      child: Card(
+        elevation: 6,
+        shadowColor: Colors.black.withOpacity(0.2),
+        color: Colors.transparent, // Make the card's color transparent
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: screenHeight * 0.015,
+            horizontal: screenWidth * 0.04,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Row with Exercise Name and Percentage Field
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => ExerciseDetailsDialog(exercise: widget.exercise),
+                      );
+                    },
+                    child: Text(
+                      widget.exercise['exercise_name'] ?? widget.exercise['name'] ?? 'Unknown Exercise',
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: screenWidth * 0.1, // Half the width of input boxes
+                    height: screenHeight * 0.04, // Same height/width proportions as input boxes
+                    decoration: BoxDecoration(
+                      color: theme.inputDecorationTheme.fillColor, // Same color as inputFieldBackground
+                      borderRadius: BorderRadius.circular(8), // Rounded corners
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '0%', // Placeholder text
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            SizedBox(height: screenHeight * 0.01),
-            // Input Fields for Sets, Reps, and Weight
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildInputField(
-                  label: 'Sets',
-                  controller: setsController,
-                  onChanged: _onFieldChanged,
-                ),
-                _buildInputField(
-                  label: 'Reps',
-                  controller: repsController,
-                  onChanged: _onFieldChanged,
-                ),
-                _buildInputField(
-                  label: 'Weight',
-                  controller: weightController,
-                  onChanged: _onFieldChanged,
-                ),
-              ],
-            ),
-          ],
+              SizedBox(height: screenHeight * 0.01),
+              // Row with Notes Icon and Input Fields
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.note_add, color: theme.primaryColor),
+                    onPressed: () {
+                      // Placeholder for adding notes functionality
+                    },
+                  ),
+                  SizedBox(width: screenWidth * 0.02), // Space between icon and input fields
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end, // Push inputs to the right
+                      children: [
+                        _buildInputField(
+                          label: 'Sets',
+                          controller: setsController,
+                          onChanged: _onFieldChanged,
+                        ),
+                        SizedBox(width: screenWidth * 0.02),
+                        _buildInputField(
+                          label: 'Reps',
+                          controller: repsController,
+                          onChanged: _onFieldChanged,
+                        ),
+                        SizedBox(width: screenWidth * 0.02),
+                        _buildInputField(
+                          label: 'Weight',
+                          controller: weightController,
+                          onChanged: _onFieldChanged,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -111,18 +158,22 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
       children: [
         Text(
           label,
-          style: theme.textTheme.bodyMedium, // Use the theme's text style
+          style: theme.textTheme.bodyLarge, // Slightly larger text for labels
         ),
         SizedBox(
-          width: screenWidth * 0.15,
+          width: screenWidth * 0.2, // Slightly wider input box
           child: TextField(
             controller: controller,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8), // Rounded corners
+              ),
+              fillColor: theme.inputDecorationTheme.fillColor, // Light grey background
+              filled: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10), // Adjust padding
             ),
-            style: theme.textTheme.bodyMedium, // Use the theme's text style
+            style: theme.textTheme.bodyLarge, // Slightly larger text for input
             onChanged: (value) => onChanged(),
           ),
         ),

@@ -8,10 +8,13 @@ class AppColors {
 
   // Improved text colors for dark mode
   static const textPrimaryDark = Color.fromARGB(255, 220, 220, 220); // A slightly softer white
-  static const textSecondaryDark = Color.fromARGB(255, 170, 170, 170); // A light gray for less emphasis
+  static const textSecondaryDark = Color.fromARGB(255, 248, 247, 247); // A light gray for less emphasis
 
   // Light mode colors
   static const backgroundLight = Color.fromARGB(255, 242, 242, 242); // A light gray background
   static const textPrimaryLight = Color.fromARGB(255, 30, 30, 30);   // A dark gray for good contrast
   static const textSecondaryLight = Color.fromARGB(255, 90, 90, 90);  // A medium gray for less emphasis
+
+  // Input field background color
+  static const inputFieldBackground = Color.fromARGB(222, 248, 142, 93); 
 }
