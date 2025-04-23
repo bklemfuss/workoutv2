@@ -20,6 +20,7 @@ import 'src/create_workout_screen.dart';
 import 'src/providers/theme_provider.dart';
 import 'src/providers/unit_provider.dart'; // Import UnitProvider
 import 'src/providers/goal_provider.dart'; // Import GoalProvider
+import 'src/post_workout_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -80,10 +81,7 @@ class MyApp extends StatelessWidget {
           final exercises = args['exercises'] as List<Map<String, dynamic>>;
           return InProgressWorkoutScreen(templateId: templateId, exercises: exercises);
         },
-        '/workout_summary': (context) {
-          final workoutId = ModalRoute.of(context)!.settings.arguments as int;
-          return WorkoutSummaryScreen(workoutId: workoutId);
-        },
+        '/workout_summary': (context) => const PostWorkoutScreen(),
         '/create_workout': (context) => const CreateWorkoutScreen(),
       },
     );
