@@ -27,7 +27,7 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.secondary,
+        unselectedItemColor: Color.fromARGB(255, 248, 104, 37),
         backgroundColor: AppColors.backgroundLight,
         elevation: 8,
         type: BottomNavigationBarType.fixed,
@@ -43,9 +43,9 @@ class AppTheme {
     return ThemeData(
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.background,
-      cardColor: AppColors.secondary,
+      cardColor: const Color.fromARGB(255, 248, 104, 37),
       inputDecorationTheme: InputDecorationTheme(
-        fillColor: AppColors.inputFieldBackground, // Use the same light grey color for consistency
+        fillColor: const Color.fromARGB(255, 248, 142, 93), // Use the same light grey color for consistency
         filled: true,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8), // Rounded corners
