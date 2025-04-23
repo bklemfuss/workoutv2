@@ -24,8 +24,9 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2, // Updated database version
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade, // Handle database upgrades
     );
   }
 
@@ -77,6 +78,7 @@ class DatabaseHelper {
         equipment INTEGER, -- 0 for false, 1 for true
         instructions TEXT,
         image_url TEXT,
+        exercise_notes TEXT, -- New column for exercise notes
         FOREIGN KEY (muscle_group_id) REFERENCES MuscleGroup(muscle_group_id)
       )
     ''');
@@ -138,6 +140,15 @@ class DatabaseHelper {
     await insertSampleData(db);
   }
 
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Add the exercise_notes column to the Exercise table
+      await db.execute('''
+        ALTER TABLE Exercise ADD COLUMN exercise_notes TEXT
+      ''');
+    }
+  }
+
   Future<void> insertSampleData(Database db) async {
     // Insert sample Users
     await db.insert('User', {
@@ -172,6 +183,7 @@ class DatabaseHelper {
       'equipment': 0,
       'instructions': 'Keep your back straight and lower yourself to the ground.',
       'image_url': 'https://example.com/push-up.png',
+      'exercise_notes': 'Focus on form to avoid injury.', // Example note
     });
     await db.insert('Exercise', {
       'exercise_id': 2,
@@ -181,6 +193,7 @@ class DatabaseHelper {
       'equipment': 0,
       'instructions': 'Pull yourself up until your chin is above the bar.',
       'image_url': 'https://example.com/pull-up.png',
+      'exercise_notes': 'Use a resistance band if needed.', // Example note
     });
     await db.insert('Exercise', {
       'exercise_id': 3,
@@ -190,6 +203,7 @@ class DatabaseHelper {
       'equipment': 0,
       'instructions': 'Lower your hips until your thighs are parallel to the ground.',
       'image_url': 'https://example.com/squat.png',
+      'exercise_notes': 'Keep your knees aligned with your toes.', // Example note
     });
     await db.insert('Exercise', {
       'exercise_id': 4,
@@ -199,6 +213,7 @@ class DatabaseHelper {
       'equipment': 1,
       'instructions': 'Lower the barbell to your chest and press it back up.',
       'image_url': 'https://example.com/bench-press.png',
+      'exercise_notes': 'Ensure a spotter is present for safety.', // Example note
     });
 
     // Insert sample TemplateExercises
