@@ -7,9 +7,13 @@ class AppTheme {
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.backgroundLight,
       cardColor: AppColors.primary,
-      inputDecorationTheme: const InputDecorationTheme(
-        fillColor: AppColors.backgroundLight,
+      inputDecorationTheme: InputDecorationTheme(
+        fillColor: AppColors.inputFieldBackground, // Use the new light grey color
         filled: true,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8), // Rounded corners
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10), // Adjust padding
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primary,
@@ -30,7 +34,7 @@ class AppTheme {
       ),
       textTheme: TextTheme(
         bodyLarge: TextStyle(fontSize: fontSize, color: AppColors.textPrimaryLight),
-        bodyMedium: TextStyle(fontSize: fontSize - 2, color: const Color.fromARGB(255, 204, 204, 204)),
+        bodyMedium: TextStyle(fontSize: fontSize - 2, color: const Color.fromARGB(255, 59, 59, 59)),
       ),
     );
   }
@@ -40,9 +44,13 @@ class AppTheme {
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.background,
       cardColor: AppColors.secondary,
-      inputDecorationTheme: const InputDecorationTheme(
-        fillColor: AppColors.background,
+      inputDecorationTheme: InputDecorationTheme(
+        fillColor: AppColors.inputFieldBackground, // Use the same light grey color for consistency
         filled: true,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8), // Rounded corners
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10), // Adjust padding
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primary,

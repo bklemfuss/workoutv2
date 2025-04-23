@@ -42,7 +42,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
     return Card(
       margin: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.05,
-        vertical: screenHeight * 0.01,
+        vertical: screenHeight * 0.005, // Reduce vertical margin
       ),
       elevation: 6,
       shadowColor: Colors.black.withOpacity(0.2), // Add subtle shadow
@@ -51,44 +51,81 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
         borderRadius: BorderRadius.circular(16), // Increase border radius for a modern look
       ),
       child: Padding(
-        padding: EdgeInsets.all(screenWidth * 0.04),
+        padding: EdgeInsets.symmetric(
+          vertical: screenHeight * 0.015, // Reduce vertical padding
+          horizontal: screenWidth * 0.04,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Exercise Name wrapped in GestureDetector
-            GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => ExerciseDetailsDialog(exercise: widget.exercise),
-                );
-              },
-              child: Text(
-                widget.exercise['exercise_name'] ?? widget.exercise['name'] ?? 'Unknown Exercise',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ), // Use the theme's text style
-              ),
-            ),
-            SizedBox(height: screenHeight * 0.01),
-            // Input Fields for Sets, Reps, and Weight
+            // Row with Exercise Name and Percentage Field
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildInputField(
-                  label: 'Sets',
-                  controller: setsController,
-                  onChanged: _onFieldChanged,
+                GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => ExerciseDetailsDialog(exercise: widget.exercise),
+                    );
+                  },
+                  child: Text(
+                    widget.exercise['exercise_name'] ?? widget.exercise['name'] ?? 'Unknown Exercise',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-                _buildInputField(
-                  label: 'Reps',
-                  controller: repsController,
-                  onChanged: _onFieldChanged,
+                Container(
+                  width: screenWidth * 0.1, // Half the width of input boxes
+                  height: screenHeight * 0.04, // Same height/width proportions as input boxes
+                  decoration: BoxDecoration(
+                    color: theme.inputDecorationTheme.fillColor, // Same color as inputFieldBackground
+                    borderRadius: BorderRadius.circular(8), // Rounded corners
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '0%', // Placeholder text
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 ),
-                _buildInputField(
-                  label: 'Weight',
-                  controller: weightController,
-                  onChanged: _onFieldChanged,
+              ],
+            ),
+            SizedBox(height: screenHeight * 0.01),
+            // Row with Notes Icon and Input Fields
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.note_add, color: theme.primaryColor),
+                  onPressed: () {
+                    // Placeholder for adding notes functionality
+                  },
+                ),
+                SizedBox(width: screenWidth * 0.02), // Space between icon and input fields
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end, // Push inputs to the right
+                    children: [
+                      _buildInputField(
+                        label: 'Sets',
+                        controller: setsController,
+                        onChanged: _onFieldChanged,
+                      ),
+                      SizedBox(width: screenWidth * 0.02),
+                      _buildInputField(
+                        label: 'Reps',
+                        controller: repsController,
+                        onChanged: _onFieldChanged,
+                      ),
+                      SizedBox(width: screenWidth * 0.02),
+                      _buildInputField(
+                        label: 'Weight',
+                        controller: weightController,
+                        onChanged: _onFieldChanged,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -111,18 +148,22 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
       children: [
         Text(
           label,
-          style: theme.textTheme.bodyMedium, // Use the theme's text style
+          style: theme.textTheme.bodyLarge, // Slightly larger text for labels
         ),
         SizedBox(
-          width: screenWidth * 0.15,
+          width: screenWidth * 0.2, // Slightly wider input box
           child: TextField(
             controller: controller,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8), // Rounded corners
+              ),
+              fillColor: theme.inputDecorationTheme.fillColor, // Light grey background
+              filled: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10), // Adjust padding
             ),
-            style: theme.textTheme.bodyMedium, // Use the theme's text style
+            style: theme.textTheme.bodyLarge, // Slightly larger text for input
             onChanged: (value) => onChanged(),
           ),
         ),
