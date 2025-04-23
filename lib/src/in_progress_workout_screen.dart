@@ -72,8 +72,12 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
     // Step 4: Save the workout timer in the database
     await dbHelper.updateWorkoutTimer(workoutId, _elapsedSeconds);
 
-    // Step 5: Navigate back to the dashboard
-    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+    // Step 5: Navigate to the PostWorkoutScreen using named route
+    Navigator.pushReplacementNamed(
+      context,
+      '/workout_summary',
+      arguments: workoutId,
+    );
   }
 
   Future<void> _discardWorkout(BuildContext context) async {
