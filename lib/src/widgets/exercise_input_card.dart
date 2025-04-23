@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/exercise_details_dialog.dart';
 
 class ExerciseInputCard extends StatefulWidget {
   final Map<String, dynamic> exercise;
@@ -54,12 +55,20 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Exercise Name
-            Text(
-              widget.exercise['exercise_name'] ?? widget.exercise['name'] ?? 'Unknown Exercise',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ), // Use the theme's text style
+            // Exercise Name wrapped in GestureDetector
+            GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => ExerciseDetailsDialog(exercise: widget.exercise),
+                );
+              },
+              child: Text(
+                widget.exercise['exercise_name'] ?? widget.exercise['name'] ?? 'Unknown Exercise',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ), // Use the theme's text style
+              ),
             ),
             SizedBox(height: screenHeight * 0.01),
             // Input Fields for Sets, Reps, and Weight
