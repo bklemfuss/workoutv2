@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart'; // For database operations
+import '../services/database_helper.dart'; // For accessing the database helper
 import '../widgets/exercise_details_dialog.dart';
 
 class ExerciseInputCard extends StatefulWidget {
@@ -31,6 +33,68 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
       'reps': int.tryParse(repsController.text) ?? 0,
       'weight': double.tryParse(weightController.text) ?? 0.0,
     });
+  }
+
+  void _showNotesDialog(BuildContext context) async {
+    final dbHelper = DatabaseHelper();
+    final TextEditingController notesController = TextEditingController(
+      text: widget.exercise['exercise_notes'] ?? '', // Pre-fill with existing notes
+    );
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(widget.exercise['exercise_name'] ?? 'Exercise Notes'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (widget.exercise['exercise_notes'] != null &&
+                  widget.exercise['exercise_notes'].isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    'Existing Notes: ${widget.exercise['exercise_notes']}',
+                    style: const TextStyle(fontStyle: FontStyle.italic),
+                  ),
+                ),
+              TextField(
+                controller: notesController,
+                maxLines: 5,
+                decoration: const InputDecoration(
+                  hintText: 'Enter notes about this exercise...',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog without saving
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final updatedNotes = notesController.text;
+                // Use the helper function to update the notes
+                await dbHelper.updateExerciseNotes(
+                  widget.exercise['exercise_id'],
+                  updatedNotes,
+                );
+                // Update the local state
+                setState(() {
+                  widget.exercise['exercise_notes'] = updatedNotes;
+                });
+                Navigator.of(context).pop(); // Close dialog after saving
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -108,7 +172,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
                   IconButton(
                     icon: Icon(Icons.note_add, color: theme.primaryColor),
                     onPressed: () {
-                      // Placeholder for adding notes functionality
+                      _showNotesDialog(context); // Show notes dialog
                     },
                   ),
                   SizedBox(width: screenWidth * 0.02), // Space between icon and input fields

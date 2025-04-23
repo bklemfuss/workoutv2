@@ -617,4 +617,14 @@ class DatabaseHelper {
       'image_url': '', // Optional: Add default or empty image URL
     });
   }
+
+  Future<void> updateExerciseNotes(int exerciseId, String notes) async {
+    final db = await database;
+    await db.update(
+      'Exercise',
+      {'exercise_notes': notes},
+      where: 'exercise_id = ?',
+      whereArgs: [exerciseId],
+    );
+  }
 }
