@@ -15,7 +15,6 @@ import 'src/change_password_screen.dart';
 import 'src/manage_account_screen.dart';
 import 'src/in_progress_workout_screen.dart';
 import 'src/start_workout_screen.dart';
-import 'src/workout_summary.dart';
 import 'src/create_workout_screen.dart';
 import 'src/providers/theme_provider.dart';
 import 'src/providers/unit_provider.dart'; // Import UnitProvider
