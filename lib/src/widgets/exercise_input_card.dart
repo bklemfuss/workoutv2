@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart'; // For database operations
 import '../services/database_helper.dart'; // For accessing the database helper
 import '../widgets/exercise_details_dialog.dart';
 
