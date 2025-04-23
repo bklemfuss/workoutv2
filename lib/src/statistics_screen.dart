@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'services/database_helper.dart';
+import 'widgets/bottom_nav_bar.dart';
 import 'theme/app_theme.dart'; // Import AppTheme
+import 'models/exercises_graph.dart'; // Import ExercisesGraph
+import 'models/personal_records_graph.dart'; // Import PersonalRecordsGraph
 
 class StatisticsScreen extends StatelessWidget {
   const StatisticsScreen({super.key});
@@ -22,6 +25,17 @@ class StatisticsScreen extends StatelessWidget {
       'totalExercises': totalExercises,
       'totalTime': totalTime,
     };
+  }
+
+  void _showGraphModal(BuildContext context, Widget graphWidget) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow custom height
+      builder: (context) => FractionallySizedBox(
+        heightFactor: 0.8, // Use 80% of the available screen height
+        child: graphWidget,
+      ),
+    );
   }
 
   @override
@@ -108,40 +122,41 @@ class StatisticsScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   itemCount: 10, // Placeholder for 10 graph cards
                   itemBuilder: (context, index) {
-                    return Card(
-                      elevation: 4,
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      color: Theme.of(context).cardColor, // Use AppTheme
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                height: 100, // Placeholder height for graph
-                                color: Colors.blue[100],
-                                child: Center(
-                                  child: Text(
-                                    'Graph ${index + 1}',
-                                    style: Theme.of(context).textTheme.bodyMedium,
-                                  ),
-                                ),
+                    final title = index == 0
+                        ? 'Exercises'
+                        : index == 1
+                            ? 'Personal Records'
+                            : 'Placeholder';
+
+                    return GestureDetector(
+                      onTap: () {
+                        if (index == 0) {
+                          _showGraphModal(context, const ExercisesGraph());
+                        } else if (index == 1) {
+                          _showGraphModal(context, const PersonalRecordsGraph());
+                        }
+                      },
+                      child: Card(
+                        elevation: 4,
+                        margin: const EdgeInsets.symmetric(vertical: 8.0),
+                        color: Theme.of(context).cardColor, // Use AppTheme
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            children: [
+                              Text(
+                                title,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                                textAlign: TextAlign.center,
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Container(
-                                height: 100, // Placeholder height for graph
-                                color: Colors.green[100],
-                                child: Center(
-                                  child: Text(
-                                    'Graph ${index + 1}',
-                                    style: Theme.of(context).textTheme.bodyMedium,
-                                  ),
-                                ),
+                              const SizedBox(height: 8),
+                              Image.asset(
+                                'assets/images/flutter_logo.png',
+                                height: 100,
+                                fit: BoxFit.contain,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -152,33 +167,8 @@ class StatisticsScreen extends StatelessWidget {
           );
         },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Statistics',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        currentIndex: 1, // Highlight the Statistics tab
-        selectedItemColor: Theme.of(context).bottomNavigationBarTheme.selectedItemColor, // Use AppTheme
-        unselectedItemColor: Theme.of(context).bottomNavigationBarTheme.unselectedItemColor, // Use AppTheme
-        backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor, // Use AppTheme
-        onTap: (index) {
-          // Handle navigation between tabs
-          if (index == 0) {
-            Navigator.pushNamed(context, '/dashboard');
-          } else if (index == 2) {
-            Navigator.pushNamed(context, '/options');
-          }
-        },
+      bottomNavigationBar: const BottomNavBar(
+        currentIndex: 2,
       ),
     );
   }
