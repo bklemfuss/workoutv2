@@ -15,6 +15,12 @@ class StatisticsScreen extends StatelessWidget {
     final totalTimeSeconds = (await dbHelper.getWorkouts())
         .fold<int>(0, (sum, workout) => sum + (workout['workout_timer'] as int));
 
+    // Calculate average workout time
+    final averageTimeSeconds = totalWorkouts > 0 ? totalTimeSeconds ~/ totalWorkouts : 0;
+    final averageTime = averageTimeSeconds > 3599
+        ? '${(averageTimeSeconds ~/ 3600).toString().padLeft(2, '0')}:${((averageTimeSeconds % 3600) ~/ 60).toString().padLeft(2, '0')}'
+        : '${(averageTimeSeconds ~/ 60).toString()} min';
+
     // Format total time
     final hours = totalTimeSeconds ~/ 3600;
     final minutes = (totalTimeSeconds % 3600) ~/ 60;
@@ -24,6 +30,7 @@ class StatisticsScreen extends StatelessWidget {
       'totalWorkouts': totalWorkouts,
       'totalExercises': totalExercises,
       'totalTime': totalTime,
+      'averageTime': averageTime,
     };
   }
 
@@ -76,41 +83,93 @@ class StatisticsScreen extends StatelessWidget {
                     Card(
                       elevation: 4,
                       color: Theme.of(context).cardColor, // Use AppTheme
-                      child: Center(
-                        child: Text(
-                          'Total Workouts: ${stats['totalWorkouts']}',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Total Workouts',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${stats['totalWorkouts']}',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
                     Card(
                       elevation: 4,
                       color: Theme.of(context).cardColor, // Use AppTheme
-                      child: Center(
-                        child: Text(
-                          'Total Exercises: ${stats['totalExercises']}',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Total Exercises',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${stats['totalExercises']}',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
                     Card(
                       elevation: 4,
                       color: Theme.of(context).cardColor, // Use AppTheme
-                      child: Center(
-                        child: Text(
-                          'Total Time: ${stats['totalTime']}',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Total Time',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${stats['totalTime']}',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
                     Card(
                       elevation: 4,
                       color: Theme.of(context).cardColor, // Use AppTheme
-                      child: const Center(
-                        child: Text(
-                          'Placeholder',
-                          style: TextStyle(fontSize: 16),
-                        ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Average Workout Time',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${stats['averageTime']}',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
                   ],
