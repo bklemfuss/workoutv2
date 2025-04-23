@@ -1,246 +1,184 @@
 import 'package:flutter/material.dart';
-import 'widgets/app_toolbar.dart';
-import 'widgets/bottom_nav_bar.dart';
-import 'widgets/floating_start_new_workout_button.dart';
-import 'package:fl_chart/fl_chart.dart'; // Import fl_chart
-import 'services/database_helper.dart'; // For fetching data
+import 'services/database_helper.dart';
+import 'theme/app_theme.dart'; // Import AppTheme
 
-class StatisticsScreen extends StatefulWidget {
+class StatisticsScreen extends StatelessWidget {
   const StatisticsScreen({super.key});
 
-  @override
-  State<StatisticsScreen> createState() => _StatisticsScreenState();
-}
+  Future<Map<String, dynamic>> _fetchStatistics() async {
+    final dbHelper = DatabaseHelper();
+    final totalWorkouts = (await dbHelper.getWorkouts()).length;
+    final totalExercises = (await dbHelper.getWorkoutExercises(0)).length; // Fetch all exercises
+    final totalTimeSeconds = (await dbHelper.getWorkouts())
+        .fold<int>(0, (sum, workout) => sum + (workout['workout_timer'] as int));
 
-class _StatisticsScreenState extends State<StatisticsScreen> {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
-  late Future<List<String>> _exerciseListFuture;
+    // Format total time
+    final hours = totalTimeSeconds ~/ 3600;
+    final minutes = (totalTimeSeconds % 3600) ~/ 60;
+    final totalTime = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
 
-  @override
-  void initState() {
-    super.initState();
-    _exerciseListFuture = _fetchExerciseList();
-  }
-
-  Future<List<String>> _fetchExerciseList() async {
-    try {
-      final workouts = await _dbHelper.getWorkoutsWithDetails();
-
-      // Debugging: Log the fetched workouts
-      debugPrint('Fetched workouts: $workouts');
-
-      // Extract and filter exercises
-      final exercises = workouts
-          .map((workout) => workout['exercise_name'] as String?)
-          .where((exerciseName) => exerciseName != null && exerciseName.isNotEmpty)
-          .toSet()
-          .toList();
-
-      // Debugging: Log the extracted exercises
-      debugPrint('Extracted exercises: $exercises');
-
-      return exercises.cast<String>();
-    } catch (e) {
-      // Log the error for debugging
-      debugPrint('Error in _fetchExerciseList: $e');
-      rethrow; // Propagate the error to the FutureBuilder
-    }
+    return {
+      'totalWorkouts': totalWorkouts,
+      'totalExercises': totalExercises,
+      'totalTime': totalTime,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: const AppToolbar(title: 'Statistics'),
-      body: ListView(
-        padding: EdgeInsets.all(screenWidth * 0.04), // Dynamic padding
-        children: [
-          // Top Section (15% of the screen height)
-          Container(
-            height: screenHeight * 0.15,
-            child: GridView.count(
-              crossAxisCount: 2,
-              childAspectRatio: 3,
-              crossAxisSpacing: screenWidth * 0.04, // Dynamic spacing
-              mainAxisSpacing: screenHeight * 0.02, // Dynamic spacing
-              physics: const NeverScrollableScrollPhysics(), // Prevent GridView from scrolling
-              children: [
-                _buildStatCard('Total Workouts Completed', '0', theme, screenWidth, screenHeight),
-                _buildStatCard('Total Exercises Performed', '0', theme, screenWidth, screenHeight),
-                _buildStatCard('Total Time Exercised', '0:00', theme, screenWidth, screenHeight),
-                _buildStatCard('Placeholder', '', theme, screenWidth, screenHeight),
-              ],
-            ),
-          ),
-          SizedBox(height: screenHeight * 0.02), // Dynamic spacing
-          // Scrollable Charts Section
-          FutureBuilder<List<String>>(
-            future: _exerciseListFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return SizedBox(
-                  height: screenHeight * 0.4,
-                  child: const Center(child: CircularProgressIndicator()),
-                );
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text(
-                    'Error: ${snapshot.error}',
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                );
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Center(
-                  child: Text(
-                    'No data available.',
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                );
-              } else {
-                final exercises = snapshot.data!;
-                return SingleChildScrollView( // Make the content scrollable
-                  child: Column(
-                    children: [
-                      _buildLineChart(exercises, theme, screenHeight, screenWidth),
-                      SizedBox(height: screenHeight * 0.02), // Dynamic spacing
-                      _buildBestPerformanceChart(exercises, theme, screenHeight, screenWidth),
-                    ],
-                  ),
-                );
-              }
-            },
-          ),
-        ],
+      appBar: AppBar(
+        title: const Text('Statistics'),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor, // Use AppTheme
       ),
-      floatingActionButton: const FloatingStartNewWorkoutButton(),
-      bottomNavigationBar: const BottomNavBar(
-        currentIndex: 2,
-      ),
-    );
-  }
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _fetchStatistics(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data == null) {
+            return const Center(child: Text('No data available.'));
+          }
 
-  Widget _buildStatCard(String title, String value, ThemeData theme, double screenWidth, double screenHeight) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(screenWidth * 0.03), // Dynamic border radius
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(screenWidth * 0.04), // Dynamic padding
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: screenHeight * 0.01), // Dynamic spacing
-            Text(
-              value,
-              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+          final stats = snapshot.data!;
 
-  Widget _buildLineChart(List<String> exercises, ThemeData theme, double screenHeight, double screenWidth) {
-    return Container(
-      height: screenHeight * 0.4,
-      width: screenWidth * 0.9,
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(screenWidth * 0.03), // Dynamic border radius
-      ),
-      child: Column(
-        children: [
-          DropdownButton<String>(
-            hint: const Text('Select Exercise'),
-            items: exercises.map((exercise) {
-              return DropdownMenuItem(
-                value: exercise,
-                child: Text(exercise),
-              );
-            }).toList(),
-            onChanged: (value) {
-              // Handle exercise selection
-            },
-          ),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(screenWidth * 0.04), // Dynamic padding
-              child: LineChart(
-                LineChartData(
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: [
-                        FlSpot(0, 1),
-                        FlSpot(1, 3),
-                        FlSpot(2, 2),
-                        FlSpot(3, 1.5),
-                        FlSpot(4, 2.5),
-                      ],
-                      isCurved: true,
-                      color: theme.primaryColor,
-                      barWidth: screenWidth * 0.01, // Dynamic bar width
-                      belowBarData: BarAreaData(show: false),
+          return Column(
+            children: [
+              // Top 25% of the screen with 2x2 cards
+              SizedBox(
+                height: screenHeight * 0.25,
+                child: GridView.count(
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  childAspectRatio: 2, // Rectangular cards
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                  padding: const EdgeInsets.all(8.0),
+                  children: [
+                    Card(
+                      elevation: 4,
+                      color: Theme.of(context).cardColor, // Use AppTheme
+                      child: Center(
+                        child: Text(
+                          'Total Workouts: ${stats['totalWorkouts']}',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                    ),
+                    Card(
+                      elevation: 4,
+                      color: Theme.of(context).cardColor, // Use AppTheme
+                      child: Center(
+                        child: Text(
+                          'Total Exercises: ${stats['totalExercises']}',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                    ),
+                    Card(
+                      elevation: 4,
+                      color: Theme.of(context).cardColor, // Use AppTheme
+                      child: Center(
+                        child: Text(
+                          'Total Time: ${stats['totalTime']}',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                    ),
+                    Card(
+                      elevation: 4,
+                      color: Theme.of(context).cardColor, // Use AppTheme
+                      child: const Center(
+                        child: Text(
+                          'Placeholder',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
                     ),
                   ],
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: true),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: true),
-                    ),
-                  ),
-                  borderData: FlBorderData(show: true),
-                  gridData: FlGridData(show: true),
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBestPerformanceChart(List<String> exercises, ThemeData theme, double screenHeight, double screenWidth) {
-    return Container(
-      height: screenHeight * 0.4,
-      width: screenWidth * 0.9,
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(screenWidth * 0.03), // Dynamic border radius
-      ),
-      child: Column(
-        children: [
-          DropdownButton<String>(
-            hint: const Text('Select Exercise'),
-            items: exercises.map((exercise) {
-              return DropdownMenuItem(
-                value: exercise,
-                child: Text(exercise),
-              );
-            }).toList(),
-            onChanged: (value) {
-              // Handle exercise selection
-            },
-          ),
-          Expanded(
-            child: Center(
-              child: Text(
-                'Best Performance Chart Placeholder',
-                style: theme.textTheme.bodyLarge,
+              // Remaining 75% of the screen with scrollable list of graph cards
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(8.0),
+                  itemCount: 10, // Placeholder for 10 graph cards
+                  itemBuilder: (context, index) {
+                    return Card(
+                      elevation: 4,
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      color: Theme.of(context).cardColor, // Use AppTheme
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 100, // Placeholder height for graph
+                                color: Colors.blue[100],
+                                child: Center(
+                                  child: Text(
+                                    'Graph ${index + 1}',
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Container(
+                                height: 100, // Placeholder height for graph
+                                color: Colors.green[100],
+                                child: Center(
+                                  child: Text(
+                                    'Graph ${index + 1}',
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
+            ],
+          );
+        },
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard),
+            label: 'Dashboard',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart),
+            label: 'Statistics',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
           ),
         ],
+        currentIndex: 1, // Highlight the Statistics tab
+        selectedItemColor: Theme.of(context).bottomNavigationBarTheme.selectedItemColor, // Use AppTheme
+        unselectedItemColor: Theme.of(context).bottomNavigationBarTheme.unselectedItemColor, // Use AppTheme
+        backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor, // Use AppTheme
+        onTap: (index) {
+          // Handle navigation between tabs
+          if (index == 0) {
+            Navigator.pushNamed(context, '/dashboard');
+          } else if (index == 2) {
+            Navigator.pushNamed(context, '/options');
+          }
+        },
       ),
     );
   }
