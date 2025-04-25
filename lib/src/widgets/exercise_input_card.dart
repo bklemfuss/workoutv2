@@ -13,24 +13,32 @@ class ExerciseInputCard extends StatefulWidget {
 }
 
 class _ExerciseInputCardState extends State<ExerciseInputCard> {
-  late TextEditingController setsController;
-  late TextEditingController repsController;
-  late TextEditingController weightController;
+  late List<Map<String, dynamic>> sets; // Store multiple sets for the exercise
 
   @override
   void initState() {
     super.initState();
-    setsController = TextEditingController(text: widget.exercise['sets']?.toString() ?? '');
-    repsController = TextEditingController(text: widget.exercise['reps']?.toString() ?? '');
-    weightController = TextEditingController(text: widget.exercise['weight']?.toString() ?? '');
+    sets = [
+      {
+        'reps': widget.exercise['reps'] ?? 0,
+        'weight': widget.exercise['weight'] ?? 0.0,
+      }
+    ]; // Initialize with one default set
   }
 
-  void _onFieldChanged() {
+  void _addSet() {
+    setState(() {
+      sets.add({'reps': 0, 'weight': 0.0}); // Add a new set with default values
+    });
+  }
+
+  void _onSetChanged(int index, String field, dynamic value) {
+    setState(() {
+      sets[index][field] = value; // Update the specific set's field
+    });
     widget.onChanged({
       'exercise_id': widget.exercise['exercise_id'],
-      'sets': int.tryParse(setsController.text) ?? 0,
-      'reps': int.tryParse(repsController.text) ?? 0,
-      'weight': double.tryParse(weightController.text) ?? 0.0,
+      'sets': sets,
     });
   }
 
@@ -180,26 +188,56 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
                       mainAxisAlignment: MainAxisAlignment.end, // Push inputs to the right
                       children: [
                         _buildInputField(
-                          label: 'Sets',
-                          controller: setsController,
-                          onChanged: _onFieldChanged,
-                        ),
-                        SizedBox(width: screenWidth * 0.02),
-                        _buildInputField(
                           label: 'Reps',
-                          controller: repsController,
-                          onChanged: _onFieldChanged,
+                          controller: TextEditingController(
+                              text: sets[0]['reps'].toString()),
+                          onChanged: (value) => _onSetChanged(
+                              0, 'reps', int.tryParse(value) ?? 0),
                         ),
                         SizedBox(width: screenWidth * 0.02),
                         _buildInputField(
                           label: 'Weight',
-                          controller: weightController,
-                          onChanged: _onFieldChanged,
+                          controller: TextEditingController(
+                              text: sets[0]['weight'].toString()),
+                          onChanged: (value) => _onSetChanged(
+                              0, 'weight', double.tryParse(value) ?? 0.0),
                         ),
                       ],
                     ),
                   ),
                 ],
+              ),
+              Column(
+                children: [
+                  for (int i = 1; i < sets.length; i++) // Render each set
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end, // Align to the right
+                      children: [
+                        _buildInputField(
+                          label: 'Reps',
+                          controller: TextEditingController(
+                              text: sets[i]['reps'].toString()),
+                          onChanged: (value) => _onSetChanged(
+                              i, 'reps', int.tryParse(value) ?? 0),
+                        ),
+                        SizedBox(width: screenWidth * 0.02),
+                        _buildInputField(
+                          label: 'Weight',
+                          controller: TextEditingController(
+                              text: sets[i]['weight'].toString()),
+                          onChanged: (value) => _onSetChanged(
+                              i, 'weight', double.tryParse(value) ?? 0.0),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+              SizedBox(height: screenHeight * 0.02),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _addSet,
+                  child: const Icon(Icons.add), // "+" button
+                ),
               ),
             ],
           ),
@@ -211,7 +249,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
   Widget _buildInputField({
     required String label,
     required TextEditingController controller,
-    required VoidCallback onChanged,
+    required ValueChanged<String> onChanged,
   }) {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
@@ -237,7 +275,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
               contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10), // Adjust padding
             ),
             style: theme.textTheme.bodyLarge, // Slightly larger text for input
-            onChanged: (value) => onChanged(),
+            onChanged: (value) => onChanged(value),
           ),
         ),
       ],
@@ -246,9 +284,6 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
 
   @override
   void dispose() {
-    setsController.dispose();
-    repsController.dispose();
-    weightController.dispose();
     super.dispose();
   }
 }

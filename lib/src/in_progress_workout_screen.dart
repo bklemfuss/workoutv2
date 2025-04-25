@@ -56,13 +56,12 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
     // Step 1: Create a new workout
     final workoutId = await dbHelper.createWorkout(widget.templateId, 1); // Use user_id = 1 for now
 
-    // Step 2: Prepare exercise data
+    // Step 2: Prepare exercise data (remove 'sets' field)
     final workoutExercises = widget.exercises.map((exercise) {
       return {
         'exercise_id': exercise['exercise_id'],
-        'sets': exercise['sets'],
-        'reps': exercise['reps'],
-        'weight': exercise['weight'],
+        'reps': exercise['reps'], // Ensure reps are included
+        'weight': exercise['weight'], // Ensure weight is included
       };
     }).toList();
 

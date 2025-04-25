@@ -73,7 +73,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
     if (_workoutDates.containsKey(formattedDate)) {
-      // Show WorkoutSummaryScreen in a BottomModalSheet
       final workoutId = _workoutDates[formattedDate];
       final result = await showModalBottomSheet<bool>(
         context: context,
@@ -84,19 +83,63 @@ class _HistoryScreenState extends State<HistoryScreen> {
         builder: (context) {
           return FractionallySizedBox(
             heightFactor: 0.9,
-            child: WorkoutSummaryScreen(workoutId: workoutId ?? -1),
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: _dbHelper.getWorkoutExercisesGroupedByExercise(workoutId ?? -1),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('Error loading workout summary.'));
+                }
+
+                final exercises = snapshot.data!;
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16.0),
+                  itemCount: exercises.length,
+                  itemBuilder: (context, index) {
+                    final exercise = exercises[index];
+                    final sets = exercise['sets'] as List<Map<String, dynamic>>;
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              exercise['exercise_name'] ?? 'Unknown Exercise',
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            ...sets.map((set) => Text(
+                                  'Reps: ${set['reps']}, Weight: ${set['weight']}',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                )),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           );
         },
       );
 
-      // Refresh the history screen if a workout was deleted
       if (result == true) {
         setState(() {
           _workoutsFuture = _fetchWorkouts();
         });
       }
     } else {
-      // Show a SnackBar if no workout exists for the selected date
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No workout found for this date.')),
       );
@@ -172,6 +215,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     itemCount: workouts.length,
                     itemBuilder: (context, index) {
                       final workout = workouts[index];
+
                       return Card(
                         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         color: theme.cardColor, // Use theme card color
