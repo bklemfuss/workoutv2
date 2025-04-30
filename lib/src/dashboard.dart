@@ -111,7 +111,7 @@ class _DashboardState extends State<Dashboard> {
                             crossAxisCount: 2, // Number of tiles per row
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
-                            childAspectRatio: 3 / 2, // Adjust the aspect ratio of tiles
+                            childAspectRatio: 1 / 1.25, // Adjust the aspect ratio of tiles (width / height)
                           ),
                           itemCount: templates.length,
                           itemBuilder: (context, index) {
