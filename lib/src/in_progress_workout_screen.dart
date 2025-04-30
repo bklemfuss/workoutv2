@@ -66,18 +66,13 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
   final db = await dbHelper.database; // Await the database getter
 
   try {
-    debugPrint('Starting _finishWorkout...');
-
     // Step 1: Create a new workout
-    debugPrint('Creating a new workout...');
     final workoutId =
         await dbHelper.createWorkout(widget.templateId, 1); // Use user_id = 1 for now
-    debugPrint('Workout created with ID: $workoutId');
 
     // **Use a transaction to ensure data consistency.**
     await db.transaction((txn) async {
       // Step 2: Create workout exercises
-      debugPrint('Creating workout exercises...');
       for (var exerciseId in _exercisesData.keys) {
         final sets = _exercisesData[exerciseId]!; // Get sets for this exercise
         for (var set in sets) {
@@ -90,25 +85,18 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
           );
         }
       }
-      debugPrint('Workout exercises created.');
     });
 
     // Step 3: Save the workout timer in the database
-    debugPrint('Saving workout timer...');
     await dbHelper.updateWorkoutTimer(workoutId, _elapsedSeconds);
-    debugPrint('Workout timer saved.');
 
     // Step 4: Navigate to the PostWorkoutScreen using named route
-    debugPrint('Navigating to PostWorkoutScreen...');
     Navigator.pushReplacementNamed(
       context,
       '/workout_summary',
       arguments: workoutId,
     );
-    debugPrint('Navigation complete.');
   } catch (e, stackTrace) {
-    debugPrint('Error in _finishWorkout: $e');
-    debugPrint('StackTrace: $stackTrace');
     //  Show error to user
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Failed to save workout: $e'), backgroundColor: Colors.red),

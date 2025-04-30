@@ -37,7 +37,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
     });
   }
 
-    void _handleNotesUpdate(String updatedNotes) {
+  void _handleNotesUpdate(String updatedNotes) {
     setState(() {
       widget.exercise['exercise_notes'] = updatedNotes;
     });
