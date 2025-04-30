@@ -41,7 +41,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 Container(
                   height: screenHeight * 0.15,
                   padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-                  color: Colors.blue[100], // Optional background color
+                  color: Theme.of(context).colorScheme.primaryContainer, // Use theme color
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [

@@ -16,9 +16,9 @@ class WorkoutSummaryScreen extends StatelessWidget {
 
       // Show a success message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Workout deleted successfully!'),
-          backgroundColor: Colors.green,
+        SnackBar(
+          content: const Text('Workout deleted successfully!'),
+          backgroundColor: Theme.of(context).colorScheme.primary, // Use theme color
         ),
       );
 
@@ -29,7 +29,7 @@ class WorkoutSummaryScreen extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to delete workout: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error, // Use theme error color
         ),
       );
     }

@@ -14,25 +14,25 @@ class LoginScreen extends StatelessWidget {
 
       if (username.isEmpty || password.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Username and password cannot be empty!'),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: const Text('Username and password cannot be empty!'),
+            backgroundColor: Theme.of(context).colorScheme.error, // Use theme error color
           ),
         );
       } else if (username == 'testuser' && password == 'password123') {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Login successful!'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: const Text('Login successful!'),
+            backgroundColor: Theme.of(context).colorScheme.primary, // Use theme primary color
           ),
         );
         // Navigate to the Dashboard using named route
         Navigator.pushReplacementNamed(context, '/dashboard');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Invalid username or password!'),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: const Text('Invalid username or password!'),
+            backgroundColor: Theme.of(context).colorScheme.error, // Use theme error color
           ),
         );
       }

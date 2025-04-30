@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'services/database_helper.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
-import 'theme/colors.dart'; // Import AppColors for custom colors
 import 'start_workout_screen.dart';
 import 'create_workout_screen.dart';
 import 'widgets/dashboard_template_card.dart'; // Import the reusable card widget
@@ -79,7 +78,7 @@ class _DashboardState extends State<Dashboard> {
               Expanded(
                 flex: 1,
                 child: Container(
-                  color: AppColors.background, // Use background color from AppColors
+                  color: Theme.of(context).colorScheme.background, // Use background color from theme
                   child: Center(
                     child: Text(
                       'Top Section (ring widgets)',
@@ -94,7 +93,7 @@ class _DashboardState extends State<Dashboard> {
               Expanded(
                 flex: 3,
                 child: Container(
-                  color: AppColors.background, // Use secondary color from AppColors
+                  color: Theme.of(context).colorScheme.background, // Use background color from theme
                   child: FutureBuilder<List<Map<String, dynamic>>>(
                     future: _templatesFuture,
                     builder: (context, snapshot) {
@@ -134,7 +133,7 @@ class _DashboardState extends State<Dashboard> {
               Expanded(
                 flex: 1,
                 child: Container(
-                  color: AppColors.background, // Use background color from AppColors
+                  color: Theme.of(context).colorScheme.background, // Use background color from theme
                   child: Center(
                     child: SizedBox(
                       width: constraints.maxWidth * 0.7,
@@ -144,7 +143,7 @@ class _DashboardState extends State<Dashboard> {
                           _navigateToCreateWorkoutScreen(context); // Navigate to CreateWorkoutScreen
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary, // Use primary color
+                          backgroundColor: Theme.of(context).colorScheme.primary, // Use primary color
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),

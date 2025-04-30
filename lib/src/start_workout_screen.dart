@@ -180,7 +180,7 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
                             ? IconButton(
                                 icon: Icon(
                                   isMarkedForRemoval ? Icons.add : Icons.remove,
-                                  color: isMarkedForRemoval ? Colors.green : Colors.red,
+                                  color: isMarkedForRemoval ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error,
                                 ),
                                 onPressed: () {
                                   setState(() {

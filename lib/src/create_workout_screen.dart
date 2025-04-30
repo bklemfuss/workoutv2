@@ -73,9 +73,9 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                 if (workoutName.isEmpty) {
                   // Show an error if the workout name is empty
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Workout name cannot be empty!'),
-                      backgroundColor: Colors.red,
+                    SnackBar(
+                      content: const Text('Workout name cannot be empty!'),
+                      backgroundColor: Theme.of(context).colorScheme.error, // Use theme error color
                     ),
                   );
                 } 
@@ -92,7 +92,7 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Workout "$workoutName" saved successfully!'),
-                        backgroundColor: Colors.green,
+                        backgroundColor: Theme.of(context).colorScheme.primary, // Use theme primary color
                       ),
                     );
 
@@ -108,7 +108,7 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Failed to save workout: $e'),
-                        backgroundColor: Colors.red,
+                        backgroundColor: Theme.of(context).colorScheme.error, // Use theme error color
                       ),
                     );
                   }
@@ -194,9 +194,9 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
 
                 if (exerciseName.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Exercise name cannot be empty!'),
-                      backgroundColor: Colors.red,
+                    SnackBar(
+                      content: const Text('Exercise name cannot be empty!'),
+                      backgroundColor: Theme.of(context).colorScheme.error, // Use theme error color
                     ),
                   );
                   return;
@@ -219,9 +219,9 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
 
                 // Show success message
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Custom exercise created successfully!'),
-                    backgroundColor: Colors.green,
+                  SnackBar( // Removed const
+                    content: const Text('Custom exercise created successfully!'),
+                    backgroundColor: Theme.of(context).colorScheme.primary, // Use theme primary color
                   ),
                 );
               },
@@ -355,7 +355,7 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                     Navigator.pop(context); // Navigate back to the dashboard
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red, // Cancel button color
+                    backgroundColor: Theme.of(context).colorScheme.error, // Cancel button color
                   ),
                   child: const Text('Cancel'),
                 ),
@@ -364,7 +364,7 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                     _showCreateCustomExerciseDialog(); // Show the custom exercise dialog
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue, // Create Custom Exercise button color
+                    backgroundColor: Theme.of(context).colorScheme.primary, // Create Custom Exercise button color
                   ),
                   child: const Text('Create Custom Exercise'),
                 ),
@@ -373,9 +373,9 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                     if (selectedExerciseIds.isEmpty) {
                       // Show an error if no exercises are selected
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Can't create an empty workout template!"),
-                          backgroundColor: Colors.red,
+                        SnackBar(
+                          content: const Text("Can't create an empty workout template!"),
+                          backgroundColor: Theme.of(context).colorScheme.error, // Use theme error color
                         ),
                       );
                     } else {
@@ -383,7 +383,7 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green, // Save button color
+                    backgroundColor: Theme.of(context).colorScheme.primary, // Save button color
                   ),
                   child: const Text('Save'),
                 ),
