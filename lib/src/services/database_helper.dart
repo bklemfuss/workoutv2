@@ -24,7 +24,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2, // Updated database version
+      version: 3, // Updated database version
       onCreate: _onCreate,
       onUpgrade: _onUpgrade, // Handle database upgrades
     );
@@ -117,7 +117,6 @@ class DatabaseHelper {
         workout_exercise_id INTEGER PRIMARY KEY AUTOINCREMENT,
         workout_id INTEGER,
         exercise_id INTEGER,
-        sets INTEGER,
         reps INTEGER,
         weight REAL,
         FOREIGN KEY (workout_id) REFERENCES Workout(workout_id),
@@ -146,6 +145,33 @@ class DatabaseHelper {
       await db.execute('''
         ALTER TABLE Exercise ADD COLUMN exercise_notes TEXT
       ''');
+    }
+    if (oldVersion < 3) {
+      // Create a new WorkoutExercise table without the `sets` column
+      await db.execute('''
+        CREATE TABLE WorkoutExercise_new (
+          workout_exercise_id INTEGER PRIMARY KEY AUTOINCREMENT,
+          workout_id INTEGER,
+          exercise_id INTEGER,
+          reps INTEGER,
+          weight REAL,
+          FOREIGN KEY (workout_id) REFERENCES Workout(workout_id),
+          FOREIGN KEY (exercise_id) REFERENCES Exercise(exercise_id)
+        )
+      ''');
+
+      // Copy data from the old table to the new table
+      await db.execute('''
+        INSERT INTO WorkoutExercise_new (workout_exercise_id, workout_id, exercise_id, reps, weight)
+        SELECT workout_exercise_id, workout_id, exercise_id, reps, weight
+        FROM WorkoutExercise
+      ''');
+
+      // Drop the old table
+      await db.execute('DROP TABLE WorkoutExercise');
+
+      // Rename the new table to the original name
+      await db.execute('ALTER TABLE WorkoutExercise_new RENAME TO WorkoutExercise');
     }
   }
 
@@ -250,7 +276,6 @@ class DatabaseHelper {
       'workout_exercise_id': 1,
       'workout_id': 1,
       'exercise_id': 1,
-      'sets': 3,
       'reps': 12,
       'weight': 0.0,
     });
@@ -258,7 +283,6 @@ class DatabaseHelper {
       'workout_exercise_id': 2,
       'workout_id': 1,
       'exercise_id': 2,
-      'sets': 3,
       'reps': 10,
       'weight': 0.0,
     });
@@ -266,7 +290,6 @@ class DatabaseHelper {
       'workout_exercise_id': 3,
       'workout_id': 2,
       'exercise_id': 3,
-      'sets': 4,
       'reps': 8,
       'weight': 50.0,
     });
@@ -274,7 +297,6 @@ class DatabaseHelper {
       'workout_exercise_id': 4,
       'workout_id': 3,
       'exercise_id': 4,
-      'sets': 5,
       'reps': 6,
       'weight': 70.0,
     });
@@ -410,18 +432,41 @@ class DatabaseHelper {
     });
     return workoutId; // Return the newly created workout ID
   }
-
+/*
   Future<void> createWorkoutExercises(int workoutId, List<Map<String, dynamic>> exercises) async {
     final db = await database;
+
+    // Insert each exercise into the workout_exercises table
     for (final exercise in exercises) {
-      await db.insert('WorkoutExercise', {
-        'workout_id': workoutId,
-        'exercise_id': exercise['exercise_id'],
-        'sets': exercise['sets'],
-        'reps': exercise['reps'],
-        'weight': exercise['weight'],
-      });
+      debugPrint('Inserting workout exercise: $exercise');
+      await db.insert(
+        'WorkoutExercise',
+        {
+          'workout_id': workoutId,
+          'exercise_id': exercise['exercise_id'],
+          'reps': exercise['reps'], // Ensure reps is handled
+          'weight': exercise['weight'], // Ensure weight is handled
+        },
+      );
     }
+  }
+*/
+
+    Future<int> createWorkoutExercise(
+      Transaction txn, // Use the transaction!
+      int workoutId,
+      int exerciseId,
+      int reps,
+      double weight,
+    ) async {
+      final workoutExercise = {
+        'workout_id': workoutId,
+        'exercise_id': exerciseId,
+        'reps': reps,
+        'weight': weight,
+      };
+      // Use the transaction object (txn) instead of the database.
+      return await txn.insert('WorkoutExercise', workoutExercise);
   }
 
   Future<Map<String, dynamic>> getWorkoutDetails(int workoutId) async {
@@ -441,17 +486,22 @@ class DatabaseHelper {
 
   Future<List<Map<String, dynamic>>> getWorkoutExercises(int workoutId) async {
     final db = await database;
-    return await db.rawQuery('''
+
+    // Correct query to fetch all workout exercises for the given workout_id
+    final result = await db.rawQuery('''
       SELECT 
-        we.workout_exercise_id,
-        e.name AS exercise_name,
-        we.sets,
-        we.reps,
+        we.workout_exercise_id AS workout_exercise_id, 
+        we.exercise_id, 
+        e.name AS exercise_name, 
+        we.reps, 
         we.weight
-      FROM WorkoutExercise we
-      INNER JOIN Exercise e ON we.exercise_id = e.exercise_id
+      FROM WorkoutExercise AS we
+      INNER JOIN Exercise AS e 
+        ON we.exercise_id = e.exercise_id
       WHERE we.workout_id = ?
     ''', [workoutId]);
+
+    return result;
   }
 
   Future<List<Map<String, dynamic>>> getExercisesByMuscleGroup(String? muscleGroup) async {
@@ -626,5 +676,38 @@ class DatabaseHelper {
       where: 'exercise_id = ?',
       whereArgs: [exerciseId],
     );
+  }
+
+  Future<List<Map<String, dynamic>>> getWorkoutExercisesGroupedByExercise(int workoutId) async {
+    final db = await database;
+
+    // Query to fetch exercises grouped by exercise_id
+    final result = await db.rawQuery('''
+      SELECT 
+        e.exercise_id,
+        e.name AS exercise_name,
+        GROUP_CONCAT(we.reps || ':' || we.weight) AS sets_data
+      FROM WorkoutExercise we
+      INNER JOIN Exercise e ON we.exercise_id = e.exercise_id
+      WHERE we.workout_id = ?
+      GROUP BY e.exercise_id
+    ''', [workoutId]);
+
+    // Parse the grouped data into a structured format
+    return result.map((row) {
+      final setsData = (row['sets_data'] as String).split(',').map((set) {
+        final parts = set.split(':');
+        return {
+          'reps': int.parse(parts[0]),
+          'weight': double.parse(parts[1]),
+        };
+      }).toList();
+
+      return {
+        'exercise_id': row['exercise_id'],
+        'exercise_name': row['exercise_name'],
+        'sets': setsData,
+      };
+    }).toList();
   }
 }
