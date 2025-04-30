@@ -12,13 +12,22 @@ class StatisticsScreen extends StatelessWidget {
     final dbHelper = DatabaseHelper();
     final workouts = await dbHelper.getWorkouts();
     final totalWorkouts = workouts.length;
-    // Assuming getWorkoutExercises(0) fetches all exercises is incorrect.
-    // This needs adjustment if you want *all* exercises across *all* workouts.
-    // For now, let's assume you want exercises from a specific workout (e.g., workout_id 0, which might not exist)
-    // or perhaps you intended to count all exercise *types*?
-    // Clarification needed on what "Total Exercises" should represent.
-    // Fetching exercises for workout_id 0 as per original code:
-    final totalExercises = (await dbHelper.getWorkoutExercises(0)).length;
+
+    // Calculate total unique exercises across all workouts
+    final Set<String> uniqueExerciseNames = {};
+    for (final workout in workouts) {
+      final workoutId = workout['id'] as int?; // Ensure workout ID is int?
+      if (workoutId != null) {
+        final exercises = await dbHelper.getWorkoutExercises(workoutId);
+        for (final exercise in exercises) {
+          final exerciseName = exercise['exercise_name'] as String?;
+          if (exerciseName != null) {
+            uniqueExerciseNames.add(exerciseName);
+          }
+        }
+      }
+    }
+    final totalExercises = uniqueExerciseNames.length;
 
     final totalTimeSeconds = workouts.fold<int>(0, (sum, workout) {
       final timerValue = workout['workout_timer'];
