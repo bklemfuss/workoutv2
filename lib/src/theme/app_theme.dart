@@ -169,7 +169,7 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         selectedItemColor: colorScheme.primary,
-        unselectedItemColor: colorScheme.secondary, // Use secondary color
+        unselectedItemColor: colorScheme.inverseSurface, // Use secondary color
         backgroundColor: colorScheme.surface, // Use surface color
         elevation: 8,
         type: BottomNavigationBarType.fixed,
