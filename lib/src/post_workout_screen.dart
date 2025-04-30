@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Import Provider
 import 'services/database_helper.dart';
+import 'providers/unit_provider.dart'; // Import UnitProvider
 
 class PostWorkoutScreen extends StatelessWidget {
   const PostWorkoutScreen({Key? key}) : super(key: key);
@@ -20,6 +22,10 @@ class PostWorkoutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Access theme
+    final unitProvider = Provider.of<UnitProvider>(context); // Access UnitProvider
+    final isMetric = unitProvider.unitSystem == 'Metric'; // Check unit system
+
     return Scaffold(
       appBar: AppBar(title: const Text('Workout Summary')),
       body: Column(
@@ -37,8 +43,17 @@ class PostWorkoutScreen extends StatelessWidget {
                 }
 
                 final workoutDetails = snapshot.data!['workoutDetails'];
-                final workoutExercises = snapshot.data!['workoutExercises'];
+                final workoutExercises = snapshot.data!['workoutExercises'] as List<Map<String, dynamic>>; // Cast for type safety
                 final totalWorkouts = snapshot.data!['totalWorkouts'];
+
+                // Group exercises by name
+                final Map<String, List<Map<String, dynamic>>> groupedExercises = {};
+                for (var exercise in workoutExercises) {
+                  final name = exercise['exercise_name'] as String? ?? 'Unknown Exercise';
+                  (groupedExercises[name] ??= []).add(exercise);
+                }
+                final exerciseNames = groupedExercises.keys.toList();
+                final weightUnit = isMetric ? 'kg' : 'lbs'; // Determine unit label
 
                 return Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -46,26 +61,64 @@ class PostWorkoutScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'You finished your $totalWorkouts workout!',
-                        style: Theme.of(context).textTheme.bodyLarge,
+                        'You finished your $totalWorkouts workout!', // Consider making this ordinal (1st, 2nd, 3rd...)
+                        style: theme.textTheme.headlineSmall, // Use a more prominent style
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
                       Text(
-                        'Workout: ${workoutDetails['template_name']}',
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        'Workout: ${workoutDetails['template_name'] ?? 'Unnamed Workout'}',
+                        style: theme.textTheme.titleMedium,
                       ),
                       const SizedBox(height: 16),
+                      // Title for the exercise list
+                      Text(
+                        'Exercises Completed:',
+                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                       const SizedBox(height: 8),
+                      // Updated ListView to show grouped exercises
                       Expanded(
                         child: ListView.builder(
-                          itemCount: workoutExercises.length,
+                          itemCount: exerciseNames.length, // Count of unique exercises
                           itemBuilder: (context, index) {
-                            final exercise = workoutExercises[index];
+                            final exerciseName = exerciseNames[index];
+                            final exerciseEntries = groupedExercises[exerciseName]!;
+
+                            // Card for each unique exercise
                             return Card(
-                              margin: const EdgeInsets.symmetric(vertical: 8),
-                              child: ListTile(
-                                title: Text(exercise['exercise_name']),
-                                subtitle: Text(
-                                    'Reps: ${exercise['reps']}, Weight: ${exercise['weight']}'),
+                              margin: const EdgeInsets.symmetric(vertical: 8.0),
+                              elevation: 2,
+                              color: theme.cardColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Exercise Name Header
+                                    Text(
+                                      exerciseName,
+                                      style: theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    // List each weight/rep entry
+                                    ...exerciseEntries.map((entry) {
+                                      final weight = entry['weight'] ?? 0;
+                                      final reps = entry['reps'] ?? 0;
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                        child: Text(
+                                          '${weight} $weightUnit x $reps reps',
+                                          style: theme.textTheme.bodyMedium,
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ],
+                                ),
                               ),
                             );
                           },

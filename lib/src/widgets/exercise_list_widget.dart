@@ -3,61 +3,69 @@ import 'package:provider/provider.dart';
 import '../providers/unit_provider.dart'; // Import UnitProvider
 
 class ExerciseListWidget extends StatelessWidget {
-  final List<Map<String, dynamic>> exercises;
+  final List<Map<String, dynamic>> exercises; // List of workoutExercise records for a specific workout
 
   const ExerciseListWidget({super.key, required this.exercises});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // Access the current theme
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final unitProvider = Provider.of<UnitProvider>(context); // Access UnitProvider
-    final isMetric = unitProvider.unitSystem == 'Metric'; // Check the unit system
+    final theme = Theme.of(context);
+    final unitProvider = Provider.of<UnitProvider>(context);
+    final isMetric = unitProvider.unitSystem == 'Metric';
 
+    // Group exercises by name to display them under a common header
+    final Map<String, List<Map<String, dynamic>>> groupedExercises = {};
+    for (var exercise in exercises) {
+      final name = exercise['exercise_name'] as String? ?? 'Unknown Exercise';
+      (groupedExercises[name] ??= []).add(exercise);
+    }
+
+    final exerciseNames = groupedExercises.keys.toList();
+
+    // Use ListView.builder to create a list of cards, one for each exercise name
     return ListView.builder(
-      padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
-      itemCount: exercises.length,
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0), // Add overall padding
+      itemCount: exerciseNames.length,
       itemBuilder: (context, index) {
-        final exercise = exercises[index];
-        final weightUnit = isMetric ? 'kg' : 'lbs'; // Determine the unit label
+        final exerciseName = exerciseNames[index];
+        // Get all workoutExercise entries for this specific exercise name within the current workout
+        final exerciseEntries = groupedExercises[exerciseName]!;
+        final weightUnit = isMetric ? 'kg' : 'lbs';
 
+        // Each exercise gets its own Card
         return Card(
-          margin: EdgeInsets.symmetric(
-            horizontal: screenWidth * 0.05,
-            vertical: screenHeight * 0.01,
-          ),
-          elevation: 4,
-          color: theme.cardColor, // Use the theme's card color
+          margin: const EdgeInsets.symmetric(vertical: 8.0), // Vertical spacing between cards
+          elevation: 2,
+          color: theme.cardColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
-            padding: EdgeInsets.all(screenWidth * 0.04),
-            child: Column(
+            padding: const EdgeInsets.all(16.0), // Padding inside the card
+            child: Column( // Column allows vertical arrangement and auto-sizing height
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Exercise Name
+                // Exercise Name Header for the card
                 Text(
-                  exercise['exercise_name'] ?? exercise['name'] ?? 'Unknown Exercise', // Use exercise_name
-                  style: theme.textTheme.bodyLarge?.copyWith(
+                  exerciseName,
+                  style: theme.textTheme.titleMedium?.copyWith( // Use titleMedium for exercise name
                     fontWeight: FontWeight.bold,
-                  ), // Use the theme's text style
+                  ),
                 ),
-                SizedBox(height: screenHeight * 0.01),
-                // Display Sets, Reps, and Weight
-                Text(
-                  'Sets: ${exercise['sets']}',
-                  style: theme.textTheme.bodyMedium, // Use the theme's text style
-                ),
-                Text(
-                  'Reps: ${exercise['reps']}',
-                  style: theme.textTheme.bodyMedium,
-                ),
-                Text(
-                  'Weight: ${exercise['weight']} $weightUnit', // Dynamically update the unit label
-                  style: theme.textTheme.bodyMedium,
-                ),
+                const SizedBox(height: 12), // Space below header
+                // List each weight/rep entry vertically
+                ...exerciseEntries.map((entry) {
+                  // Safely access weight and reps, providing defaults
+                  final weight = entry['weight'] ?? 0;
+                  final reps = entry['reps'] ?? 0;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0), // Spacing between entries
+                    child: Text(
+                      '${weight} $weightUnit x $reps reps', // Display weight, unit, and reps
+                      style: theme.textTheme.bodyMedium, // Use bodyMedium for entries
+                    ),
+                  );
+                }).toList(),
               ],
             ),
           ),
