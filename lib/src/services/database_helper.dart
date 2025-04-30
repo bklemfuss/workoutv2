@@ -432,7 +432,7 @@ class DatabaseHelper {
     });
     return workoutId; // Return the newly created workout ID
   }
-
+/*
   Future<void> createWorkoutExercises(int workoutId, List<Map<String, dynamic>> exercises) async {
     final db = await database;
 
@@ -449,6 +449,24 @@ class DatabaseHelper {
         },
       );
     }
+  }
+*/
+
+    Future<int> createWorkoutExercise(
+      Transaction txn, // Use the transaction!
+      int workoutId,
+      int exerciseId,
+      int reps,
+      double weight,
+    ) async {
+      final workoutExercise = {
+        'workout_id': workoutId,
+        'exercise_id': exerciseId,
+        'reps': reps,
+        'weight': weight,
+      };
+      // Use the transaction object (txn) instead of the database.
+      return await txn.insert('WorkoutExercise', workoutExercise);
   }
 
   Future<Map<String, dynamic>> getWorkoutDetails(int workoutId) async {

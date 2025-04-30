@@ -4,58 +4,49 @@ import '../widgets/exercise_details_dialog.dart';
 
 class ExerciseInputCard extends StatefulWidget {
   final Map<String, dynamic> exercise;
-  final Function(Map<String, dynamic>) onChanged;
+  final Function(int exerciseId, List<Map<String, dynamic>> sets) onSetsChanged; // Changed callback
 
-  const ExerciseInputCard({super.key, required this.exercise, required this.onChanged});
+  const ExerciseInputCard({super.key, required this.exercise, required this.onSetsChanged});
 
   @override
   State<ExerciseInputCard> createState() => _ExerciseInputCardState();
 }
 
 class _ExerciseInputCardState extends State<ExerciseInputCard> {
-  late List<Map<String, dynamic>> sets; // Store multiple sets for the exercise
+  late List<Map<String, dynamic>> sets;
 
   @override
   void initState() {
     super.initState();
-    // Ensure the sets list is mutable by creating a new list
-    sets = List<Map<String, dynamic>>.from(widget.exercise['rows'] ?? [
-      {
-        'reps': widget.exercise['reps'] ?? 0,
-        'weight': widget.exercise['weight'] ?? 0.0,
-      }
+    sets = List<Map<String, dynamic>>.from(widget.exercise['sets'] ?? [
+      {'reps': 0, 'weight': 0.0},
     ]);
-    debugPrint('Initialized sets: $sets');
   }
 
   void _addSet() {
     setState(() {
-      sets = List<Map<String, dynamic>>.from(sets); // Ensure sets is mutable
-      sets.add({'reps': 0, 'weight': 0.0}); // Add a new set with default values
-    });
-    debugPrint('Set added: $sets');
-    widget.onChanged({
-      'exercise_id': widget.exercise['exercise_id'],
-      'rows': sets, // Send all rows (sets) for this exercise
+      sets.add({'reps': 0, 'weight': 0.0});
+      widget.onSetsChanged(widget.exercise['exercise_id'], sets); // Notify about changes
     });
   }
 
   void _onSetChanged(int index, String field, dynamic value) {
     setState(() {
-      sets = List<Map<String, dynamic>>.from(sets); // Ensure sets is mutable
-      sets[index][field] = value; // Update the specific set's field
+      sets[index][field] = value;
+      widget.onSetsChanged(widget.exercise['exercise_id'], sets); // Notify about changes
     });
-    debugPrint('Set changed: $sets');
-    widget.onChanged({
-      'exercise_id': widget.exercise['exercise_id'],
-      'rows': sets, // Send all rows (sets) for this exercise
+  }
+
+    void _handleNotesUpdate(String updatedNotes) {
+    setState(() {
+      widget.exercise['exercise_notes'] = updatedNotes;
     });
   }
 
   void _showNotesDialog(BuildContext context) async {
     final dbHelper = DatabaseHelper();
     final TextEditingController notesController = TextEditingController(
-      text: widget.exercise['exercise_notes'] ?? '', // Pre-fill with existing notes
+      text: widget.exercise['exercise_notes'] ?? '',
     );
 
     await showDialog(
@@ -88,23 +79,19 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close dialog without saving
+                Navigator.of(context).pop();
               },
               child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () async {
                 final updatedNotes = notesController.text;
-                // Use the helper function to update the notes
                 await dbHelper.updateExerciseNotes(
                   widget.exercise['exercise_id'],
                   updatedNotes,
                 );
-                // Update the local state
-                setState(() {
-                  widget.exercise['exercise_notes'] = updatedNotes;
-                });
-                Navigator.of(context).pop(); // Close dialog after saving
+                _handleNotesUpdate(updatedNotes); // Update state
+                Navigator.of(context).pop();
               },
               child: const Text('Save'),
             ),
@@ -116,18 +103,18 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // Access the current theme
+    final theme = Theme.of(context);
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [theme.primaryColor, theme.cardColor], // Gradient colors
+          colors: [theme.primaryColor, theme.cardColor],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16), // Match the card's border radius
+        borderRadius: BorderRadius.circular(16),
       ),
       margin: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.05,
@@ -136,7 +123,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
       child: Card(
         elevation: 6,
         shadowColor: Colors.black.withOpacity(0.2),
-        color: Colors.transparent, // Make the card's color transparent
+        color: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -148,7 +135,6 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Row with Exercise Name and Percentage Field
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -167,50 +153,45 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
                     ),
                   ),
                   Container(
-                    width: screenWidth * 0.1, // Half the width of input boxes
-                    height: screenHeight * 0.04, // Same height/width proportions as input boxes
+                    width: screenWidth * 0.1,
+                    height: screenHeight * 0.04,
                     decoration: BoxDecoration(
-                      color: theme.inputDecorationTheme.fillColor, // Same color as inputFieldBackground
-                      borderRadius: BorderRadius.circular(8), // Rounded corners
+                      color: theme.inputDecorationTheme.fillColor,
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      '0%', // Placeholder text
+                      '0%',
                       style: theme.textTheme.bodyMedium,
                     ),
                   ),
                 ],
               ),
               SizedBox(height: screenHeight * 0.01),
-              // Row with Notes Icon and Input Fields
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   IconButton(
                     icon: Icon(Icons.note_add, color: theme.primaryColor),
                     onPressed: () {
-                      _showNotesDialog(context); // Show notes dialog
+                      _showNotesDialog(context);
                     },
                   ),
-                  SizedBox(width: screenWidth * 0.02), // Space between icon and input fields
+                  SizedBox(width: screenWidth * 0.02),
                   Expanded(
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end, // Push inputs to the right
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         _buildInputField(
                           label: 'Reps',
-                          controller: TextEditingController(
-                              text: sets[0]['reps'].toString()),
-                          onChanged: (value) => _onSetChanged(
-                              0, 'reps', int.tryParse(value) ?? 0),
+                          controller: TextEditingController(text: sets[0]['reps'].toString()),
+                          onChanged: (value) => _onSetChanged(0, 'reps', int.tryParse(value) ?? 0),
                         ),
                         SizedBox(width: screenWidth * 0.02),
                         _buildInputField(
                           label: 'Weight',
-                          controller: TextEditingController(
-                              text: sets[0]['weight'].toString()),
-                          onChanged: (value) => _onSetChanged(
-                              0, 'weight', double.tryParse(value) ?? 0.0),
+                          controller: TextEditingController(text: sets[0]['weight'].toString()),
+                          onChanged: (value) => _onSetChanged(0, 'weight', double.tryParse(value) ?? 0.0),
                         ),
                       ],
                     ),
@@ -219,24 +200,20 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
               ),
               Column(
                 children: [
-                  for (int i = 1; i < sets.length; i++) // Render each set
+                  for (int i = 1; i < sets.length; i++)
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end, // Align to the right
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         _buildInputField(
                           label: 'Reps',
-                          controller: TextEditingController(
-                              text: sets[i]['reps'].toString()),
-                          onChanged: (value) => _onSetChanged(
-                              i, 'reps', int.tryParse(value) ?? 0),
+                          controller: TextEditingController(text: sets[i]['reps'].toString()),
+                          onChanged: (value) => _onSetChanged(i, 'reps', int.tryParse(value) ?? 0),
                         ),
                         SizedBox(width: screenWidth * 0.02),
                         _buildInputField(
                           label: 'Weight',
-                          controller: TextEditingController(
-                              text: sets[i]['weight'].toString()),
-                          onChanged: (value) => _onSetChanged(
-                              i, 'weight', double.tryParse(value) ?? 0.0),
+                          controller: TextEditingController(text: sets[i]['weight'].toString()),
+                          onChanged: (value) => _onSetChanged(i, 'weight', double.tryParse(value) ?? 0.0),
                         ),
                       ],
                     ),
@@ -246,7 +223,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
               Center(
                 child: ElevatedButton(
                   onPressed: _addSet,
-                  child: const Icon(Icons.add), // "+" button
+                  child: const Icon(Icons.add),
                 ),
               ),
             ],
@@ -269,22 +246,22 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
       children: [
         Text(
           label,
-          style: theme.textTheme.bodyLarge, // Slightly larger text for labels
+          style: theme.textTheme.bodyLarge,
         ),
         SizedBox(
-          width: screenWidth * 0.2, // Slightly wider input box
+          width: screenWidth * 0.2,
           child: TextField(
             controller: controller,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8), // Rounded corners
+                borderRadius: BorderRadius.circular(8),
               ),
-              fillColor: theme.inputDecorationTheme.fillColor, // Light grey background
+              fillColor: theme.inputDecorationTheme.fillColor,
               filled: true,
-              contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10), // Adjust padding
+              contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
             ),
-            style: theme.textTheme.bodyLarge, // Slightly larger text for input
+            style: theme.textTheme.bodyLarge,
             onChanged: (value) => onChanged(value),
           ),
         ),

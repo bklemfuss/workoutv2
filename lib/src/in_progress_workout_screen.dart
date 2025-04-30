@@ -1,19 +1,16 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'services/database_helper.dart';
-import 'widgets/exercise_input_card.dart';
 import 'package:provider/provider.dart';
 import 'providers/unit_provider.dart';
+import 'services/database_helper.dart'; // Import DatabaseHelper
+import 'widgets/exercise_input_card.dart';
 
 class InProgressWorkoutScreen extends StatefulWidget {
   final List<Map<String, dynamic>> exercises;
   final int templateId;
 
-  const InProgressWorkoutScreen({
-    Key? key,
-    required this.exercises,
-    required this.templateId,
-  }) : super(key: key);
+  const InProgressWorkoutScreen({Key? key, required this.exercises, required this.templateId})
+      : super(key: key);
 
   @override
   State<InProgressWorkoutScreen> createState() => _InProgressWorkoutScreenState();
@@ -22,10 +19,18 @@ class InProgressWorkoutScreen extends StatefulWidget {
 class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
   late Timer _timer;
   int _elapsedSeconds = 0;
+  //  Use a Map to store the exercise data, keyed by exercise_id.
+  final Map<int, List<Map<String, dynamic>>> _exercisesData = {};
 
   @override
   void initState() {
     super.initState();
+     // Initialize _exercisesData
+    for (var exercise in widget.exercises) {
+      _exercisesData[exercise['exercise_id']] = [
+        {'reps': 0, 'weight': 0.0}
+      ]; // Initialize with one default set
+    }
     _startTimer();
   }
 
@@ -50,61 +55,68 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
     return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   }
 
-  Future<void> _finishWorkout(BuildContext context) async {
-    final dbHelper = DatabaseHelper();
-
-    try {
-      debugPrint('Starting _finishWorkout...');
-
-      // Step 1: Create a new workout
-      debugPrint('Creating a new workout...');
-      final workoutId = await dbHelper.createWorkout(widget.templateId, 1); // Use user_id = 1 for now
-      debugPrint('Workout created with ID: $workoutId');
-
-      // Step 2: Prepare workout exercises data
-      debugPrint('Preparing workout exercises data...');
-      final workoutExercises = <Map<String, dynamic>>[];
-
-      for (final exercise in widget.exercises) {
-        debugPrint('Processing exercise: $exercise');
-        for (final row in exercise['rows'] ?? []) {
-          debugPrint('Processing row: $row');
-          workoutExercises.add({
-            'exercise_id': exercise['exercise_id'],
-            'reps': row['reps'] ?? 0, // Default to 0 if null
-            'weight': row['weight'] ?? 0.0, // Default to 0.0 if null
-          });
-        }
-      }
-
-      debugPrint('Workout exercises prepared: $workoutExercises');
-
-      // Step 3: Create workout exercises
-      debugPrint('Creating workout exercises...');
-      await dbHelper.createWorkoutExercises(workoutId, workoutExercises);
-      debugPrint('Workout exercises created.');
-
-      // Step 4: Save the workout timer in the database
-      debugPrint('Saving workout timer...');
-      await dbHelper.updateWorkoutTimer(workoutId, _elapsedSeconds);
-      debugPrint('Workout timer saved.');
-
-      // Step 5: Navigate to the PostWorkoutScreen using named route
-      debugPrint('Navigating to PostWorkoutScreen...');
-      Navigator.pushReplacementNamed(
-        context,
-        '/workout_summary',
-        arguments: workoutId,
-      );
-      debugPrint('Navigation complete.');
-    } catch (e, stackTrace) {
-      debugPrint('Error in _finishWorkout: $e');
-      debugPrint('StackTrace: $stackTrace');
-    }
+    void _handleSetsChanged(int exerciseId, List<Map<String, dynamic>> sets) {
+    setState(() {
+      _exercisesData[exerciseId] = sets;
+    });
   }
 
+  Future<void> _finishWorkout(BuildContext context) async {
+  final dbHelper = DatabaseHelper();
+  final db = await dbHelper.database; // Await the database getter
+
+  try {
+    debugPrint('Starting _finishWorkout...');
+
+    // Step 1: Create a new workout
+    debugPrint('Creating a new workout...');
+    final workoutId =
+        await dbHelper.createWorkout(widget.templateId, 1); // Use user_id = 1 for now
+    debugPrint('Workout created with ID: $workoutId');
+
+    // **Use a transaction to ensure data consistency.**
+    await db.transaction((txn) async {
+      // Step 2: Create workout exercises
+      debugPrint('Creating workout exercises...');
+      for (var exerciseId in _exercisesData.keys) {
+        final sets = _exercisesData[exerciseId]!; // Get sets for this exercise
+        for (var set in sets) {
+          await dbHelper.createWorkoutExercise(
+            txn, // Pass the transaction
+            workoutId,
+            exerciseId,
+            set['reps'] ?? 0,
+            set['weight'] ?? 0.0,
+          );
+        }
+      }
+      debugPrint('Workout exercises created.');
+    });
+
+    // Step 3: Save the workout timer in the database
+    debugPrint('Saving workout timer...');
+    await dbHelper.updateWorkoutTimer(workoutId, _elapsedSeconds);
+    debugPrint('Workout timer saved.');
+
+    // Step 4: Navigate to the PostWorkoutScreen using named route
+    debugPrint('Navigating to PostWorkoutScreen...');
+    Navigator.pushReplacementNamed(
+      context,
+      '/workout_summary',
+      arguments: workoutId,
+    );
+    debugPrint('Navigation complete.');
+  } catch (e, stackTrace) {
+    debugPrint('Error in _finishWorkout: $e');
+    debugPrint('StackTrace: $stackTrace');
+    //  Show error to user
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to save workout: $e'), backgroundColor: Colors.red),
+    );
+  }
+}
+
   Future<void> _discardWorkout(BuildContext context) async {
-    // Simply navigate back to the dashboard without saving anything
     Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
   }
 
@@ -119,7 +131,6 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
       appBar: AppBar(title: const Text('In Progress Workout')),
       body: Column(
         children: [
-          // Top Section (5% of the screen height)
           Container(
             height: screenHeight * 0.05,
             padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
@@ -128,7 +139,7 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  _formatTime(_elapsedSeconds), // Display the timer
+                  _formatTime(_elapsedSeconds),
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 ElevatedButton(
@@ -140,8 +151,7 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
                         debugPrint('Showing confirmation dialog...');
                         return AlertDialog(
                           title: const Text('Finish Workout'),
-                          content: const Text(
-                              'What would you like to do with this workout?'),
+                          content: const Text('What would you like to do with this workout?'),
                           actions: [
                             TextButton(
                               onPressed: () {
@@ -171,11 +181,9 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
 
                     debugPrint('Dialog result: $confirm');
                     if (confirm == 1) {
-                      // Finish and save the workout
                       debugPrint('Calling _finishWorkout...');
                       await _finishWorkout(context);
                     } else if (confirm == 2) {
-                      // Finish and discard the workout
                       debugPrint('Calling _discardWorkout...');
                       await _discardWorkout(context);
                     } else {
@@ -197,21 +205,14 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
               ],
             ),
           ),
-          // Scrollable List of Exercises (95% of the screen height)
           Expanded(
             child: ListView.builder(
               itemCount: widget.exercises.length,
               itemBuilder: (context, index) {
                 final exercise = widget.exercises[index];
-                debugPrint('Building ExerciseInputCard for exercise: $exercise');
                 return ExerciseInputCard(
                   exercise: exercise,
-                  onChanged: (updatedExercise) {
-                    setState(() {
-                      debugPrint('Updating exercise at index $index with: $updatedExercise');
-                      widget.exercises[index] = updatedExercise; // Update the exercise in the list
-                    });
-                  },
+                  onSetsChanged: _handleSetsChanged,
                 );
               },
             ),
