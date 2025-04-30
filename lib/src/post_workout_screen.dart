@@ -45,6 +45,15 @@ class PostWorkoutScreen extends StatelessWidget {
                 final workoutDetails = snapshot.data!['workoutDetails'];
                 final workoutExercises = snapshot.data!['workoutExercises'] as List<Map<String, dynamic>>; // Cast for type safety
                 final totalWorkouts = snapshot.data!['totalWorkouts'];
+                final workoutTimerSeconds = workoutDetails['workout_timer'] as int? ?? 0; // Get timer value
+
+                // Format timer value
+                final hours = workoutTimerSeconds ~/ 3600;
+                final minutes = (workoutTimerSeconds % 3600) ~/ 60;
+                final seconds = workoutTimerSeconds % 60;
+                final formattedTime = hours > 0
+                    ? '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}'
+                    : '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
                 // Group exercises by name
                 final Map<String, List<Map<String, dynamic>>> groupedExercises = {};
@@ -68,6 +77,11 @@ class PostWorkoutScreen extends StatelessWidget {
                       Text(
                         'Workout: ${workoutDetails['template_name'] ?? 'Unnamed Workout'}',
                         style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 4), // Add small space
+                      Text( // Display formatted workout time
+                        'Duration: $formattedTime',
+                        style: theme.textTheme.bodyMedium, // Use a less prominent style
                       ),
                       const SizedBox(height: 16),
                       // Title for the exercise list
