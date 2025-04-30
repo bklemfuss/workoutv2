@@ -35,115 +35,61 @@ class _HistoryScreenState extends State<HistoryScreen> {
       final validWorkouts = workouts.where((workout) {
         final date = workout['date'];
         final workoutId = workout['workout_id'];
+        // Basic check for null date or id
         if (date == null || workoutId == null) {
-          debugPrint('Invalid workout data: $workout');
+          debugPrint('Invalid workout data (null date or id): $workout');
           return false;
         }
-        return true;
+        // Attempt to parse the date to ensure it's valid
+        try {
+          DateTime.parse(date);
+          return true;
+        } catch (e) {
+          debugPrint('Invalid date format in workout data: $workout');
+          return false;
+        }
       }).toList();
 
-      // Sort by date
+      // Sort by date (most recent first)
       validWorkouts.sort((a, b) {
         try {
+          // Ensure dates are parsed before comparison
           return DateTime.parse(b['date']).compareTo(DateTime.parse(a['date']));
         } catch (e) {
-          debugPrint('Error parsing date: ${b['date']} or ${a['date']}');
-          return 0;
+          // Handle potential parsing errors during sort, though filtering should prevent this
+          debugPrint('Error parsing date during sort: ${b['date']} or ${a['date']}');
+          return 0; // Maintain original order if parsing fails
         }
       });
 
-      // Map workout dates to workout IDs
+      // Map dates with workouts for calendar markers
       _workoutDates = {
         for (var workout in validWorkouts)
-          DateFormat('yyyy-MM-dd').format(DateTime.parse(workout['date'])): workout['workout_id'],
+          // Ensure date is valid before formatting
+          DateFormat('yyyy-MM-dd').format(DateTime.parse(workout['date'])): workout['workout_id'], // Value doesn't matter much here, just the key presence
       };
 
       return validWorkouts;
     } catch (e) {
       debugPrint('Error in _fetchWorkouts: $e');
-      rethrow;
+      // Consider showing an error message to the user or logging more details
+      return Future.error('Failed to load workouts: $e'); // Propagate error
     }
   }
 
-  void _onDateSelected(DateTime selectedDate, DateTime focusedDate) async {
+  // Updated _onDateSelected: Only updates state to trigger rebuild and list filtering
+  void _onDateSelected(DateTime selectedDate, DateTime focusedDate) {
     setState(() {
-      _selectedDate = selectedDate;
-      _focusedDate = focusedDate;
-    });
-
-    final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
-    if (_workoutDates.containsKey(formattedDate)) {
-      final workoutId = _workoutDates[formattedDate];
-      final result = await showModalBottomSheet<bool>(
-        context: context,
-        isScrollControlled: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        builder: (context) {
-          return FractionallySizedBox(
-            heightFactor: 0.9,
-            child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: _dbHelper.getWorkoutExercisesGroupedByExercise(workoutId ?? -1),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('Error loading workout summary.'));
-                }
-
-                final exercises = snapshot.data!;
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
-                  itemCount: exercises.length,
-                  itemBuilder: (context, index) {
-                    final exercise = exercises[index];
-                    final sets = exercise['sets'] as List<Map<String, dynamic>>;
-
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              exercise['exercise_name'] ?? 'Unknown Exercise',
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            ...sets.map((set) => Text(
-                                  'Reps: ${set['reps']}, Weight: ${set['weight']}',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                )),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          );
-        },
-      );
-
-      if (result == true) {
-        setState(() {
-          _workoutsFuture = _fetchWorkouts();
-        });
+      // Toggle selection: if the same day is tapped again, deselect it.
+      if (isSameDay(_selectedDate, selectedDate)) {
+        _selectedDate = null; // Deselect
+      } else {
+        _selectedDate = selectedDate;
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No workout found for this date.')),
-      );
-    }
+      _focusedDate = focusedDate; // Always update focused day
+    });
+    // Removed the modal bottom sheet logic from here.
+    // The list below will now filter based on _selectedDate.
   }
 
   @override
@@ -158,11 +104,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            // Display the error message
             return Center(
-              child: Text(
-                'Error: ${snapshot.error}',
-                style: theme.textTheme.bodyLarge,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Error loading workouts: ${snapshot.error}', // Show specific error
+                  style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.error),
+                  textAlign: TextAlign.center,
+                ),
               ),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -173,12 +122,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             );
           } else {
-            final workouts = snapshot.data!;
+            final allWorkouts = snapshot.data!;
+
+            // Filter workouts based on the selected date
+            final displayedWorkouts = _selectedDate == null
+                ? allWorkouts // Show all if no date is selected
+                : allWorkouts.where((workout) {
+                    try {
+                      // Safely parse date and compare
+                      return isSameDay(DateTime.parse(workout['date']), _selectedDate);
+                    } catch (e) {
+                      debugPrint('Error parsing date for filtering: ${workout['date']}');
+                      return false; // Exclude if date is invalid
+                    }
+                  }).toList();
+
             return Column(
               children: [
-                // Calendar Section (40% of the screen height)
+                // Calendar Section
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.4,
+                  // Keep calendar height fixed or dynamic as preferred
+                  height: MediaQuery.of(context).size.height * 0.45, // Slightly increased height
                   child: TableCalendar(
                     firstDay: DateTime(2000),
                     lastDay: DateTime.now(),
@@ -199,69 +163,139 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         shape: BoxShape.circle,
                       ),
                       markerDecoration: BoxDecoration(
-                        color: theme.colorScheme.secondary, // Dates with workouts
+                        color: theme.colorScheme.secondary.withOpacity(0.7), // Use a distinct marker color
                         shape: BoxShape.circle,
                       ),
+                      // Add outside days style if needed
+                      outsideDaysVisible: false,
+                    ),
+                    headerStyle: HeaderStyle(
+                      formatButtonVisible: false, // Hide format button if not needed
+                      titleCentered: true,
+                      titleTextStyle: theme.textTheme.titleLarge ?? const TextStyle(),
+                    ),
+                    calendarBuilders: CalendarBuilders(
+                      markerBuilder: (context, date, events) {
+                        if (events.isNotEmpty) {
+                          // Customize marker appearance if needed
+                          return Positioned(
+                            right: 1,
+                            bottom: 1,
+                            child: Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: theme.colorScheme.secondary, // Match markerDecoration
+                              ),
+                            ),
+                          );
+                        }
+                        return null;
+                      },
                     ),
                     eventLoader: (day) {
                       final formattedDate = DateFormat('yyyy-MM-dd').format(day);
+                      // Check if any workout exists for this date using the pre-calculated map
                       return _workoutDates.containsKey(formattedDate) ? [true] : [];
                     },
                   ),
                 ),
-                // Scrollable List of Workouts (60% of the screen height)
+
+                // Divider between Calendar and List
+                const Divider(height: 1, thickness: 1),
+
+                // Conditional Message or List Title
+                if (_selectedDate != null && displayedWorkouts.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      'No workouts recorded on ${DateFormat.yMMMd().format(_selectedDate!)}.',
+                      style: theme.textTheme.bodyLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                else if (_selectedDate != null)
+                   Padding(
+                     padding: const EdgeInsets.symmetric(vertical: 8.0),
+                     child: Text(
+                       'Workouts on ${DateFormat.yMMMd().format(_selectedDate!)}',
+                       style: theme.textTheme.titleMedium,
+                     ),
+                   ),
+
+                // Scrollable List of Workouts (Filtered or All)
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: workouts.length,
-                    itemBuilder: (context, index) {
-                      final workout = workouts[index];
-
-                      return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        color: theme.cardColor, // Use theme card color
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ListTile(
-                          title: Text(
-                            workout['template_name'] ?? 'Unknown Template',
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ), // Use theme's text style
+                  child: displayedWorkouts.isEmpty && _selectedDate == null
+                      ? Center( // Show message if allWorkouts is empty initially
+                          child: Text(
+                            'No workouts found.',
+                            style: theme.textTheme.bodyLarge,
                           ),
-                          subtitle: Text(
-                            'Date: ${workout['date']}',
-                            style: theme.textTheme.bodyMedium, // Use theme's text style
-                          ),
-                          trailing: const Icon(Icons.arrow_forward),
-                          onTap: () async {
-                            // Show WorkoutSummaryScreen in a BottomModalSheet
-                            final result = await showModalBottomSheet<bool>(
-                              context: context,
-                              isScrollControlled: true,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                              ),
-                              builder: (context) {
-                                return FractionallySizedBox(
-                                  heightFactor: 0.9, // Adjust the height of the modal sheet
-                                  child: WorkoutSummaryScreen(workoutId: workout['workout_id']),
-                                );
-                              },
-                            );
-
-                            // Refresh the history screen if a workout was deleted
-                            if (result == true) {
-                              setState(() {
-                                _workoutsFuture = _fetchWorkouts();
-                              });
+                        )
+                      : ListView.separated( // Use ListView.separated
+                          itemCount: displayedWorkouts.length,
+                          itemBuilder: (context, index) {
+                            final workout = displayedWorkouts[index];
+                            String formattedDate = 'Invalid Date';
+                            try {
+                              formattedDate = DateFormat.yMMMd().add_jm().format(DateTime.parse(workout['date']));
+                            } catch (e) {
+                              debugPrint('Error formatting date for display: ${workout['date']}');
                             }
+
+                            return Card(
+                              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              color: theme.cardColor, // Use theme card color
+                              elevation: 4,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: ListTile(
+                                title: Text(
+                                  workout['template_name'] ?? 'Workout', // Provide default
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  'Completed: $formattedDate', // Show formatted date/time
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                                trailing: Icon(Icons.chevron_right, color: theme.iconTheme.color), // Use chevron
+                                onTap: () async {
+                                  // Show WorkoutSummaryScreen in a BottomModalSheet
+                                  final result = await showModalBottomSheet<bool>(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                                    ),
+                                    builder: (context) {
+                                      return FractionallySizedBox(
+                                        heightFactor: 0.9, // Adjust the height of the modal sheet
+                                        child: WorkoutSummaryScreen(workoutId: workout['workout_id']),
+                                      );
+                                    },
+                                  );
+
+                                  // Refresh the history screen if a workout was deleted
+                                  if (result == true) {
+                                    setState(() {
+                                      _workoutsFuture = _fetchWorkouts();
+                                    });
+                                  }
+                                },
+                              ),
+                            );
                           },
+                          separatorBuilder: (context, index) => const Divider(
+                            height: 1, // Minimal height for the divider line
+                            thickness: 1,
+                            indent: 16, // Indent divider from the left edge
+                            endIndent: 16, // Indent divider from the right edge
+                          ),
                         ),
-                      );
-                    },
-                  ),
                 ),
               ],
             );
