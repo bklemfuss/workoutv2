@@ -132,32 +132,27 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    debugPrint('Finish Workout button pressed.');
                     final confirm = await showDialog<int>(
                       context: context,
                       builder: (context) {
-                        debugPrint('Showing confirmation dialog...');
                         return AlertDialog(
                           title: const Text('Finish Workout'),
                           content: const Text('What would you like to do with this workout?'),
                           actions: [
                             TextButton(
                               onPressed: () {
-                                debugPrint('Cancel selected.');
                                 Navigator.pop(context, 0);
                               },
                               child: const Text('Cancel'),
                             ),
                             TextButton(
                               onPressed: () {
-                                debugPrint('Finish and Save selected.');
                                 Navigator.pop(context, 1);
                               },
                               child: const Text('Finish and Save'),
                             ),
                             TextButton(
                               onPressed: () {
-                                debugPrint('Finish and Discard selected.');
                                 Navigator.pop(context, 2);
                               },
                               child: const Text('Finish and Discard'),
@@ -167,12 +162,9 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
                       },
                     );
 
-                    debugPrint('Dialog result: $confirm');
                     if (confirm == 1) {
-                      debugPrint('Calling _finishWorkout...');
                       await _finishWorkout(context);
                     } else if (confirm == 2) {
-                      debugPrint('Calling _discardWorkout...');
                       await _discardWorkout(context);
                     } else {
                       debugPrint('No action taken.');
