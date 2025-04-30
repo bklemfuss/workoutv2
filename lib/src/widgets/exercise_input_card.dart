@@ -18,27 +18,37 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
   @override
   void initState() {
     super.initState();
-    sets = [
+    // Ensure the sets list is mutable by creating a new list
+    sets = List<Map<String, dynamic>>.from(widget.exercise['rows'] ?? [
       {
         'reps': widget.exercise['reps'] ?? 0,
         'weight': widget.exercise['weight'] ?? 0.0,
       }
-    ]; // Initialize with one default set
+    ]);
+    debugPrint('Initialized sets: $sets');
   }
 
   void _addSet() {
     setState(() {
+      sets = List<Map<String, dynamic>>.from(sets); // Ensure sets is mutable
       sets.add({'reps': 0, 'weight': 0.0}); // Add a new set with default values
+    });
+    debugPrint('Set added: $sets');
+    widget.onChanged({
+      'exercise_id': widget.exercise['exercise_id'],
+      'rows': sets, // Send all rows (sets) for this exercise
     });
   }
 
   void _onSetChanged(int index, String field, dynamic value) {
     setState(() {
+      sets = List<Map<String, dynamic>>.from(sets); // Ensure sets is mutable
       sets[index][field] = value; // Update the specific set's field
     });
+    debugPrint('Set changed: $sets');
     widget.onChanged({
       'exercise_id': widget.exercise['exercise_id'],
-      'sets': sets,
+      'rows': sets, // Send all rows (sets) for this exercise
     });
   }
 

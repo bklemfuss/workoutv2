@@ -65,7 +65,7 @@ class PostWorkoutScreen extends StatelessWidget {
                               child: ListTile(
                                 title: Text(exercise['exercise_name']),
                                 subtitle: Text(
-                                    'Sets: ${exercise['sets']}, Reps: ${exercise['reps']}, Weight: ${exercise['weight']}'),
+                                    'Reps: ${exercise['reps']}, Weight: ${exercise['weight']}'),
                               ),
                             );
                           },

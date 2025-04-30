@@ -435,18 +435,19 @@ class DatabaseHelper {
 
   Future<void> createWorkoutExercises(int workoutId, List<Map<String, dynamic>> exercises) async {
     final db = await database;
-    for (final exercise in exercises) {
-      final exerciseId = exercise['exercise_id'];
-      final sets = exercise['sets'] as List<Map<String, dynamic>>;
 
-      for (final set in sets) {
-        await db.insert('WorkoutExercise', {
+    // Insert each exercise into the workout_exercises table
+    for (final exercise in exercises) {
+      debugPrint('Inserting workout exercise: $exercise');
+      await db.insert(
+        'WorkoutExercise',
+        {
           'workout_id': workoutId,
-          'exercise_id': exerciseId,
-          'reps': set['reps'],
-          'weight': set['weight'],
-        });
-      }
+          'exercise_id': exercise['exercise_id'],
+          'reps': exercise['reps'], // Ensure reps is handled
+          'weight': exercise['weight'], // Ensure weight is handled
+        },
+      );
     }
   }
 
@@ -467,17 +468,22 @@ class DatabaseHelper {
 
   Future<List<Map<String, dynamic>>> getWorkoutExercises(int workoutId) async {
     final db = await database;
-    return await db.rawQuery('''
+
+    // Correct query to fetch all workout exercises for the given workout_id
+    final result = await db.rawQuery('''
       SELECT 
-        we.workout_exercise_id,
-        e.name AS exercise_name,
-        we.sets,
-        we.reps,
+        we.workout_exercise_id AS workout_exercise_id, 
+        we.exercise_id, 
+        e.name AS exercise_name, 
+        we.reps, 
         we.weight
-      FROM WorkoutExercise we
-      INNER JOIN Exercise e ON we.exercise_id = e.exercise_id
+      FROM WorkoutExercise AS we
+      INNER JOIN Exercise AS e 
+        ON we.exercise_id = e.exercise_id
       WHERE we.workout_id = ?
     ''', [workoutId]);
+
+    return result;
   }
 
   Future<List<Map<String, dynamic>>> getExercisesByMuscleGroup(String? muscleGroup) async {
