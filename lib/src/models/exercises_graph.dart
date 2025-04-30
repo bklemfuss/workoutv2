@@ -123,9 +123,9 @@ class _ExercisesGraphState extends State<ExercisesGraph> {
     }
 
     return SideTitleWidget(
-      child: Text(DateFormat('MM/dd').format(date), style: style), // Format as MM/dd
       meta: meta, // Pass the required meta parameter
       space: 4,
+      child: Text(DateFormat('MM/dd').format(date), style: style),
     );
   }
 
@@ -136,9 +136,9 @@ class _ExercisesGraphState extends State<ExercisesGraph> {
     );
 
     return SideTitleWidget(
-      child: Text(value.toStringAsFixed(0), style: style), // Adjust precision if needed
       meta: meta, // Pass the required meta parameter
       space: 4,
+      child: Text(value.toStringAsFixed(0), style: style),
     );
   }
 
