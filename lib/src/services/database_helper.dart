@@ -710,4 +710,51 @@ class DatabaseHelper {
       };
     }).toList();
   }
+
+  // New method to get distinct exercises performed in workouts
+  Future<List<Map<String, dynamic>>> getCompletedExerciseDetails() async {
+    final db = await database;
+    // Select distinct exercise IDs, names, and equipment status
+    // from exercises that appear in the WorkoutExercise table.
+    final result = await db.rawQuery('''
+      SELECT DISTINCT
+        e.exercise_id,
+        e.name,
+        e.equipment
+      FROM Exercise e
+      INNER JOIN WorkoutExercise we ON e.exercise_id = we.exercise_id
+      ORDER BY e.name ASC
+    ''');
+    return result;
+  }
+
+  // New method to get details for a specific exercise
+  Future<Map<String, dynamic>?> getExerciseDetails(int exerciseId) async {
+    final db = await database;
+    final result = await db.query(
+      'Exercise',
+      columns: ['name', 'equipment'],
+      where: 'exercise_id = ?',
+      whereArgs: [exerciseId],
+      limit: 1,
+    );
+    return result.isNotEmpty ? result.first : null;
+  }
+
+  // New method to get workout history for a specific exercise, ordered by date
+  Future<List<Map<String, dynamic>>> getWorkoutHistoryForExercise(int exerciseId) async {
+    final db = await database;
+    // Join WorkoutExercise with Workout to get the date and order by it
+    final result = await db.rawQuery('''
+      SELECT
+        we.reps,
+        we.weight,
+        w.date
+      FROM WorkoutExercise we
+      INNER JOIN Workout w ON we.workout_id = w.workout_id
+      WHERE we.exercise_id = ?
+      ORDER BY w.date ASC
+    ''', [exerciseId]);
+    return result;
+  }
 }
