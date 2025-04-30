@@ -10,10 +10,21 @@ class StatisticsScreen extends StatelessWidget {
 
   Future<Map<String, dynamic>> _fetchStatistics() async {
     final dbHelper = DatabaseHelper();
-    final totalWorkouts = (await dbHelper.getWorkouts()).length;
-    final totalExercises = (await dbHelper.getWorkoutExercises(0)).length; // Fetch all exercises
-    final totalTimeSeconds = (await dbHelper.getWorkouts())
-        .fold<int>(0, (sum, workout) => sum + (workout['workout_timer'] as int));
+    final workouts = await dbHelper.getWorkouts();
+    final totalWorkouts = workouts.length;
+    // Assuming getWorkoutExercises(0) fetches all exercises is incorrect.
+    // This needs adjustment if you want *all* exercises across *all* workouts.
+    // For now, let's assume you want exercises from a specific workout (e.g., workout_id 0, which might not exist)
+    // or perhaps you intended to count all exercise *types*?
+    // Clarification needed on what "Total Exercises" should represent.
+    // Fetching exercises for workout_id 0 as per original code:
+    final totalExercises = (await dbHelper.getWorkoutExercises(0)).length;
+
+    final totalTimeSeconds = workouts.fold<int>(0, (sum, workout) {
+      final timerValue = workout['workout_timer'];
+      // Add null check and default to 0 if null
+      return sum + (timerValue is int ? timerValue : 0);
+    });
 
     // Calculate average workout time
     final averageTimeSeconds = totalWorkouts > 0 ? totalTimeSeconds ~/ totalWorkouts : 0;
