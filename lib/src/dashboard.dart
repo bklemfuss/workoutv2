@@ -109,7 +109,7 @@ class _DashboardState extends State<Dashboard> {
                           padding: const EdgeInsets.all(16),
                           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2, // Number of tiles per row
-                            crossAxisSpacing: 16,
+                            crossAxisSpacing: 8, // Reduced spacing between columns
                             mainAxisSpacing: 16,
                             childAspectRatio: 1 / 1.25, // Adjust the aspect ratio of tiles (width / height)
                           ),
