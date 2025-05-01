@@ -802,4 +802,53 @@ class DatabaseHelper {
 
     return 0; // Exercise not found in the last workout
   }
+
+  // New method to get the number of workouts completed this week (assuming week starts on Monday)
+  Future<int> getWorkoutsCompletedThisWeek() async {
+    final db = await database;
+    final now = DateTime.now();
+    // Calculate the date of the most recent Monday (start of the week)
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    // Calculate the date of the upcoming Sunday (end of the week)
+    final endOfWeek = startOfWeek.add(const Duration(days: 6));
+
+    // Format dates for SQL query (YYYY-MM-DD)
+    final startDateStr = "${startOfWeek.year}-${startOfWeek.month.toString().padLeft(2, '0')}-${startOfWeek.day.toString().padLeft(2, '0')}";
+    final endDateStr = "${endOfWeek.year}-${endOfWeek.month.toString().padLeft(2, '0')}-${endOfWeek.day.toString().padLeft(2, '0')}";
+
+    final result = await db.rawQuery('''
+      SELECT COUNT(*) as count
+      FROM Workout
+      WHERE date >= ? AND date <= ?
+    ''', [startDateStr, endDateStr]);
+
+    if (result.isNotEmpty && result.first['count'] != null) {
+      return result.first['count'] as int;
+    }
+    return 0;
+  }
+
+  // New method to get the number of workouts completed this month
+  Future<int> getWorkoutsCompletedThisMonth() async {
+    final db = await database;
+    final now = DateTime.now();
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    // Calculate the last day of the month
+    final endOfMonth = DateTime(now.year, now.month + 1, 0); // Day 0 of next month is the last day of current month
+
+    // Format dates for SQL query (YYYY-MM-DD)
+    final startDateStr = "${startOfMonth.year}-${startOfMonth.month.toString().padLeft(2, '0')}-${startOfMonth.day.toString().padLeft(2, '0')}";
+    final endDateStr = "${endOfMonth.year}-${endOfMonth.month.toString().padLeft(2, '0')}-${endOfMonth.day.toString().padLeft(2, '0')}";
+
+    final result = await db.rawQuery('''
+      SELECT COUNT(*) as count
+      FROM Workout
+      WHERE date >= ? AND date <= ?
+    ''', [startDateStr, endDateStr]);
+
+    if (result.isNotEmpty && result.first['count'] != null) {
+      return result.first['count'] as int;
+    }
+    return 0;
+  }
 }
