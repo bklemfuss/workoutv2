@@ -69,14 +69,26 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         : '${(averageTimeSeconds ~/ 60).toString()} min';
 
     // Format total time
-    final hours = totalTimeSeconds ~/ 3600;
-    final minutes = (totalTimeSeconds % 3600) ~/ 60;
-    final totalTime = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+    final totalMinutes = totalTimeSeconds ~/ 60;
+    final totalHours = totalMinutes ~/ 60;
+    final totalDays = totalHours ~/ 24;
+
+    final displayMinutes = totalMinutes % 60;
+    final displayHours = totalHours % 24;
+
+    String totalTime;
+    if (totalDays > 0) {
+      totalTime = '${totalDays} d ${displayHours.toString().padLeft(2, '0')} h ${displayMinutes.toString().padLeft(2, '0')} m';
+    } else if (totalHours > 0) {
+      totalTime = '${totalHours} h ${displayMinutes.toString().padLeft(2, '0')} m';
+    } else {
+      totalTime = '${totalMinutes} m'; // Handle cases less than an hour
+    }
 
     return {
       'totalWorkouts': totalWorkouts,
       'totalExercises': totalExercises,
-      'totalTime': totalTime,
+      'totalTime': totalTime, // Use the new formatted string
       'averageTime': averageTime,
     };
   }
@@ -98,6 +110,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // Allow custom height
+      // The builder context inherits the theme, so the modal should use theme colors automatically.
       builder: (context) => FractionallySizedBox(
         heightFactor: 0.8, // Use 80% of the available screen height
         child: finalGraphWidget, // Use the potentially updated widget
@@ -119,9 +132,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            // Use theme's error color or a standard text style for errors
+            return Center(child: Text('Error: ${snapshot.error}', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error)));
           } else if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(child: Text('No data available.'));
+            return Center(child: Text('No data available.', style: theme.textTheme.bodyMedium));
           }
 
           final stats = snapshot.data!;
@@ -140,94 +154,76 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   mainAxisSpacing: 8,
                   padding: const EdgeInsets.all(8.0),
                   children: [
-                    // ... existing cards for Total Workouts, Total Exercises, Total Time, Average Time ...
+                    // Use Card widget which implicitly uses CardTheme from AppTheme
                     Card(
-                      elevation: 4,
-                      color: theme.cardColor, // Use AppTheme
+                      // elevation and color are handled by CardTheme
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             'Total Workouts',
-                            style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
+                            // Use appropriate text styles from the theme
+                            style: theme.textTheme.titleSmall,
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             '${stats['totalWorkouts']}',
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
+                            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold), // Example: Use titleLarge
                             textAlign: TextAlign.center,
                           ),
                         ],
                       ),
                     ),
                     Card(
-                      elevation: 4,
-                      color: theme.cardColor, // Use AppTheme
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Total Exercises', // Consider renaming if it means defined exercises
-                            style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
+                            'Total Exercises',
+                            style: theme.textTheme.titleSmall,
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '${stats['totalExercises']}', // This might need clarification
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
+                            '${stats['totalExercises']}',
+                            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
                           ),
                         ],
                       ),
                     ),
                     Card(
-                      elevation: 4,
-                      color: theme.cardColor, // Use AppTheme
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             'Total Time',
-                            style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
+                            style: theme.textTheme.titleSmall,
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             '${stats['totalTime']}',
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
+                            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
                           ),
                         ],
                       ),
                     ),
                     Card(
-                      elevation: 4,
-                      color: theme.cardColor, // Use AppTheme
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             'Average Workout Time',
-                            style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
+                            style: theme.textTheme.titleSmall,
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             '${stats['averageTime']}',
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
+                            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -240,7 +236,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(8.0),
-                  // Adjust itemCount based on actual graphs needed, e.g., 2 for now
                   itemCount: 2, // Only Exercises and Personal Records for now
                   itemBuilder: (context, index) {
                     // --- Card for Exercises Graph (index 0) ---
@@ -257,22 +252,20 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                 );
                               }
                             : null, // Disable onTap if nothing selected
-                        child: Card(
-                          elevation: 4,
-                          margin: const EdgeInsets.symmetric(vertical: 8.0),
-                          color: theme.cardColor,
+                        child: Card( // Uses CardTheme
+                          // elevation and margin are handled by CardTheme, color by CardTheme.color
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Column(
                               children: [
-                                // Dropdown for selecting exercise
+                                // Dropdown uses InputDecorationTheme from AppTheme
                                 DropdownButtonFormField<int>(
                                   value: _selectedExerciseId,
-                                  hint: const Text('Select an exercise to view graph'),
+                                  hint: Text('Select an exercise to view graph', style: theme.inputDecorationTheme.hintStyle),
                                   isExpanded: true,
+                                  // decoration uses InputDecorationTheme
                                   decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    // border and contentPadding are handled by InputDecorationTheme
                                   ),
                                   items: _completedExercises.map((exercise) {
                                     return DropdownMenuItem<int>(
@@ -280,6 +273,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                       child: Text(
                                         exercise['name'] as String? ?? 'Unnamed Exercise',
                                         overflow: TextOverflow.ellipsis,
+                                        // Use a default text style that fits dropdown items
+                                        style: theme.textTheme.bodyMedium,
                                       ),
                                     );
                                   }).toList(),
@@ -287,11 +282,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                     setState(() {
                                       _selectedExerciseId = value;
                                     });
-                                    // Optionally: Show a small preview or indicator here
                                   },
+                                  // Style the dropdown itself if needed, e.g., icon color
+                                  iconEnabledColor: theme.colorScheme.onSurface.withOpacity(0.7),
                                 ),
                                 const SizedBox(height: 16),
-                                // Placeholder/Preview Area (Optional)
+                                // Placeholder/Preview Area
                                 if (_selectedExerciseId != null)
                                   Container(
                                     height: 100, // Example height
@@ -299,10 +295,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                     child: Column(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
+                                         // Use IconTheme data or specific color from ColorScheme
                                          Icon(Icons.show_chart, size: 40, color: theme.colorScheme.primary),
                                          const SizedBox(height: 8),
                                          Text(
                                           'Tap to view graph for selected exercise',
+                                          // Use appropriate text style from theme
                                           style: theme.textTheme.bodySmall,
                                           textAlign: TextAlign.center,
                                          ),
@@ -315,6 +313,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                     alignment: Alignment.center,
                                     child: Text(
                                       'Select an exercise from the dropdown above.',
+                                      // Use appropriate text style from theme
                                       style: theme.textTheme.bodyMedium,
                                       textAlign: TextAlign.center,
                                     ),
@@ -332,25 +331,27 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         onTap: () {
                           _showGraphModal(context, const PersonalRecordsGraph());
                         },
-                        child: Card(
-                          elevation: 4,
-                          margin: const EdgeInsets.symmetric(vertical: 8.0),
-                          color: theme.cardColor,
+                        child: Card( // Uses CardTheme
+                          // elevation, margin, color handled by CardTheme
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Column(
                               children: [
                                 Text(
                                   title,
-                                  style: theme.textTheme.bodyLarge,
+                                  // Use appropriate text style from theme
+                                  style: theme.textTheme.titleMedium, // Example: Use titleMedium
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 8),
                                 // Keep placeholder image or add specific preview
+                                // Consider using an Icon with theme color if appropriate
                                 Image.asset(
                                   'assets/images/flutter_logo.png', // Replace with relevant icon/preview
                                   height: 100,
                                   fit: BoxFit.contain,
+                                  // Optionally apply theme color filter if it's an icon-like image
+                                  // color: theme.colorScheme.secondary,
                                 ),
                               ],
                             ),
@@ -371,7 +372,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         },
       ),
       bottomNavigationBar: const BottomNavBar(
-        currentIndex: 2,
+        currentIndex: 2, // BottomNavBar should internally use theme
       ),
     );
   }
