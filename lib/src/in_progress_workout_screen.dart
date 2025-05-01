@@ -111,29 +111,36 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Get the theme
+    final colorScheme = theme.colorScheme; // Get the color scheme
+    final textTheme = theme.textTheme; // Get the text theme
+
     // Ensure no parent widget intercepts touch events
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(), // Dismiss keyboard on tap outside
       child: Scaffold(
-        appBar: AppBar(title: const Text('In Progress Workout')),
+        appBar: AppBar(title: const Text('In Progress Workout')), // Uses AppBarTheme
         body: Column(
           children: [
             Container(
               height: MediaQuery.of(context).size.height * 0.05,
               padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
-              color: Colors.blue[100],
+              // Use a theme color, maybe secondary or a custom one if needed
+              color: colorScheme.secondaryContainer, // Example: Using secondaryContainer
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     _formatTime(_elapsedSeconds),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    // Use a text theme style
+                    style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   ElevatedButton(
                     onPressed: () async {
                       final confirm = await showDialog<int>(
                         context: context,
                         builder: (context) {
+                          // AlertDialog will use DialogTheme from AppTheme
                           return AlertDialog(
                             title: const Text('Finish Workout'),
                             content: const Text('What would you like to do with this workout?'),
@@ -142,6 +149,7 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
                                 onPressed: () {
                                   Navigator.pop(context, 0);
                                 },
+                                // TextButton uses TextButtonTheme
                                 child: const Text('Cancel'),
                               ),
                               TextButton(
@@ -154,7 +162,11 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
                                 onPressed: () {
                                   Navigator.pop(context, 2);
                                 },
-                                child: const Text('Finish and Discard'),
+                                // Consider a different style for destructive actions if needed
+                                child: Text(
+                                  'Finish and Discard',
+                                  style: TextStyle(color: colorScheme.error), // Use error color for discard
+                                ),
                               ),
                             ],
                           );
@@ -169,16 +181,20 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
                         debugPrint('No action taken.');
                       }
                     },
+                    // Use ElevatedButtonTheme, potentially override specific properties if needed
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: Colors.green, // Keep specific color for this button? Or use theme.colorScheme.primary?
+                      foregroundColor: Colors.white, // Ensure contrast with green
                       padding: EdgeInsets.symmetric(
                         vertical: MediaQuery.of(context).size.height * 0.01,
                         horizontal: MediaQuery.of(context).size.width * 0.05,
                       ),
+                      // Use text style from theme if possible, or define explicitly if needed
+                      textStyle: textTheme.labelLarge?.copyWith(fontSize: 14), // Example using labelLarge
                     ),
                     child: const Text(
                       'Finish Workout',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                      // Style is now mostly handled by ElevatedButton.styleFrom
                     ),
                   ),
                 ],
@@ -196,10 +212,14 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
                 },
               ),
             ),
-            Center(
-              child: Text(
-                'Weight: ${Provider.of<UnitProvider>(context).unitSystem == 'Metric' ? 'kg' : 'lbs'}',
-                style: Theme.of(context).textTheme.bodyLarge,
+            Padding( // Add some padding
+              padding: const EdgeInsets.all(16.0),
+              child: Center(
+                child: Text(
+                  'Weight: ${Provider.of<UnitProvider>(context).unitSystem == 'Metric' ? 'kg' : 'lbs'}',
+                  // Use a text theme style
+                  style: textTheme.bodyLarge,
+                ),
               ),
             ),
           ],
