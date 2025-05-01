@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Existing dark mode colors
-  static const primary = Color.fromARGB(222, 245, 133, 81);
-  static const secondary = Color.fromARGB(210, 248, 104, 37);
-  static const background = Color.fromARGB(212, 29, 43, 59);
+  static const primary = Color.fromARGB(255, 245, 133, 81);
+  static const secondary = Color.fromARGB(255, 248, 104, 37);
+  static const background = Color.fromARGB(255, 29, 43, 59);
 
   // Improved text colors for dark mode
   static const textPrimaryDark = Color.fromARGB(255, 220, 220, 220); // A slightly softer white
@@ -16,5 +16,5 @@ class AppColors {
   static const textSecondaryLight = Color.fromARGB(255, 90, 90, 90);  // A medium gray for less emphasis
 
   // Input field background color
-  static const inputFieldBackground = Color.fromARGB(222, 248, 142, 93); 
+  static const inputFieldBackground = Color.fromARGB(255, 248, 142, 93); 
 }
