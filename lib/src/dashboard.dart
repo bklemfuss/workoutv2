@@ -196,18 +196,22 @@ class _DashboardState extends State<Dashboard> {
                         onPressed: () {
                           _navigateToCreateWorkoutScreen(context); // Navigate to CreateWorkoutScreen
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary, // Use primary color
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
+                        // Remove the explicit style property below
+                        // style: ElevatedButton.styleFrom(
+                        //   backgroundColor: Theme.of(context).colorScheme.primary, // Use primary color
+                        //   shape: RoundedRectangleBorder(
+                        //     borderRadius: BorderRadius.circular(12),
+                        //   ),
+                        // ),
                         child: Text(
                           'Create New Workout',
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: Colors.white, // Ensure text is visible on primary color
-                            fontWeight: FontWeight.bold,
-                          ),
+                          // Use the theme's labelLarge style for button text
+                          style: theme.textTheme.labelLarge,
+                          // Remove explicit color/weight if labelLarge provides it
+                          // ?.copyWith(
+                          //   color: Colors.white, // Ensure text is visible on primary color
+                          //   fontWeight: FontWeight.bold,
+                          // ),
                         ),
                       ),
                     ),
