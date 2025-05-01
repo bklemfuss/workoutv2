@@ -18,14 +18,23 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
   @override
   void initState() {
     super.initState();
+    // Ensure each set has a unique identifier for the Key
     sets = List<Map<String, dynamic>>.from(widget.exercise['sets'] ?? [
-      {'reps': 0, 'weight': 0.0},
+      {'id': UniqueKey().toString(), 'reps': 0, 'weight': 0.0}, // Add unique ID
     ]);
   }
 
   void _addSet() {
     setState(() {
-      sets.add({'reps': 0, 'weight': 0.0});
+      // Add unique ID to new sets
+      sets.add({'id': UniqueKey().toString(), 'reps': 0, 'weight': 0.0});
+      widget.onSetsChanged(widget.exercise['exercise_id'], sets); // Notify about changes
+    });
+  }
+
+  void _removeSet(int index) {
+    setState(() {
+      sets.removeAt(index);
       widget.onSetsChanged(widget.exercise['exercise_id'], sets); // Notify about changes
     });
   }
@@ -201,21 +210,71 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
               Column(
                 children: [
                   for (int i = 1; i < sets.length; i++)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        _buildInputField(
-                          label: 'Reps',
-                          controller: TextEditingController(text: sets[i]['reps'].toString()),
-                          onChanged: (value) => _onSetChanged(i, 'reps', int.tryParse(value) ?? 0),
-                        ),
-                        SizedBox(width: screenWidth * 0.02),
-                        _buildInputField(
-                          label: 'Weight',
-                          controller: TextEditingController(text: sets[i]['weight'].toString()),
-                          onChanged: (value) => _onSetChanged(i, 'weight', double.tryParse(value) ?? 0.0),
-                        ),
-                      ],
+                    Dismissible(
+                      // Use a unique key for each dismissible item
+                      key: ValueKey(sets[i]['id']),
+                      direction: DismissDirection.endToStart, // Swipe direction
+                      confirmDismiss: (direction) async {
+                        final set = sets[i];
+                        final hasData = (set['reps'] != null && set['reps'] > 0) ||
+                                        (set['weight'] != null && set['weight'] > 0.0);
+
+                        if (hasData) {
+                          return await showDialog<bool>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Confirm Deletion'),
+                                content: const Text('Are you sure you want to delete this set?'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(false), // Don't dismiss
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(true), // Dismiss
+                                    child: const Text('Delete'),
+                                  ),
+                                ],
+                              );
+                            },
+                          ) ?? false; // Return false if dialog is dismissed without selection
+                        } else {
+                          // No data, dismiss immediately without confirmation
+                          return true;
+                        }
+                      },
+                      onDismissed: (direction) {
+                        // Actual removal happens after confirmDismiss returns true
+                        _removeSet(i);
+                        // Optional: Show a snackbar confirmation
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Set removed')),
+                        );
+                      },
+                      background: Container(
+                        color: Colors.red,
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      child: Row( // The original Row for the set input fields
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          _buildInputField(
+                            label: 'Reps',
+                            // Use a unique key for the controller if needed, or manage state differently
+                            controller: TextEditingController(text: sets[i]['reps'].toString()),
+                            onChanged: (value) => _onSetChanged(i, 'reps', int.tryParse(value) ?? 0),
+                          ),
+                          SizedBox(width: screenWidth * 0.02),
+                          _buildInputField(
+                            label: 'Weight',
+                            controller: TextEditingController(text: sets[i]['weight'].toString()),
+                            onChanged: (value) => _onSetChanged(i, 'weight', double.tryParse(value) ?? 0.0),
+                          ),
+                        ],
+                      ),
                     ),
                 ],
               ),
