@@ -757,4 +757,38 @@ class DatabaseHelper {
     ''', [exerciseId]);
     return result;
   }
+
+  // New method to get the count of sets for an exercise from the last workout using a specific template
+  Future<int> getLastWorkoutSetsCountForExercise(int templateId, int exerciseId) async {
+    final db = await database;
+
+    // Find the most recent workout_id for the given template_id
+    final List<Map<String, dynamic>> lastWorkout = await db.query(
+      'Workout',
+      columns: ['workout_id'],
+      where: 'template_id = ?',
+      whereArgs: [templateId],
+      orderBy: 'date DESC',
+      limit: 1,
+    );
+
+    if (lastWorkout.isEmpty) {
+      return 0; // No previous workout found for this template
+    }
+
+    final int lastWorkoutId = lastWorkout.first['workout_id'] as int;
+
+    // Count the number of sets (entries) for the specific exercise in that workout
+    final result = await db.rawQuery('''
+      SELECT COUNT(*) as setCount
+      FROM WorkoutExercise
+      WHERE workout_id = ? AND exercise_id = ?
+    ''', [lastWorkoutId, exerciseId]);
+
+    if (result.isNotEmpty && result.first['setCount'] != null) {
+      return result.first['setCount'] as int;
+    }
+
+    return 0; // Exercise not found in the last workout
+  }
 }

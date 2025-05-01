@@ -19,19 +19,43 @@ class InProgressWorkoutScreen extends StatefulWidget {
 class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
   late Timer _timer;
   int _elapsedSeconds = 0;
-  //  Use a Map to store the exercise data, keyed by exercise_id.
   final Map<int, List<Map<String, dynamic>>> _exercisesData = {};
+  bool _isLoading = true; // Add loading state
 
   @override
   void initState() {
     super.initState();
-    // Ensure proper initialization of controllers or focus nodes if used
-    for (var exercise in widget.exercises) {
-      _exercisesData[exercise['exercise_id']] = [
-        {'reps': 0, 'weight': 0.0}
-      ]; // Initialize with one default set
-    }
+    _initializeExerciseData(); // Call async initialization
     _startTimer();
+  }
+
+  // New async method to initialize exercise data
+  Future<void> _initializeExerciseData() async {
+    final dbHelper = DatabaseHelper();
+    for (var exercise in widget.exercises) {
+      final exerciseId = exercise['exercise_id'] as int;
+      int setCount = await dbHelper.getLastWorkoutSetsCountForExercise(
+        widget.templateId,
+        exerciseId,
+      );
+
+      // Default to 1 set if no previous data or 0 sets recorded
+      if (setCount <= 0) {
+        setCount = 1;
+      }
+
+      // Initialize sets with default values
+      _exercisesData[exerciseId] = List.generate(
+        setCount,
+        (_) => {'reps': 0, 'weight': 0.0},
+      );
+    }
+    // Update state after fetching data
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -120,110 +144,124 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
       onTap: () => FocusScope.of(context).unfocus(), // Dismiss keyboard on tap outside
       child: Scaffold(
         appBar: AppBar(title: const Text('In Progress Workout')), // Uses AppBarTheme
-        body: Column(
-          children: [
-            Container(
-              height: MediaQuery.of(context).size.height * 0.05,
-              padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
-              // Use a theme color, maybe secondary or a custom one if needed
-              color: colorScheme.secondaryContainer, // Example: Using secondaryContainer
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        body: _isLoading // Show loading indicator while fetching data
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
                 children: [
-                  Text(
-                    _formatTime(_elapsedSeconds),
-                    // Use a text theme style
-                    style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final confirm = await showDialog<int>(
-                        context: context,
-                        builder: (context) {
-                          // AlertDialog will use DialogTheme from AppTheme
-                          return AlertDialog(
-                            title: const Text('Finish Workout'),
-                            content: const Text('What would you like to do with this workout?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, 0);
-                                },
-                                // TextButton uses TextButtonTheme
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, 1);
-                                },
-                                child: const Text('Finish and Save'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, 2);
-                                },
-                                // Consider a different style for destructive actions if needed
-                                child: Text(
-                                  'Finish and Discard',
-                                  style: TextStyle(color: colorScheme.error), // Use error color for discard
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      );
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.05,
+                    padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
+                    // Use a theme color, maybe secondary or a custom one if needed
+                    color: colorScheme.secondaryContainer, // Example: Using secondaryContainer
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _formatTime(_elapsedSeconds),
+                          // Use a text theme style
+                          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final confirm = await showDialog<int>(
+                              context: context,
+                              builder: (context) {
+                                // AlertDialog will use DialogTheme from AppTheme
+                                return AlertDialog(
+                                  title: const Text('Finish Workout'),
+                                  content: const Text('What would you like to do with this workout?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context, 0);
+                                      },
+                                      // TextButton uses TextButtonTheme
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context, 1);
+                                      },
+                                      child: const Text('Finish and Save'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context, 2);
+                                      },
+                                      // Consider a different style for destructive actions if needed
+                                      child: Text(
+                                        'Finish and Discard',
+                                        style: TextStyle(color: colorScheme.error), // Use error color for discard
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
 
-                      if (confirm == 1) {
-                        await _finishWorkout(context);
-                      } else if (confirm == 2) {
-                        await _discardWorkout(context);
-                      } else {
-                        debugPrint('No action taken.');
-                      }
-                    },
-                    // Use ElevatedButtonTheme, potentially override specific properties if needed
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green, // Keep specific color for this button? Or use theme.colorScheme.primary?
-                      foregroundColor: Colors.white, // Ensure contrast with green
-                      padding: EdgeInsets.symmetric(
-                        vertical: MediaQuery.of(context).size.height * 0.01,
-                        horizontal: MediaQuery.of(context).size.width * 0.05,
-                      ),
-                      // Use text style from theme if possible, or define explicitly if needed
-                      textStyle: textTheme.labelLarge?.copyWith(fontSize: 14), // Example using labelLarge
+                            if (confirm == 1) {
+                              await _finishWorkout(context);
+                            } else if (confirm == 2) {
+                              await _discardWorkout(context);
+                            } else {
+                              debugPrint('No action taken.');
+                            }
+                          },
+                          // Use ElevatedButtonTheme, potentially override specific properties if needed
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green, // Keep specific color for this button? Or use theme.colorScheme.primary?
+                            foregroundColor: Colors.white, // Ensure contrast with green
+                            padding: EdgeInsets.symmetric(
+                              vertical: MediaQuery.of(context).size.height * 0.01,
+                              horizontal: MediaQuery.of(context).size.width * 0.05,
+                            ),
+                            // Use text style from theme if possible, or define explicitly if needed
+                            textStyle: textTheme.labelLarge?.copyWith(fontSize: 14), // Example using labelLarge
+                          ),
+                          child: const Text(
+                            'Finish Workout',
+                            // Style is now mostly handled by ElevatedButton.styleFrom
+                          ),
+                        ),
+                      ],
                     ),
-                    child: const Text(
-                      'Finish Workout',
-                      // Style is now mostly handled by ElevatedButton.styleFrom
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: widget.exercises.length,
+                      itemBuilder: (context, index) {
+                        final exercise = widget.exercises[index];
+                        final exerciseId = exercise['exercise_id'] as int;
+                        // Pass the initialized sets to the card
+                        // Ensure _exercisesData has the entry before building the card
+                        if (_exercisesData.containsKey(exerciseId)) {
+                           // Create a copy of the exercise map and add the sets data
+                           final exerciseWithSets = Map<String, dynamic>.from(exercise);
+                           exerciseWithSets['sets'] = _exercisesData[exerciseId];
+
+                           return ExerciseInputCard(
+                             exercise: exerciseWithSets, // Pass the map with sets
+                             onSetsChanged: _handleSetsChanged,
+                           );
+                        } else {
+                          // Handle case where data might not be ready (though _isLoading should prevent this)
+                          return const SizedBox.shrink();
+                        }
+                      },
+                    ),
+                  ),
+                  Padding( // Add some padding
+                    padding: const EdgeInsets.all(16.0),
+                    child: Center(
+                      child: Text(
+                        'Weight: ${Provider.of<UnitProvider>(context).unitSystem == 'Metric' ? 'kg' : 'lbs'}',
+                        // Use a text theme style
+                        style: textTheme.bodyLarge,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: widget.exercises.length,
-                itemBuilder: (context, index) {
-                  final exercise = widget.exercises[index];
-                  return ExerciseInputCard(
-                    exercise: exercise,
-                    onSetsChanged: _handleSetsChanged,
-                  );
-                },
-              ),
-            ),
-            Padding( // Add some padding
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: Text(
-                  'Weight: ${Provider.of<UnitProvider>(context).unitSystem == 'Metric' ? 'kg' : 'lbs'}',
-                  // Use a text theme style
-                  style: textTheme.bodyLarge,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
