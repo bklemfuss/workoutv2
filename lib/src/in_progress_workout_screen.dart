@@ -25,7 +25,7 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
   @override
   void initState() {
     super.initState();
-     // Initialize _exercisesData
+    // Ensure proper initialization of controllers or focus nodes if used
     for (var exercise in widget.exercises) {
       _exercisesData[exercise['exercise_id']] = [
         {'reps': 0, 'weight': 0.0}
@@ -36,6 +36,7 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
 
   @override
   void dispose() {
+    // Ensure proper disposal of controllers or focus nodes if used
     _timer.cancel();
     super.dispose();
   }
@@ -110,100 +111,99 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final unitProvider = Provider.of<UnitProvider>(context);
-    final isMetric = unitProvider.unitSystem == 'Metric';
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    // Ensure no parent widget intercepts touch events
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(), // Dismiss keyboard on tap outside
+      child: Scaffold(
+        appBar: AppBar(title: const Text('In Progress Workout')),
+        body: Column(
+          children: [
+            Container(
+              height: MediaQuery.of(context).size.height * 0.05,
+              padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
+              color: Colors.blue[100],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _formatTime(_elapsedSeconds),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final confirm = await showDialog<int>(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Finish Workout'),
+                            content: const Text('What would you like to do with this workout?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context, 0);
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context, 1);
+                                },
+                                child: const Text('Finish and Save'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context, 2);
+                                },
+                                child: const Text('Finish and Discard'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('In Progress Workout')),
-      body: Column(
-        children: [
-          Container(
-            height: screenHeight * 0.05,
-            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-            color: Colors.blue[100],
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  _formatTime(_elapsedSeconds),
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    final confirm = await showDialog<int>(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text('Finish Workout'),
-                          content: const Text('What would you like to do with this workout?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context, 0);
-                              },
-                              child: const Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context, 1);
-                              },
-                              child: const Text('Finish and Save'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context, 2);
-                              },
-                              child: const Text('Finish and Discard'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-
-                    if (confirm == 1) {
-                      await _finishWorkout(context);
-                    } else if (confirm == 2) {
-                      await _discardWorkout(context);
-                    } else {
-                      debugPrint('No action taken.');
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: EdgeInsets.symmetric(
-                      vertical: screenHeight * 0.01,
-                      horizontal: screenWidth * 0.05,
+                      if (confirm == 1) {
+                        await _finishWorkout(context);
+                      } else if (confirm == 2) {
+                        await _discardWorkout(context);
+                      } else {
+                        debugPrint('No action taken.');
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: EdgeInsets.symmetric(
+                        vertical: MediaQuery.of(context).size.height * 0.01,
+                        horizontal: MediaQuery.of(context).size.width * 0.05,
+                      ),
+                    ),
+                    child: const Text(
+                      'Finish Workout',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  child: const Text(
-                    'Finish Workout',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: widget.exercises.length,
-              itemBuilder: (context, index) {
-                final exercise = widget.exercises[index];
-                return ExerciseInputCard(
-                  exercise: exercise,
-                  onSetsChanged: _handleSetsChanged,
-                );
-              },
+            Expanded(
+              child: ListView.builder(
+                itemCount: widget.exercises.length,
+                itemBuilder: (context, index) {
+                  final exercise = widget.exercises[index];
+                  return ExerciseInputCard(
+                    exercise: exercise,
+                    onSetsChanged: _handleSetsChanged,
+                  );
+                },
+              ),
             ),
-          ),
-          Center(
-            child: Text(
-              'Weight: ${isMetric ? 'kg' : 'lbs'}',
-              style: Theme.of(context).textTheme.bodyLarge,
+            Center(
+              child: Text(
+                'Weight: ${Provider.of<UnitProvider>(context).unitSystem == 'Metric' ? 'kg' : 'lbs'}',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
