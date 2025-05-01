@@ -93,6 +93,8 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                       SnackBar(
                         content: Text('Workout "$workoutName" saved successfully!'),
                         backgroundColor: Theme.of(context).colorScheme.primary, // Use theme primary color
+                        behavior: SnackBarBehavior.floating, // Make it float
+                        margin: const EdgeInsets.only(top: 16, left: 16, right: 16), // Position at the top
                       ),
                     );
 

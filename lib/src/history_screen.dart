@@ -302,7 +302,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
           }
         },
       ),
-      floatingActionButton: const FloatingStartNewWorkoutButton(),
       bottomNavigationBar: const BottomNavBar(
         currentIndex: 1,
       ),
