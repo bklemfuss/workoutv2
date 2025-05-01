@@ -262,6 +262,11 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
               contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
             ),
             style: theme.textTheme.bodyLarge,
+            onTap: () {
+              if (controller.text == '0') {
+                controller.clear(); // Clear the default value when tapped
+              }
+            },
             onChanged: (value) => onChanged(value),
           ),
         ),
