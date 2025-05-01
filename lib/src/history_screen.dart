@@ -4,7 +4,6 @@ import 'package:table_calendar/table_calendar.dart'; // Import TableCalendar
 import 'services/database_helper.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
-import 'widgets/floating_start_new_workout_button.dart';
 import 'workout_summary.dart';
 
 class HistoryScreen extends StatefulWidget {
