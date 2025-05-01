@@ -18,12 +18,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
   late Future<List<Map<String, dynamic>>> _workoutsFuture;
   Map<String, int> _workoutDates = {}; // Map of date strings to workout IDs
   DateTime _focusedDate = DateTime.now();
-  DateTime? _selectedDate;
+  DateTime? _selectedDate = DateTime.now(); // Initialize with today's date
 
   @override
   void initState() {
     super.initState();
     _workoutsFuture = _fetchWorkouts();
+    // _selectedDate is already initialized above
   }
 
   Future<List<Map<String, dynamic>>> _fetchWorkouts() async {
@@ -79,15 +80,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
   // Updated _onDateSelected: Only updates state to trigger rebuild and list filtering
   void _onDateSelected(DateTime selectedDate, DateTime focusedDate) {
     setState(() {
-      // Toggle selection: if the same day is tapped again, deselect it.
+      // Toggle selection: if the same day is tapped again, revert to today.
       if (isSameDay(_selectedDate, selectedDate)) {
-        _selectedDate = null; // Deselect
+        _selectedDate = DateTime.now(); // Revert to today
+        _focusedDate = DateTime.now(); // Also focus today
       } else {
         _selectedDate = selectedDate;
+        _focusedDate = focusedDate; // Update focused day to selected day
       }
-      _focusedDate = focusedDate; // Always update focused day
     });
-    // Removed the modal bottom sheet logic from here.
     // The list below will now filter based on _selectedDate.
   }
 
@@ -123,18 +124,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
           } else {
             final allWorkouts = snapshot.data!;
 
-            // Filter workouts based on the selected date
-            final displayedWorkouts = _selectedDate == null
-                ? allWorkouts // Show all if no date is selected
-                : allWorkouts.where((workout) {
-                    try {
-                      // Safely parse date and compare
-                      return isSameDay(DateTime.parse(workout['date']), _selectedDate);
-                    } catch (e) {
-                      debugPrint('Error parsing date for filtering: ${workout['date']}');
-                      return false; // Exclude if date is invalid
-                    }
-                  }).toList();
+            // Filter workouts based on the selected date (which defaults to today)
+            final displayedWorkouts = allWorkouts.where((workout) {
+              try {
+                // Safely parse date and compare
+                // Ensure _selectedDate is not null before comparing
+                return _selectedDate != null && isSameDay(DateTime.parse(workout['date']), _selectedDate);
+              } catch (e) {
+                debugPrint('Error parsing date for filtering: ${workout['date']}');
+                return false; // Exclude if date is invalid
+              }
+            }).toList();
+
+            // Determine if the currently selected/default date is today
+            final bool isTodaySelected = _selectedDate != null && isSameDay(_selectedDate, DateTime.now());
 
             return Column(
               children: [
@@ -209,7 +212,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
-                      'No workouts recorded on ${DateFormat.yMMMd().format(_selectedDate!)}.',
+                      isTodaySelected
+                          ? 'No workouts recorded today.'
+                          : 'No workouts recorded on ${DateFormat.yMMMd().format(_selectedDate!)}.',
                       style: theme.textTheme.bodyLarge,
                       textAlign: TextAlign.center,
                     ),
@@ -218,20 +223,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
                    Padding(
                      padding: const EdgeInsets.symmetric(vertical: 8.0),
                      child: Text(
-                       'Workouts on ${DateFormat.yMMMd().format(_selectedDate!)}',
+                       isTodaySelected
+                           ? 'Workouts Today'
+                           : 'Workouts on ${DateFormat.yMMMd().format(_selectedDate!)}',
                        style: theme.textTheme.titleMedium,
+                       textAlign: TextAlign.center, // Center the title
                      ),
                    ),
 
-                // Scrollable List of Workouts (Filtered or All)
+                // Scrollable List of Workouts (Filtered)
                 Expanded(
-                  child: displayedWorkouts.isEmpty && _selectedDate == null
-                      ? Center( // Show message if allWorkouts is empty initially
-                          child: Text(
-                            'No workouts found.',
-                            style: theme.textTheme.bodyLarge,
-                          ),
-                        )
+                  // The list should only be empty if displayedWorkouts is empty.
+                  // The initial "No workouts found." message is handled by the outer snapshot check.
+                  child: displayedWorkouts.isEmpty
+                      ? Container() // Show nothing further if list is empty (message handled above)
                       : ListView.separated( // Use ListView.separated
                           itemCount: displayedWorkouts.length,
                           itemBuilder: (context, index) {
