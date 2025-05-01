@@ -420,7 +420,18 @@ class DatabaseHelper {
 
   Future<List<Map<String, dynamic>>> getTemplates() async {
     final db = await database;
-    return await db.query('Template');
+    // Query templates and order them by usage count in the Workout table
+    return await db.rawQuery('''
+      SELECT 
+        t.template_id, 
+        t.template_name, 
+        t.template_premade,
+        COUNT(w.template_id) as usage_count
+      FROM Template t
+      LEFT JOIN Workout w ON t.template_id = w.template_id
+      GROUP BY t.template_id
+      ORDER BY usage_count DESC, t.template_name ASC 
+    ''');
   }
 
   Future<int> createWorkout(int templateId, int userId) async {
