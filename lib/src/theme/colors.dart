@@ -11,7 +11,7 @@ class AppColors {
   static const textSecondaryDark = Color.fromARGB(255, 248, 247, 247); // A light gray for less emphasis
 
   // Light mode colors
-  static const backgroundLight = Color.fromARGB(255, 242, 242, 242); // A light gray background
+  static const backgroundLight = Color.fromARGB(255, 231, 231, 231); // A light gray background
   static const textPrimaryLight = Color.fromARGB(255, 30, 30, 30);   // A dark gray for good contrast
   static const textSecondaryLight = Color.fromARGB(255, 90, 90, 90);  // A medium gray for less emphasis
 

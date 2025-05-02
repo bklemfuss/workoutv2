@@ -144,7 +144,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 // Calendar Section
                 SizedBox(
                   // Keep calendar height fixed or dynamic as preferred
-                  height: MediaQuery.of(context).size.height * 0.45, // Slightly increased height
+                  height: MediaQuery.of(context).size.height * 0.5, // Slightly increased height
                   child: TableCalendar(
                     firstDay: DateTime(2000),
                     lastDay: DateTime.now(),
