@@ -14,6 +14,9 @@ class ExerciseInputCard extends StatefulWidget {
 
 class _ExerciseInputCardState extends State<ExerciseInputCard> {
   late List<Map<String, dynamic>> sets;
+  // Add lists to hold controllers
+  late List<TextEditingController> _weightControllers;
+  late List<TextEditingController> _repsControllers;
 
   @override
   void initState() {
@@ -46,12 +49,36 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
     }
 
     sets = processedSets;
+
+    // Initialize controllers based on initial sets
+    _weightControllers = sets
+        .map((set) => TextEditingController(text: set['weight'].toString()))
+        .toList();
+    _repsControllers = sets
+        .map((set) => TextEditingController(text: set['reps'].toString()))
+        .toList();
+  }
+
+  @override
+  void dispose() {
+    // Dispose of all controllers
+    for (var controller in _weightControllers) {
+      controller.dispose();
+    }
+    for (var controller in _repsControllers) {
+      controller.dispose();
+    }
+    super.dispose();
   }
 
   void _addSet() {
     setState(() {
       // Add new set with isChecked field
-      sets.add({'reps': 0, 'weight': 0.0, 'isChecked': false});
+      final newSet = {'reps': 0, 'weight': 0.0, 'isChecked': false};
+      sets.add(newSet);
+      // Add corresponding controllers
+      _weightControllers.add(TextEditingController(text: newSet['weight'].toString()));
+      _repsControllers.add(TextEditingController(text: newSet['reps'].toString()));
       widget.onSetsChanged(widget.exercise['exercise_id'], sets); // Notify about changes
     });
   }
@@ -230,14 +257,16 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
                         // Swapped Weight and Reps
                         _buildInputField(
                           label: 'Weight',
-                          controller: TextEditingController(text: sets[0]['weight'].toString()),
+                          // Pass the existing controller
+                          controller: _weightControllers[0],
                           onChanged: (value) => _onSetChanged(0, 'weight', double.tryParse(value) ?? 0.0),
                           isChecked: sets[0]['isChecked'], // Pass checked state
                         ),
                         SizedBox(width: screenWidth * 0.02),
                         _buildInputField(
                           label: 'Reps',
-                          controller: TextEditingController(text: sets[0]['reps'].toString()),
+                          // Pass the existing controller
+                          controller: _repsControllers[0],
                           onChanged: (value) => _onSetChanged(0, 'reps', int.tryParse(value) ?? 0),
                           isChecked: sets[0]['isChecked'], // Pass checked state
                         ),
@@ -263,14 +292,16 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
                         // Swapped Weight and Reps
                         _buildInputField(
                           label: 'Weight',
-                          controller: TextEditingController(text: sets[i]['weight'].toString()),
+                          // Pass the existing controller
+                          controller: _weightControllers[i],
                           onChanged: (value) => _onSetChanged(i, 'weight', double.tryParse(value) ?? 0.0),
                           isChecked: sets[i]['isChecked'], // Pass checked state
                         ),
                         SizedBox(width: screenWidth * 0.02),
                         _buildInputField(
                           label: 'Reps',
-                          controller: TextEditingController(text: sets[i]['reps'].toString()),
+                          // Pass the existing controller
+                          controller: _repsControllers[i],
                           onChanged: (value) => _onSetChanged(i, 'reps', int.tryParse(value) ?? 0),
                           isChecked: sets[i]['isChecked'], // Pass checked state
                         ),
@@ -305,7 +336,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
 
   Widget _buildInputField({
     required String label,
-    required TextEditingController controller,
+    required TextEditingController controller, // Accept controller
     required ValueChanged<String> onChanged,
     required bool isChecked, // Added isChecked parameter
   }) {
@@ -326,7 +357,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
         SizedBox(
           width: screenWidth * 0.2,
           child: TextField(
-            controller: controller,
+            controller: controller, // Use the passed controller
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               border: OutlineInputBorder(
@@ -347,10 +378,5 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
         ),
       ],
     );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }
