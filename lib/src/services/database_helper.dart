@@ -978,4 +978,40 @@ class DatabaseHelper {
     // Return in chronological order (oldest week first)
     return weeklyCounts.reversed.toList();
   }
+
+  // New method to get the total volume for an exercise from the last workout using a specific template
+  Future<double> getLastWorkoutVolumeForExercise(
+      int templateId, int exerciseId) async {
+    final db = await database;
+
+    // Find the most recent workout_id for the given template_id
+    final List<Map<String, dynamic>> lastWorkout = await db.query(
+      'Workout',
+      columns: ['workout_id'],
+      where: 'template_id = ?',
+      whereArgs: [templateId],
+      orderBy: 'date DESC', // Get the most recent one
+      limit: 1,
+    );
+
+    if (lastWorkout.isEmpty) {
+      return 0.0; // No previous workout found for this template
+    }
+
+    final int lastWorkoutId = lastWorkout.first['workout_id'] as int;
+
+    // Calculate the total volume (sum of weight * reps) for the specific exercise in that workout
+    final result = await db.rawQuery('''
+      SELECT SUM(weight * reps) as totalVolume
+      FROM WorkoutExercise
+      WHERE workout_id = ? AND exercise_id = ?
+    ''', [lastWorkoutId, exerciseId]);
+
+    if (result.isNotEmpty && result.first['totalVolume'] != null) {
+      // Ensure the result is treated as a number before converting to double
+      return (result.first['totalVolume'] as num).toDouble();
+    }
+
+    return 0.0; // Exercise not found or no volume recorded in the last workout
+  }
 }
