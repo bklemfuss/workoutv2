@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'providers/unit_provider.dart';
 import 'services/database_helper.dart'; // Import DatabaseHelper
@@ -258,6 +259,7 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
 
                            return ExerciseInputCard(
                              exercise: exerciseWithSets, // Pass the map with sets
+                             templateId: widget.templateId,
                              onSetsChanged: _handleSetsChanged,
                            );
                         } else {

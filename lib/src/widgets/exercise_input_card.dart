@@ -4,9 +4,15 @@ import '../widgets/exercise_details_dialog.dart';
 
 class ExerciseInputCard extends StatefulWidget {
   final Map<String, dynamic> exercise;
-  final Function(int exerciseId, List<Map<String, dynamic>> sets) onSetsChanged; // Changed callback
+  final int templateId; // Add templateId
+  final Function(int exerciseId, List<Map<String, dynamic>> sets) onSetsChanged;
 
-  const ExerciseInputCard({super.key, required this.exercise, required this.onSetsChanged});
+  const ExerciseInputCard({
+    super.key,
+    required this.exercise,
+    required this.templateId, // Require templateId
+    required this.onSetsChanged,
+  });
 
   @override
   State<ExerciseInputCard> createState() => _ExerciseInputCardState();
@@ -14,9 +20,13 @@ class ExerciseInputCard extends StatefulWidget {
 
 class _ExerciseInputCardState extends State<ExerciseInputCard> {
   late List<Map<String, dynamic>> sets;
-  // Add lists to hold controllers
   late List<TextEditingController> _weightControllers;
   late List<TextEditingController> _repsControllers;
+
+  // State for percentage calculation
+  double _previousTotalVolume = 0.0;
+  double? _percentageChange;
+  Color _percentageColor = Colors.grey; // Default color
 
   @override
   void initState() {
@@ -57,6 +67,59 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
     _repsControllers = sets
         .map((set) => TextEditingController(text: set['reps'].toString()))
         .toList();
+
+    // Fetch previous volume and calculate initial percentage
+    _fetchPreviousVolumeAndCalculatePercentage();
+  }
+
+  // Fetch previous volume and calculate percentage
+  Future<void> _fetchPreviousVolumeAndCalculatePercentage() async {
+    final dbHelper = DatabaseHelper();
+    _previousTotalVolume = await dbHelper.getLastWorkoutVolumeForExercise(
+      widget.templateId,
+      widget.exercise['exercise_id'],
+    );
+    _calculateAndSetPercentage(); // Calculate based on fetched data and initial sets
+  }
+
+  // Calculate current total volume and percentage change
+  void _calculateAndSetPercentage() {
+    double currentTotalVolume = 0.0;
+    // Only include checked sets in the current volume calculation
+    for (final set in sets) {
+      if (set['isChecked'] == true) { // Check if the set is checked
+        final weight = (set['weight'] as num?)?.toDouble() ?? 0.0;
+        final reps = (set['reps'] as num?)?.toInt() ?? 0;
+        currentTotalVolume += weight * reps;
+      }
+    }
+
+    setState(() {
+      if (_previousTotalVolume == 0.0) {
+        if (currentTotalVolume > 0.0) {
+          _percentageChange = 100.0; // Treat as 100% if first time with volume
+          _percentageColor = Colors.green;
+        } else {
+          _percentageChange = null; // No change if both are 0 or no sets checked
+          _percentageColor = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
+        }
+      } else {
+        // Avoid division by zero if previous volume is zero but current is not
+        if (currentTotalVolume == 0.0) {
+           _percentageChange = 0.0; // Show 0% if current volume is zero
+           _percentageColor = Colors.red; // Or grey, depending on preference
+        } else {
+          _percentageChange = (currentTotalVolume / _previousTotalVolume) * 100.0;
+          if (_percentageChange! >= 100.0) {
+            _percentageColor = Colors.green;
+          } else if (_percentageChange! >= 70.0) {
+            _percentageColor = Colors.orange;
+          } else {
+            _percentageColor = Colors.red;
+          }
+        }
+      }
+    });
   }
 
   @override
@@ -80,6 +143,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
       _weightControllers.add(TextEditingController(text: newSet['weight'].toString()));
       _repsControllers.add(TextEditingController(text: newSet['reps'].toString()));
       widget.onSetsChanged(widget.exercise['exercise_id'], sets); // Notify about changes
+      _calculateAndSetPercentage(); // Recalculate percentage
     });
   }
 
@@ -87,6 +151,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
     setState(() {
       sets[index][field] = value;
       widget.onSetsChanged(widget.exercise['exercise_id'], sets); // Notify about changes
+      _calculateAndSetPercentage(); // Recalculate percentage
     });
   }
 
@@ -95,6 +160,8 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
     setState(() {
       sets[index]['isChecked'] = isChecked ?? false;
       widget.onSetsChanged(widget.exercise['exercise_id'], sets); // Notify about changes
+      // Recalculate percentage when a checkbox changes
+      _calculateAndSetPercentage();
     });
   }
 
@@ -178,6 +245,11 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
+    // Determine percentage text and handle null case
+    final percentageText = _percentageChange != null
+        ? '${_percentageChange!.toStringAsFixed(0)}%'
+        : '--%'; // Show '--%' if no previous data or current volume is 0
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -224,16 +296,21 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
                     ),
                   ),
                   Container(
-                    width: screenWidth * 0.1,
+                    width: screenWidth * 0.15,
                     height: screenHeight * 0.04,
                     decoration: BoxDecoration(
-                      color: theme.inputDecorationTheme.fillColor,
+                      color: theme.colorScheme.onSurface, // Use themed surface color
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: _percentageColor, width: 1),
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      '0%',
-                      style: theme.textTheme.bodyMedium,
+                      percentageText,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: _percentageColor, // Keep dynamic color for meaning
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
