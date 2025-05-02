@@ -348,46 +348,57 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
           // Bottom Buttons (10%)
           Container(
             height: screenHeight * 0.1,
-            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Adjusted padding
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Navigate back to the dashboard
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.error, // Cancel button color
+                Flexible( // Wrap with Flexible
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Navigate back to the dashboard
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.error, // Cancel button color
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Optional: Adjust button padding
+                    ),
+                    child: const Text('Cancel'),
                   ),
-                  child: const Text('Cancel'),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    _showCreateCustomExerciseDialog(); // Show the custom exercise dialog
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary, // Create Custom Exercise button color
+                const SizedBox(width: 8), // Add spacing between buttons
+                Flexible( // Wrap with Flexible
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _showCreateCustomExerciseDialog(); // Show the custom exercise dialog
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary, // Create Custom Exercise button color
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Optional: Adjust button padding
+                    ),
+                    child: const Text('Custom Exercise', textAlign: TextAlign.center), // Adjust text if needed
                   ),
-                  child: const Text('Create Custom Exercise'),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (selectedExerciseIds.isEmpty) {
-                      // Show an error if no exercises are selected
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text("Can't create an empty workout template!"),
-                          backgroundColor: Theme.of(context).colorScheme.error, // Use theme error color
-                        ),
-                      );
-                    } else {
-                      _showSaveDialog(); // Show the save dialog if exercises are selected
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary, // Save button color
+                const SizedBox(width: 8), // Add spacing between buttons
+                Flexible( // Wrap with Flexible
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (selectedExerciseIds.isEmpty) {
+                        // Show an error if no exercises are selected
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text("Can't create an empty workout template!"),
+                            backgroundColor: Theme.of(context).colorScheme.error, // Use theme error color
+                          ),
+                        );
+                      } else {
+                        _showSaveDialog(); // Show the save dialog if exercises are selected
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary, // Save button color
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Optional: Adjust button padding
+                    ),
+                    child: const Text('Save'),
                   ),
-                  child: const Text('Save'),
                 ),
               ],
             ),
