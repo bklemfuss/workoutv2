@@ -935,4 +935,47 @@ class DatabaseHelper {
 
     return prs;
   }
+
+  // New method to get workout counts for the last N weeks
+  Future<List<Map<String, dynamic>>> getWeeklyWorkoutCounts(
+      {int numberOfWeeks = 8}) async {
+    final db = await database;
+    final List<Map<String, dynamic>> weeklyCounts = [];
+    final now = DateTime.now();
+
+    // Ensure week starts on Monday consistently
+    final currentWeekStart = now.subtract(Duration(days: now.weekday - 1));
+
+    for (int i = 0; i < numberOfWeeks; i++) {
+      // Calculate start and end dates for the week (Monday to Sunday)
+      final weekStartDate = DateTime(currentWeekStart.year, currentWeekStart.month, currentWeekStart.day).subtract(Duration(days: i * 7));
+      final weekEndDate = weekStartDate.add(const Duration(days: 6)); // Sunday
+
+      // Format dates for SQL query (YYYY-MM-DD)
+      final startDateStr = "${weekStartDate.year}-${weekStartDate.month.toString().padLeft(2, '0')}-${weekStartDate.day.toString().padLeft(2, '0')}";
+      // Query needs to include the end date, so use the day *after* Sunday midnight
+      final nextDayAfterEnd = weekEndDate.add(const Duration(days: 1));
+      final endDateStr = "${nextDayAfterEnd.year}-${nextDayAfterEnd.month.toString().padLeft(2, '0')}-${nextDayAfterEnd.day.toString().padLeft(2, '0')}";
+
+
+      final result = await db.rawQuery('''
+        SELECT COUNT(*) as count
+        FROM Workout
+        WHERE date >= ? AND date < ? 
+      ''', [startDateStr, endDateStr]); // Use '<' for the end date
+
+      int count = 0;
+      if (result.isNotEmpty && result.first['count'] != null) {
+        count = result.first['count'] as int;
+      }
+
+      weeklyCounts.add({
+        'weekStartDate': weekStartDate, // Store the actual start date
+        'count': count,
+      });
+    }
+
+    // Return in chronological order (oldest week first)
+    return weeklyCounts.reversed.toList();
+  }
 }
