@@ -18,14 +18,40 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
   @override
   void initState() {
     super.initState();
-    sets = List<Map<String, dynamic>>.from(widget.exercise['sets'] ?? [
-      {'reps': 0, 'weight': 0.0},
-    ]);
+    // Explicitly handle type casting and filter invalid elements for initial sets
+    final initialSetsRaw = widget.exercise['sets'];
+    List<Map<String, dynamic>> processedSets = []; // Initialize as empty
+
+    if (initialSetsRaw != null && initialSetsRaw is List) {
+      // Iterate and safely process each element
+      for (var setElement in initialSetsRaw) {
+        // Check if the element is a non-null Map
+        if (setElement != null && setElement is Map) {
+          final setMap = Map<String, dynamic>.from(setElement);
+          processedSets.add({
+            'reps': setMap['reps'] ?? 0,
+            'weight': setMap['weight'] ?? 0.0,
+            'isChecked': setMap['isChecked'] ?? false,
+          });
+        }
+        // else: Skip null or non-Map elements
+      }
+    }
+
+    // Ensure there's at least one set if the list ended up empty
+    if (processedSets.isEmpty) {
+      processedSets = [
+        {'reps': 0, 'weight': 0.0, 'isChecked': false}, // Default first set
+      ];
+    }
+
+    sets = processedSets;
   }
 
   void _addSet() {
     setState(() {
-      sets.add({'reps': 0, 'weight': 0.0});
+      // Add new set with isChecked field
+      sets.add({'reps': 0, 'weight': 0.0, 'isChecked': false});
       widget.onSetsChanged(widget.exercise['exercise_id'], sets); // Notify about changes
     });
   }
@@ -33,6 +59,14 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
   void _onSetChanged(int index, String field, dynamic value) {
     setState(() {
       sets[index][field] = value;
+      widget.onSetsChanged(widget.exercise['exercise_id'], sets); // Notify about changes
+    });
+  }
+
+  // Handler for checkbox changes
+  void _onSetChecked(int index, bool? isChecked) {
+    setState(() {
+      sets[index]['isChecked'] = isChecked ?? false;
       widget.onSetsChanged(widget.exercise['exercise_id'], sets); // Notify about changes
     });
   }
@@ -168,6 +202,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
                 ],
               ),
               SizedBox(height: screenHeight * 0.01),
+              // First set row (index 0)
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -177,43 +212,64 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
                       _showNotesDialog(context);
                     },
                   ),
-                  SizedBox(width: screenWidth * 0.02),
+                  SizedBox(width: screenWidth * 0.01),
                   Expanded(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        _buildInputField(
-                          label: 'Reps',
-                          controller: TextEditingController(text: sets[0]['reps'].toString()),
-                          onChanged: (value) => _onSetChanged(0, 'reps', int.tryParse(value) ?? 0),
-                        ),
-                        SizedBox(width: screenWidth * 0.02),
+                        // Swapped Weight and Reps
                         _buildInputField(
                           label: 'Weight',
                           controller: TextEditingController(text: sets[0]['weight'].toString()),
                           onChanged: (value) => _onSetChanged(0, 'weight', double.tryParse(value) ?? 0.0),
+                          isChecked: sets[0]['isChecked'], // Pass checked state
+                        ),
+                        SizedBox(width: screenWidth * 0.02),
+                        _buildInputField(
+                          label: 'Reps',
+                          controller: TextEditingController(text: sets[0]['reps'].toString()),
+                          onChanged: (value) => _onSetChanged(0, 'reps', int.tryParse(value) ?? 0),
+                          isChecked: sets[0]['isChecked'], // Pass checked state
+                        ),
+                        SizedBox(width: screenWidth * 0.01), // Add some space before checkbox
+                        // Moved Checkbox here
+                        Checkbox(
+                          value: sets[0]['isChecked'],
+                          onChanged: (bool? value) => _onSetChecked(0, value),
+                          activeColor: theme.primaryColor,
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
+              // Subsequent set rows (index 1 onwards)
               Column(
                 children: [
                   for (int i = 1; i < sets.length; i++)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        _buildInputField(
-                          label: 'Reps',
-                          controller: TextEditingController(text: sets[i]['reps'].toString()),
-                          onChanged: (value) => _onSetChanged(i, 'reps', int.tryParse(value) ?? 0),
-                        ),
-                        SizedBox(width: screenWidth * 0.02),
+                        // Swapped Weight and Reps
                         _buildInputField(
                           label: 'Weight',
                           controller: TextEditingController(text: sets[i]['weight'].toString()),
                           onChanged: (value) => _onSetChanged(i, 'weight', double.tryParse(value) ?? 0.0),
+                          isChecked: sets[i]['isChecked'], // Pass checked state
+                        ),
+                        SizedBox(width: screenWidth * 0.02),
+                        _buildInputField(
+                          label: 'Reps',
+                          controller: TextEditingController(text: sets[i]['reps'].toString()),
+                          onChanged: (value) => _onSetChanged(i, 'reps', int.tryParse(value) ?? 0),
+                          isChecked: sets[i]['isChecked'], // Pass checked state
+                        ),
+                        SizedBox(width: screenWidth * 0.01), // Add some space before checkbox
+                        // Moved Checkbox here
+                        Checkbox(
+                          value: sets[i]['isChecked'],
+                          onChanged: (bool? value) => _onSetChecked(i, value),
+                          activeColor: theme.primaryColor, // Use theme color
                         ),
                       ],
                     ),
@@ -223,7 +279,11 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
               Center(
                 child: ElevatedButton(
                   onPressed: _addSet,
-                  child: const Icon(Icons.add),
+                  // Explicitly set the icon color for better contrast
+                  child: Icon(
+                    Icons.add,
+                    color: Theme.of(context).colorScheme.onPrimary, // Use onPrimary color
+                  ),
                 ),
               ),
             ],
@@ -237,9 +297,14 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
     required String label,
     required TextEditingController controller,
     required ValueChanged<String> onChanged,
+    required bool isChecked, // Added isChecked parameter
   }) {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
+    // Determine background color based on isChecked state
+    final fillColor = isChecked
+        ? theme.primaryColor.withOpacity(0.2) // Greenish tint when checked
+        : theme.inputDecorationTheme.fillColor; // Default fill color
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,7 +322,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
-              fillColor: theme.inputDecorationTheme.fillColor,
+              fillColor: fillColor, // Use determined fill color
               filled: true,
               contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
             ),

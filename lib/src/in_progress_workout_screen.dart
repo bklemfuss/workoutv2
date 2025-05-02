@@ -44,10 +44,10 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
         setCount = 1;
       }
 
-      // Initialize sets with default values
+      // Initialize sets with default values including isChecked
       _exercisesData[exerciseId] = List.generate(
         setCount,
-        (_) => {'reps': 0, 'weight': 0.0},
+        (_) => {'reps': 0, 'weight': 0.0, 'isChecked': false}, // Add isChecked
       );
     }
     // Update state after fetching data
@@ -97,10 +97,13 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
 
     // **Use a transaction to ensure data consistency.**
     await db.transaction((txn) async {
-      // Step 2: Create workout exercises
+      // Step 2: Create workout exercises for CHECKED sets only
       for (var exerciseId in _exercisesData.keys) {
-        final sets = _exercisesData[exerciseId]!; // Get sets for this exercise
-        for (var set in sets) {
+        final allSets = _exercisesData[exerciseId]!; // Get all sets for this exercise
+        // Filter sets where 'isChecked' is true
+        final checkedSets = allSets.where((set) => set['isChecked'] == true).toList();
+
+        for (var set in checkedSets) { // Iterate only over checked sets
           await dbHelper.createWorkoutExercise(
             txn, // Pass the transaction
             workoutId,
@@ -237,6 +240,7 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
                         if (_exercisesData.containsKey(exerciseId)) {
                            // Create a copy of the exercise map and add the sets data
                            final exerciseWithSets = Map<String, dynamic>.from(exercise);
+                           // Make sure to pass the sets with the 'isChecked' field
                            exerciseWithSets['sets'] = _exercisesData[exerciseId];
 
                            return ExerciseInputCard(
