@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'providers/unit_provider.dart';
 import 'services/database_helper.dart'; // Import DatabaseHelper
 import 'widgets/exercise_input_card.dart';
+import 'theme/colors.dart'; // Import AppColors
 
 class InProgressWorkoutScreen extends StatefulWidget {
   final List<Map<String, dynamic>> exercises;
@@ -124,7 +125,7 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
       '/workout_summary',
       arguments: workoutId,
     );
-  } catch (e, stackTrace) {
+  } catch (e) {
     //  Show error to user
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Failed to save workout: $e'), backgroundColor: Colors.red),
@@ -212,8 +213,8 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
                           },
                           // Use ElevatedButtonTheme, potentially override specific properties if needed
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green, // Keep specific color for this button? Or use theme.colorScheme.primary?
-                            foregroundColor: Colors.white, // Ensure contrast with green
+                            backgroundColor: AppColors.success, // Use theme success color
+                            foregroundColor: AppColors.onSuccess, // Use theme color for text on success
                             padding: EdgeInsets.symmetric(
                               vertical: MediaQuery.of(context).size.height * 0.01,
                               horizontal: MediaQuery.of(context).size.width * 0.05,

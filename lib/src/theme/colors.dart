@@ -17,4 +17,8 @@ class AppColors {
 
   // Input field background color
   static const inputFieldBackground = Color.fromARGB(255, 248, 142, 93); 
+
+  // Add new colors here
+  static const Color success = Colors.green; // Define success color
+  static const Color onSuccess = Colors.white; // Define text/icon color on success background
 }
