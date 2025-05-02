@@ -168,8 +168,8 @@ class AppTheme {
         hintStyle: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        selectedItemColor: colorScheme.primary,
-        unselectedItemColor: colorScheme.inverseSurface, // Use secondary color
+        selectedItemColor: colorScheme.inverseSurface,
+        unselectedItemColor: colorScheme.primary, // Use secondary color
         backgroundColor: colorScheme.surface, // Use surface color
         elevation: 8,
         type: BottomNavigationBarType.fixed,
