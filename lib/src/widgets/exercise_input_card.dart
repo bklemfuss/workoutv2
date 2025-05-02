@@ -120,6 +120,16 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
             ElevatedButton(
               onPressed: () async {
                 final updatedNotes = notesController.text;
+                // *** Add Validation ***
+                const maxLength = 500; // Example maximum length
+                if (updatedNotes.length > maxLength) {
+                   ScaffoldMessenger.of(context).showSnackBar(
+                     SnackBar(content: Text('Notes cannot exceed $maxLength characters.'), backgroundColor: Colors.red),
+                   );
+                   return; // Prevent saving
+                }
+                // *** End Validation ***
+
                 await dbHelper.updateExerciseNotes(
                   widget.exercise['exercise_id'],
                   updatedNotes,

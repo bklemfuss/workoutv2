@@ -105,12 +105,24 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
         final checkedSets = allSets.where((set) => set['isChecked'] == true).toList();
 
         for (var set in checkedSets) { // Iterate only over checked sets
+          // *** Add Validation ***
+          final reps = set['reps'] ?? 0;
+          final weight = set['weight'] ?? 0.0;
+
+          // Ensure reps and weight are not negative
+          if (reps < 0 || weight < 0) {
+            // Optionally, show an error or skip this set
+            debugPrint('Skipping set with negative values: reps=$reps, weight=$weight');
+            continue; // Skip this invalid set
+          }
+          // *** End Validation ***
+
           await dbHelper.createWorkoutExercise(
             txn, // Pass the transaction
             workoutId,
             exerciseId,
-            set['reps'] ?? 0,
-            set['weight'] ?? 0.0,
+            reps, // Use validated reps
+            weight, // Use validated weight
           );
         }
       }
