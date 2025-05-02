@@ -152,22 +152,32 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     selectedDayPredicate: (day) => isSameDay(_selectedDate, day),
                     onDaySelected: _onDateSelected,
                     calendarStyle: CalendarStyle(
+                      // Remove the shape and potentially set color to transparent
+                      // to avoid the default circle on all past dates.
                       defaultDecoration: BoxDecoration(
-                        color: theme.cardColor, // Dates without workouts
-                        shape: BoxShape.circle,
+                        color: Colors.transparent, // Or theme.canvasColor if preferred
+                        // shape: BoxShape.circle, // REMOVED
                       ),
+                      // Keep today's decoration as a circle
                       todayDecoration: BoxDecoration(
-                        color: theme.primaryColor, // Highlight today's date
+                        color: theme.primaryColor.withOpacity(0.5), // Slightly transparent today
                         shape: BoxShape.circle,
                       ),
+                      // Keep selected decoration as a circle
                       selectedDecoration: BoxDecoration(
                         color: theme.colorScheme.secondary, // Selected date
                         shape: BoxShape.circle,
                       ),
+                      // Marker for days with workouts (small dot)
                       markerDecoration: BoxDecoration(
-                        color: theme.colorScheme.secondary.withOpacity(0.7), // Use a distinct marker color
+                        color: theme.colorScheme.secondary.withOpacity(0.7),
                         shape: BoxShape.circle,
                       ),
+                      // Ensure text styles contrast with background
+                      defaultTextStyle: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                      weekendTextStyle: TextStyle(color: theme.textTheme.bodyLarge?.color?.withOpacity(0.7)), // Slightly dimmer weekends
+                      todayTextStyle: TextStyle(color: theme.colorScheme.onPrimary), // Text color on today's highlight
+                      selectedTextStyle: TextStyle(color: theme.colorScheme.onSecondary), // Text color on selected highlight
                       // Add outside days style if needed
                       outsideDaysVisible: false,
                     ),
