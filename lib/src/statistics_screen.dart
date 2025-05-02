@@ -4,6 +4,7 @@ import 'widgets/bottom_nav_bar.dart';
 import 'widgets/app_toolbar.dart'; // Import AppToolbar
 import 'models/exercises_graph.dart';
 import 'models/personal_records_graph.dart';
+import 'models/weekly_workouts_graph.dart'; // Import the new graph
 
 // Convert to StatefulWidget to manage state for the dropdown
 class StatisticsScreen extends StatefulWidget {
@@ -236,7 +237,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(8.0),
-                  itemCount: 2, // Only Exercises and Personal Records for now
+                  itemCount: 3, // Increased item count to 3
                   itemBuilder: (context, index) {
                     // --- Card for Exercises Graph (index 0) ---
                     if (index == 0) {
@@ -343,15 +344,55 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                   style: theme.textTheme.titleMedium, // Example: Use titleMedium
                                   textAlign: TextAlign.center,
                                 ),
+                                const SizedBox(height: 16), // Increased spacing
+                                // Placeholder Icon
+                                Icon(
+                                  Icons.emoji_events_outlined, // Trophy/PR icon
+                                  size: 60, // Larger icon
+                                  color: theme.colorScheme.secondary, // Use theme color
+                                ),
                                 const SizedBox(height: 8),
-                                // Keep placeholder image or add specific preview
-                                // Consider using an Icon with theme color if appropriate
-                                Image.asset(
-                                  'assets/images/flutter_logo.png', // Replace with relevant icon/preview
-                                  height: 100,
-                                  fit: BoxFit.contain,
-                                  // Optionally apply theme color filter if it's an icon-like image
-                                  // color: theme.colorScheme.secondary,
+                                Text(
+                                  'Tap to view personal records',
+                                  style: theme.textTheme.bodySmall,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    // --- Card for Weekly Workouts Graph (index 2) ---
+                    else if (index == 2) {
+                      final title = 'Weekly Workouts';
+                      return GestureDetector(
+                        onTap: () {
+                          // Show the WeeklyWorkoutsGraph in a modal
+                          _showGraphModal(context, const WeeklyWorkoutsGraph());
+                        },
+                        child: Card( // Uses CardTheme
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              children: [
+                                Text(
+                                  title,
+                                  style: theme.textTheme.titleMedium,
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 16),
+                                // Placeholder Icon
+                                Icon(
+                                  Icons.calendar_view_week_outlined, // Calendar week icon
+                                  size: 60,
+                                  color: theme.colorScheme.tertiary, // Use another theme color
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Tap to view weekly workout trends',
+                                  style: theme.textTheme.bodySmall,
+                                  textAlign: TextAlign.center,
                                 ),
                               ],
                             ),
