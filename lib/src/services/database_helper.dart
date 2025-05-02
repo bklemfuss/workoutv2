@@ -171,7 +171,8 @@ class DatabaseHelper {
       await db.execute('DROP TABLE WorkoutExercise');
 
       // Rename the new table to the original name
-      await db.execute('ALTER TABLE WorkoutExercise_new RENAME TO WorkoutExercise');
+      await db
+          .execute('ALTER TABLE WorkoutExercise_new RENAME TO WorkoutExercise');
     }
   }
 
@@ -190,10 +191,26 @@ class DatabaseHelper {
     });
 
     // Insert sample Templates
-    await db.insert('Template', {'template_id': 1, 'template_name': 'Full Body Workout A', 'template_premade': 1});
-    await db.insert('Template', {'template_id': 2, 'template_name': 'Upper Body Strength', 'template_premade': 1});
-    await db.insert('Template', {'template_id': 3, 'template_name': 'Lower Body Endurance', 'template_premade': 1});
-    await db.insert('Template', {'template_id': 4, 'template_name': 'Core Stability', 'template_premade': 1});
+    await db.insert('Template', {
+      'template_id': 1,
+      'template_name': 'Full Body Workout A',
+      'template_premade': 1
+    });
+    await db.insert('Template', {
+      'template_id': 2,
+      'template_name': 'Upper Body Strength',
+      'template_premade': 1
+    });
+    await db.insert('Template', {
+      'template_id': 3,
+      'template_name': 'Lower Body Endurance',
+      'template_premade': 1
+    });
+    await db.insert('Template', {
+      'template_id': 4,
+      'template_name': 'Core Stability',
+      'template_premade': 1
+    });
 
     // Insert sample MuscleGroups
     await db.insert('MuscleGroup', {'muscle_group_id': 1, 'Name': 'Chest'});
@@ -207,7 +224,8 @@ class DatabaseHelper {
       'name': 'Push-Up',
       'Description': 'A basic upper body exercise.',
       'equipment': 0,
-      'instructions': 'Keep your back straight and lower yourself to the ground.',
+      'instructions':
+          'Keep your back straight and lower yourself to the ground.',
       'image_url': 'https://example.com/push-up.png',
       'exercise_notes': 'Focus on form to avoid injury.', // Example note
     });
@@ -227,9 +245,11 @@ class DatabaseHelper {
       'name': 'Squat',
       'Description': 'A basic lower body exercise.',
       'equipment': 0,
-      'instructions': 'Lower your hips until your thighs are parallel to the ground.',
+      'instructions':
+          'Lower your hips until your thighs are parallel to the ground.',
       'image_url': 'https://example.com/squat.png',
-      'exercise_notes': 'Keep your knees aligned with your toes.', // Example note
+      'exercise_notes':
+          'Keep your knees aligned with your toes.', // Example note
     });
     await db.insert('Exercise', {
       'exercise_id': 4,
@@ -239,14 +259,19 @@ class DatabaseHelper {
       'equipment': 1,
       'instructions': 'Lower the barbell to your chest and press it back up.',
       'image_url': 'https://example.com/bench-press.png',
-      'exercise_notes': 'Ensure a spotter is present for safety.', // Example note
+      'exercise_notes':
+          'Ensure a spotter is present for safety.', // Example note
     });
 
     // Insert sample TemplateExercises
-    await db.insert('TemplateExercise', {'template_exercise_id': 1, 'template_id': 1, 'exercise_id': 1});
-    await db.insert('TemplateExercise', {'template_exercise_id': 2, 'template_id': 1, 'exercise_id': 2});
-    await db.insert('TemplateExercise', {'template_exercise_id': 3, 'template_id': 2, 'exercise_id': 3});
-    await db.insert('TemplateExercise', {'template_exercise_id': 4, 'template_id': 3, 'exercise_id': 4});
+    await db.insert('TemplateExercise',
+        {'template_exercise_id': 1, 'template_id': 1, 'exercise_id': 1});
+    await db.insert('TemplateExercise',
+        {'template_exercise_id': 2, 'template_id': 1, 'exercise_id': 2});
+    await db.insert('TemplateExercise',
+        {'template_exercise_id': 3, 'template_id': 2, 'exercise_id': 3});
+    await db.insert('TemplateExercise',
+        {'template_exercise_id': 4, 'template_id': 3, 'exercise_id': 4});
 
     // Insert sample Workouts
     await db.insert('Workout', {
@@ -371,7 +396,8 @@ class DatabaseHelper {
   Future<int> updateWorkout(Map<String, dynamic> workout) async {
     final db = await database;
     int id = workout['workout_id'];
-    return await db.update('Workout', workout, where: 'workout_id = ?', whereArgs: [id]);
+    return await db
+        .update('Workout', workout, where: 'workout_id = ?', whereArgs: [id]);
   }
 
   Future<String> getFirstTemplateName() async {
@@ -404,7 +430,8 @@ class DatabaseHelper {
     return results;
   }
 
-  Future<List<Map<String, dynamic>>> getExercisesByTemplateId(int templateId) async {
+  Future<List<Map<String, dynamic>>> getExercisesByTemplateId(
+      int templateId) async {
     final db = await database;
     return await db.rawQuery('''
       SELECT 
@@ -420,18 +447,7 @@ class DatabaseHelper {
 
   Future<List<Map<String, dynamic>>> getTemplates() async {
     final db = await database;
-    // Query templates and order them by usage count in the Workout table
-    return await db.rawQuery('''
-      SELECT 
-        t.template_id, 
-        t.template_name, 
-        t.template_premade,
-        COUNT(w.template_id) as usage_count
-      FROM Template t
-      LEFT JOIN Workout w ON t.template_id = w.template_id
-      GROUP BY t.template_id
-      ORDER BY usage_count DESC, t.template_name ASC 
-    ''');
+    return await db.query('Template');
   }
 
   Future<int> createWorkout(int templateId, int userId) async {
@@ -439,7 +455,8 @@ class DatabaseHelper {
     final workoutId = await db.insert('Workout', {
       'template_id': templateId,
       'user_id': userId,
-      'date': DateTime.now().toIso8601String(), // Store the current date and time
+      'date':
+          DateTime.now().toIso8601String(), // Store the current date and time
     });
     return workoutId; // Return the newly created workout ID
   }
@@ -463,21 +480,21 @@ class DatabaseHelper {
   }
 */
 
-    Future<int> createWorkoutExercise(
-      Transaction txn, // Use the transaction!
-      int workoutId,
-      int exerciseId,
-      int reps,
-      double weight,
-    ) async {
-      final workoutExercise = {
-        'workout_id': workoutId,
-        'exercise_id': exerciseId,
-        'reps': reps,
-        'weight': weight,
-      };
-      // Use the transaction object (txn) instead of the database.
-      return await txn.insert('WorkoutExercise', workoutExercise);
+  Future<int> createWorkoutExercise(
+    Transaction txn, // Use the transaction!
+    int workoutId,
+    int exerciseId,
+    int reps,
+    double weight,
+  ) async {
+    final workoutExercise = {
+      'workout_id': workoutId,
+      'exercise_id': exerciseId,
+      'reps': reps,
+      'weight': weight,
+    };
+    // Use the transaction object (txn) instead of the database.
+    return await txn.insert('WorkoutExercise', workoutExercise);
   }
 
   Future<Map<String, dynamic>> getWorkoutDetails(int workoutId) async {
@@ -515,7 +532,8 @@ class DatabaseHelper {
     return result;
   }
 
-  Future<List<Map<String, dynamic>>> getExercisesByMuscleGroup(String? muscleGroup) async {
+  Future<List<Map<String, dynamic>>> getExercisesByMuscleGroup(
+      String? muscleGroup) async {
     final db = await database;
     if (muscleGroup == null || muscleGroup == 'All') {
       return await db.query('Exercise');
@@ -572,7 +590,8 @@ class DatabaseHelper {
     });
   }
 
-  Future<void> deleteExerciseFromTemplate(int templateId, int exerciseId) async {
+  Future<void> deleteExerciseFromTemplate(
+      int templateId, int exerciseId) async {
     final db = await database;
     await db.delete(
       'TemplateExercise',
@@ -624,7 +643,8 @@ class DatabaseHelper {
     });
   }
 
-  Future<List<Map<String, dynamic>>> getExercisesNotInTemplate(int templateId) async {
+  Future<List<Map<String, dynamic>>> getExercisesNotInTemplate(
+      int templateId) async {
     final db = await database;
 
     // Query to fetch exercises not in the current template
@@ -645,7 +665,9 @@ class DatabaseHelper {
       whereArgs: [templateId],
       limit: 1,
     );
-    return result.isNotEmpty ? result.first['template_premade'] as int : 1; // Default to 1 if not found
+    return result.isNotEmpty
+        ? result.first['template_premade'] as int
+        : 1; // Default to 1 if not found
   }
 
   Future<void> addCustomExercise({
@@ -689,7 +711,8 @@ class DatabaseHelper {
     );
   }
 
-  Future<List<Map<String, dynamic>>> getWorkoutExercisesGroupedByExercise(int workoutId) async {
+  Future<List<Map<String, dynamic>>> getWorkoutExercisesGroupedByExercise(
+      int workoutId) async {
     final db = await database;
 
     // Query to fetch exercises grouped by exercise_id
@@ -753,7 +776,8 @@ class DatabaseHelper {
   }
 
   // New method to get workout history for a specific exercise, ordered by date
-  Future<List<Map<String, dynamic>>> getWorkoutHistoryForExercise(int exerciseId) async {
+  Future<List<Map<String, dynamic>>> getWorkoutHistoryForExercise(
+      int exerciseId) async {
     final db = await database;
     // Join WorkoutExercise with Workout to get the date and order by it
     final result = await db.rawQuery('''
@@ -770,7 +794,8 @@ class DatabaseHelper {
   }
 
   // New method to get the count of sets for an exercise from the last workout using a specific template
-  Future<int> getLastWorkoutSetsCountForExercise(int templateId, int exerciseId) async {
+  Future<int> getLastWorkoutSetsCountForExercise(
+      int templateId, int exerciseId) async {
     final db = await database;
 
     // Find the most recent workout_id for the given template_id
@@ -813,8 +838,10 @@ class DatabaseHelper {
     final endOfWeek = startOfWeek.add(const Duration(days: 6));
 
     // Format dates for SQL query (YYYY-MM-DD)
-    final startDateStr = "${startOfWeek.year}-${startOfWeek.month.toString().padLeft(2, '0')}-${startOfWeek.day.toString().padLeft(2, '0')}";
-    final endDateStr = "${endOfWeek.year}-${endOfWeek.month.toString().padLeft(2, '0')}-${endOfWeek.day.toString().padLeft(2, '0')}";
+    final startDateStr =
+        "${startOfWeek.year}-${startOfWeek.month.toString().padLeft(2, '0')}-${startOfWeek.day.toString().padLeft(2, '0')}";
+    final endDateStr =
+        "${endOfWeek.year}-${endOfWeek.month.toString().padLeft(2, '0')}-${endOfWeek.day.toString().padLeft(2, '0')}";
 
     final result = await db.rawQuery('''
       SELECT COUNT(*) as count
@@ -834,11 +861,14 @@ class DatabaseHelper {
     final now = DateTime.now();
     final startOfMonth = DateTime(now.year, now.month, 1);
     // Calculate the last day of the month
-    final endOfMonth = DateTime(now.year, now.month + 1, 0); // Day 0 of next month is the last day of current month
+    final endOfMonth = DateTime(now.year, now.month + 1,
+        0); // Day 0 of next month is the last day of current month
 
     // Format dates for SQL query (YYYY-MM-DD)
-    final startDateStr = "${startOfMonth.year}-${startOfMonth.month.toString().padLeft(2, '0')}-${startOfMonth.day.toString().padLeft(2, '0')}";
-    final endDateStr = "${endOfMonth.year}-${endOfMonth.month.toString().padLeft(2, '0')}-${endOfMonth.day.toString().padLeft(2, '0')}";
+    final startDateStr =
+        "${startOfMonth.year}-${startOfMonth.month.toString().padLeft(2, '0')}-${startOfMonth.day.toString().padLeft(2, '0')}";
+    final endDateStr =
+        "${endOfMonth.year}-${endOfMonth.month.toString().padLeft(2, '0')}-${endOfMonth.day.toString().padLeft(2, '0')}";
 
     final result = await db.rawQuery('''
       SELECT COUNT(*) as count
@@ -850,5 +880,59 @@ class DatabaseHelper {
       return result.first['count'] as int;
     }
     return 0;
+  }
+
+  // Fetches the max weight and max volume (weight * reps) for each exercise
+  // from workouts completed *before* the specified currentWorkoutId.
+  // Assumes workout_id is incrementally ordered.
+  Future<Map<String, Map<String, double>>> getPreviousExercisePRs(
+      int currentWorkoutId) async {
+    final db = await database;
+
+    // Get max weight for each exercise from previous workouts, joining with Exercise table
+    final List<Map<String, dynamic>> maxWeights = await db.rawQuery('''
+      SELECT e.name as exercise_name, MAX(we.weight) as maxWeight
+      FROM WorkoutExercise we
+      INNER JOIN Exercise e ON we.exercise_id = e.exercise_id
+      WHERE we.workout_id < ? AND we.weight IS NOT NULL AND we.reps IS NOT NULL
+      GROUP BY e.name
+    ''', [currentWorkoutId]);
+
+    // Get max volume (weight * reps) for each exercise from previous workouts, joining with Exercise table
+    final List<Map<String, dynamic>> maxVolumes = await db.rawQuery('''
+      SELECT e.name as exercise_name, MAX(we.weight * we.reps) as maxVolume
+      FROM WorkoutExercise we
+      INNER JOIN Exercise e ON we.exercise_id = e.exercise_id
+      WHERE we.workout_id < ? AND we.weight IS NOT NULL AND we.reps IS NOT NULL
+      GROUP BY e.name
+    ''', [currentWorkoutId]);
+
+    final Map<String, Map<String, double>> prs = {};
+
+    // Populate PR map with max weights
+    for (var row in maxWeights) {
+      final name = row['exercise_name'] as String?; // Use the aliased name
+      final weight = (row['maxWeight'] as num?)?.toDouble();
+      if (name != null && weight != null) {
+        prs.putIfAbsent(name, () => {})['maxWeight'] = weight;
+      }
+    }
+
+    // Populate PR map with max volumes
+    for (var row in maxVolumes) {
+      final name = row['exercise_name'] as String?; // Use the aliased name
+      final volume = (row['maxVolume'] as num?)?.toDouble();
+      if (name != null && volume != null) {
+        prs.putIfAbsent(name, () => {})['maxVolume'] = volume;
+      }
+    }
+
+    // Ensure all exercises found have both keys, defaulting to 0.0 if one is missing
+    prs.forEach((name, data) {
+      data.putIfAbsent('maxWeight', () => 0.0);
+      data.putIfAbsent('maxVolume', () => 0.0);
+    });
+
+    return prs;
   }
 }
