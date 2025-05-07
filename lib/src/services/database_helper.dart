@@ -438,7 +438,8 @@ class DatabaseHelper {
         e.exercise_id, 
         e.name, 
         e.Description, 
-        e.instructions 
+        e.instructions,
+        e.equipment -- Add this line to include equipment
       FROM TemplateExercise te
       INNER JOIN Exercise e ON te.exercise_id = e.exercise_id
       WHERE te.template_id = ?

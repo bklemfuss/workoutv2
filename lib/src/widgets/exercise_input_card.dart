@@ -245,6 +245,17 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
+    // Robustly determine if this exercise requires equipment
+    final dynamic equipmentValue = widget.exercise['equipment'];
+    // Debug print to check the value and type
+    // ignore: avoid_print
+    print('DEBUG: exercise_id=${widget.exercise['exercise_id']}, equipment=${equipmentValue} (${equipmentValue.runtimeType})');
+
+    final bool hasEquipment = equipmentValue == true ||
+        equipmentValue == 1 ||
+        equipmentValue == '1' ||
+        (equipmentValue is String && equipmentValue.toLowerCase() == 'true');
+
     // Determine percentage text and handle null case
     final percentageText = _percentageChange != null
         ? '${_percentageChange!.toStringAsFixed(0)}%'
@@ -331,24 +342,23 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        // Swapped Weight and Reps
-                        _buildInputField(
-                          label: 'Weight',
-                          // Pass the existing controller
-                          controller: _weightControllers[0],
-                          onChanged: (value) => _onSetChanged(0, 'weight', double.tryParse(value) ?? 0.0),
-                          isChecked: sets[0]['isChecked'], // Pass checked state
-                        ),
-                        SizedBox(width: screenWidth * 0.02),
+                        // Only show weight input if equipment is required
+                        if (hasEquipment)
+                          _buildInputField(
+                            label: 'Weight',
+                            controller: _weightControllers[0],
+                            onChanged: (value) => _onSetChanged(0, 'weight', double.tryParse(value) ?? 0.0),
+                            isChecked: sets[0]['isChecked'],
+                          ),
+                        if (hasEquipment)
+                          SizedBox(width: screenWidth * 0.02),
                         _buildInputField(
                           label: 'Reps',
-                          // Pass the existing controller
                           controller: _repsControllers[0],
                           onChanged: (value) => _onSetChanged(0, 'reps', int.tryParse(value) ?? 0),
-                          isChecked: sets[0]['isChecked'], // Pass checked state
+                          isChecked: sets[0]['isChecked'],
                         ),
-                        SizedBox(width: screenWidth * 0.01), // Add some space before checkbox
-                        // Moved Checkbox here
+                        SizedBox(width: screenWidth * 0.01),
                         Checkbox(
                           value: sets[0]['isChecked'],
                           onChanged: (bool? value) => _onSetChecked(0, value),
@@ -366,28 +376,26 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        // Swapped Weight and Reps
-                        _buildInputField(
-                          label: 'Weight',
-                          // Pass the existing controller
-                          controller: _weightControllers[i],
-                          onChanged: (value) => _onSetChanged(i, 'weight', double.tryParse(value) ?? 0.0),
-                          isChecked: sets[i]['isChecked'], // Pass checked state
-                        ),
-                        SizedBox(width: screenWidth * 0.02),
+                        if (hasEquipment)
+                          _buildInputField(
+                            label: 'Weight',
+                            controller: _weightControllers[i],
+                            onChanged: (value) => _onSetChanged(i, 'weight', double.tryParse(value) ?? 0.0),
+                            isChecked: sets[i]['isChecked'],
+                          ),
+                        if (hasEquipment)
+                          SizedBox(width: screenWidth * 0.02),
                         _buildInputField(
                           label: 'Reps',
-                          // Pass the existing controller
                           controller: _repsControllers[i],
                           onChanged: (value) => _onSetChanged(i, 'reps', int.tryParse(value) ?? 0),
-                          isChecked: sets[i]['isChecked'], // Pass checked state
+                          isChecked: sets[i]['isChecked'],
                         ),
-                        SizedBox(width: screenWidth * 0.01), // Add some space before checkbox
-                        // Moved Checkbox here
+                        SizedBox(width: screenWidth * 0.01),
                         Checkbox(
                           value: sets[i]['isChecked'],
                           onChanged: (bool? value) => _onSetChecked(i, value),
-                          activeColor: theme.primaryColor, // Use theme color
+                          activeColor: theme.primaryColor,
                         ),
                       ],
                     ),
