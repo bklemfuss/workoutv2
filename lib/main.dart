@@ -20,6 +20,7 @@ import 'src/providers/theme_provider.dart';
 import 'src/providers/unit_provider.dart'; // Import UnitProvider
 import 'src/providers/goal_provider.dart'; // Import GoalProvider
 import 'src/post_workout_screen.dart';
+import 'src/exercises_screen.dart'; // <-- Add this import
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -82,6 +83,7 @@ class MyApp extends StatelessWidget {
         },
         '/workout_summary': (context) => const PostWorkoutScreen(),
         '/create_workout': (context) => const CreateWorkoutScreen(),
+        '/exercises': (context) => const ExercisesScreen(), // <-- Add this route
       },
     );
   }

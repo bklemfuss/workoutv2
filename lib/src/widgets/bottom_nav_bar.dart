@@ -29,6 +29,10 @@ class BottomNavBar extends StatelessWidget {
           label: 'Statistics',
         ),
         BottomNavigationBarItem(
+          icon: Icon(Icons.fitness_center), // <-- New Exercises tab icon
+          label: 'Exercises',                // <-- New Exercises tab label
+        ),
+        BottomNavigationBarItem(
           icon: Icon(Icons.settings),
           label: 'Options',
         ),
@@ -41,6 +45,7 @@ class BottomNavBar extends StatelessWidget {
       '/',           // Dashboard route
       '/history',    // History route
       '/statistics', // Statistics route
+      '/exercises',  // <-- New Exercises route
       '/options',    // Options route
     ];
 

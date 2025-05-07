@@ -317,7 +317,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         },
       ),
       bottomNavigationBar: const BottomNavBar(
-        currentIndex: 1,
+        currentIndex: 1, // History tab
       ),
     );
   }
