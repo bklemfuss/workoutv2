@@ -89,6 +89,37 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
   }
 
   Future<void> _finishWorkout(BuildContext context) async {
+  // Check if any sets are checked (i.e., any exercise performed)
+  final anyChecked = _exercisesData.values.any(
+    (sets) => sets.any((set) => set['isChecked'] == true),
+  );
+
+  if (!anyChecked) {
+    // Show dialog: No exercises completed
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('No Exercises Completed'),
+        content: const Text('No exercises have been completed for this workout. Do you want to discard this workout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Discard'),
+          ),
+        ],
+      ),
+    );
+    if (discard == true) {
+      await _discardWorkout(context);
+    }
+    // If cancel or dialog dismissed, just return to workout
+    return;
+  }
+
   final dbHelper = DatabaseHelper();
   final db = await dbHelper.database; // Await the database getter
 
