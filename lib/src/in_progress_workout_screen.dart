@@ -136,25 +136,30 @@ class _InProgressWorkoutScreenState extends State<InProgressWorkoutScreen> {
         // Filter sets where 'isChecked' is true
         final checkedSets = allSets.where((set) => set['isChecked'] == true).toList();
 
-        for (var set in checkedSets) { // Iterate only over checked sets
-          // *** Add Validation ***
+        // Find the original exercise object to get the equipment property
+        final exercise = widget.exercises.firstWhere(
+          (ex) => ex['exercise_id'] == exerciseId,
+          orElse: () => {},
+        );
+        final bool hasEquipment = (exercise['equipment'] == true || exercise['equipment'] == 1);
+
+        for (var set in checkedSets) {
           final reps = set['reps'] ?? 0;
-          final weight = set['weight'] ?? 0.0;
+          // If no equipment, force weight to 0
+          final weight = hasEquipment ? (set['weight'] ?? 0.0) : 0.0;
 
           // Ensure reps and weight are not negative
           if (reps < 0 || weight < 0) {
-            // Optionally, show an error or skip this set
             debugPrint('Skipping set with negative values: reps=$reps, weight=$weight');
-            continue; // Skip this invalid set
+            continue;
           }
-          // *** End Validation ***
 
           await dbHelper.createWorkoutExercise(
-            txn, // Pass the transaction
+            txn,
             workoutId,
             exerciseId,
-            reps, // Use validated reps
-            weight, // Use validated weight
+            reps,
+            weight,
           );
         }
       }
