@@ -413,7 +413,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         },
       ),
       bottomNavigationBar: const BottomNavBar(
-        currentIndex: 2, // BottomNavBar should internally use theme
+        currentIndex: 2, // Statistics tab
       ),
     );
   }

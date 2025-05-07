@@ -223,7 +223,7 @@ class _DashboardState extends State<Dashboard> {
         },
       ),
       bottomNavigationBar: const BottomNavBar(
-        currentIndex: 0,
+        currentIndex: 0, // Dashboard tab
       ),
     );
   }

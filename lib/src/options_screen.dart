@@ -158,7 +158,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
         ],
       ),
       bottomNavigationBar: const BottomNavBar(
-        currentIndex: 3, // Index for Options
+        currentIndex: 4, // Index for Options (was 3)
       ),
     );
   }
