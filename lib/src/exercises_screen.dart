@@ -17,6 +17,7 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
   List<Map<String, dynamic>> _filteredExercises = [];
   String _searchQuery = '';
   String _selectedBodyWeight = 'All';
+  bool _showBodyweightOnly = false; // New state for radio button
 
   final List<String> _bodyWeightOptions = ['All', 'Bodyweight', 'Equipment'];
 
@@ -47,7 +48,8 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
             : (_selectedBodyWeight == 'Bodyweight'
                 ? exercise['equipment'] == 0
                 : exercise['equipment'] == 1);
-        return matchesSearch && matchesBodyWeight;
+        final matchesEquipment = _showBodyweightOnly ? exercise['equipment'] == 0 : true;
+        return matchesSearch && matchesBodyWeight && matchesEquipment;
       }).toList();
     });
   }
@@ -104,6 +106,25 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Equipment switch
+                SizedBox(
+                  width: 140,
+                  child: SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: Text(
+                      'Bodyweight',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    value: _showBodyweightOnly,
+                    onChanged: (val) {
+                      setState(() {
+                        _showBodyweightOnly = val;
+                        _applyFilters();
+                      });
+                    },
+                  ),
+                ),
                 const Text('Filter by:'),
                 DropdownButton<String>(
                   value: _selectedBodyWeight,
@@ -152,7 +173,7 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: const BottomNavBar(currentIndex: 3), // Exercises tab
+      bottomNavigationBar: const BottomNavBar(currentIndex: 3), // Exercises tab (4th tab)
     );
   }
 }

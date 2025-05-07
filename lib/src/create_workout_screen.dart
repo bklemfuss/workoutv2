@@ -16,6 +16,7 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
   List<Map<String, dynamic>> allExercises = []; // Original unfiltered list
   List<Map<String, dynamic>> exercises = []; // Filtered list
   List<int> selectedExerciseIds = [];
+  bool showBodyweightOnly = false; // New state for radio button
 
   @override
   void initState() {
@@ -28,22 +29,29 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
     final fetchedExercises = await dbHelper.getExercisesByMuscleGroup(muscleGroup);
     setState(() {
       allExercises = fetchedExercises; // Store the original data
-      exercises = List.from(allExercises); // Initialize the filtered list
+      _applyEquipmentFilter(); // Apply equipment filter after fetching
     });
+  }
+
+  void _applyEquipmentFilter() {
+    // Filter by equipment and search query
+    List<Map<String, dynamic>> filtered = List.from(allExercises);
+    if (showBodyweightOnly) {
+      filtered = filtered.where((e) => e['equipment'] == 0).toList();
+    }
+    final query = searchController.text.trim();
+    if (query.isNotEmpty) {
+      filtered = filtered
+          .where((exercise) =>
+              exercise['name'].toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
+    exercises = filtered;
   }
 
   void _onSearchChanged(String query) {
     setState(() {
-      if (query.isEmpty) {
-        // If the query is empty, restore the original list
-        exercises = List.from(allExercises);
-      } else {
-        // Filter the original list
-        exercises = allExercises
-            .where((exercise) =>
-                exercise['name'].toLowerCase().contains(query.toLowerCase()))
-            .toList();
-      }
+      _applyEquipmentFilter();
     });
   }
 
@@ -272,6 +280,25 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Equipment switch
+                SizedBox(
+                  width: 140,
+                  child: SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: Text(
+                      'Bodyweight',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    value: showBodyweightOnly,
+                    onChanged: (val) {
+                      setState(() {
+                        showBodyweightOnly = val;
+                        _applyEquipmentFilter();
+                      });
+                    },
+                  ),
+                ),
                 const Text('Filter by Muscle Group:'),
                 DropdownButton<String>(
                   value: selectedMuscleGroup,
