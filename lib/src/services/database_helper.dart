@@ -679,17 +679,20 @@ class DatabaseHelper {
   }) async {
     final db = await database;
 
-    // Get the muscle group ID (default to 1 if not found)
-    final muscleGroupResult = await db.query(
-      'MuscleGroup',
-      columns: ['muscle_group_id'],
-      where: 'Name = ?',
-      whereArgs: [muscleGroup],
-      limit: 1,
-    );
-    final muscleGroupId = muscleGroupResult.isNotEmpty
-        ? muscleGroupResult.first['muscle_group_id'] as int
-        : 1;
+    // Get the muscle group ID (default to 1 if not found or if "All" is selected)
+    int muscleGroupId = 1;
+    if (muscleGroup != 'All') {
+      final muscleGroupResult = await db.query(
+        'MuscleGroup',
+        columns: ['muscle_group_id'],
+        where: 'Name = ?',
+        whereArgs: [muscleGroup],
+        limit: 1,
+      );
+      if (muscleGroupResult.isNotEmpty) {
+        muscleGroupId = muscleGroupResult.first['muscle_group_id'] as int;
+      }
+    }
 
     // Insert the custom exercise
     await db.insert('Exercise', {
