@@ -4,6 +4,7 @@ import 'services/database_helper.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'widgets/exercise_details_dialog.dart';
+import 'widgets/create_exercise_dialog.dart';
 
 class ExercisesScreen extends StatefulWidget {
   const ExercisesScreen({Key? key}) : super(key: key);
@@ -75,8 +76,18 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
     );
   }
 
-  void _navigateToCreateExercise() {
-    Navigator.pushNamed(context, '/create_workout'); // Reuse create_workout_screen for now
+  void _showCreateExerciseDialog() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => CreateExerciseDialog(
+        onExerciseCreated: () {
+          _fetchExercises();
+        },
+      ),
+    );
+    if (result == true) {
+      _fetchExercises();
+    }
   }
 
   @override
@@ -167,7 +178,7 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.add),
                 label: const Text('Create New Exercise'),
-                onPressed: _navigateToCreateExercise,
+                onPressed: _showCreateExerciseDialog,
               ),
             ),
           ),

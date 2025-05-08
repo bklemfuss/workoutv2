@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'services/database_helper.dart';
 import 'widgets/exercise_details_dialog.dart';
+import 'widgets/create_exercise_dialog.dart';
 
 class CreateWorkoutScreen extends StatefulWidget {
   const CreateWorkoutScreen({super.key});
@@ -132,115 +133,18 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
     );
   }
 
-  void _showCreateCustomExerciseDialog() {
-    final TextEditingController nameController = TextEditingController();
-    final TextEditingController descriptionController = TextEditingController();
-    String selectedMuscleGroup = 'All';
-    bool requiresEquipment = true;
-
-    showDialog(
+  void _showCreateCustomExerciseDialog() async {
+    final result = await showDialog<bool>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Create Custom Exercise'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Exercise Name',
-                    hintText: 'Enter exercise name',
-                  ),
-                ),
-                TextField(
-                  controller: descriptionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Description (Optional)',
-                    hintText: 'Enter exercise description',
-                  ),
-                ),
-                DropdownButtonFormField<String>(
-                  value: selectedMuscleGroup,
-                  items: ['All', 'Chest', 'Back', 'Legs', 'Arms', 'Core']
-                      .map((group) => DropdownMenuItem(
-                            value: group,
-                            child: Text(group),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    selectedMuscleGroup = value!;
-                  },
-                  decoration: const InputDecoration(
-                    labelText: 'Muscle Group',
-                  ),
-                ),
-                Row(
-                  children: [
-                    Checkbox(
-                      value: requiresEquipment,
-                      onChanged: (value) {
-                        requiresEquipment = value!;
-                      },
-                    ),
-                    const Text('Requires Equipment'),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final exerciseName = nameController.text.trim();
-                final exerciseDescription = descriptionController.text.trim();
-
-                if (exerciseName.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('Exercise name cannot be empty!'),
-                      backgroundColor: Theme.of(context).colorScheme.error, // Use theme error color
-                    ),
-                  );
-                  return;
-                }
-
-                // Save the custom exercise to the database
-                final dbHelper = DatabaseHelper();
-                await dbHelper.addCustomExercise(
-                  name: exerciseName,
-                  description: exerciseDescription,
-                  muscleGroup: selectedMuscleGroup,
-                  requiresEquipment: requiresEquipment,
-                );
-
-                // Refresh the exercise list
-                _fetchExercises();
-
-                // Close the dialog
-                Navigator.pop(context);
-
-                // Show success message
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar( // Removed const
-                    content: const Text('Custom exercise created successfully!'),
-                    backgroundColor: Theme.of(context).colorScheme.primary, // Use theme primary color
-                  ),
-                );
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
+      builder: (context) => CreateExerciseDialog(
+        onExerciseCreated: () {
+          _fetchExercises();
+        },
+      ),
     );
+    if (result == true) {
+      _fetchExercises();
+    }
   }
 
   @override
