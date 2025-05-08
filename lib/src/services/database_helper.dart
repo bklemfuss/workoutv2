@@ -657,6 +657,20 @@ class DatabaseHelper {
     ''', [templateId]);
   }
 
+  // New method: fetch exercises not in template, including muscle group name
+  Future<List<Map<String, dynamic>>> getExercisesNotInTemplateWithMuscleGroup(
+      int templateId) async {
+    final db = await database;
+    return await db.rawQuery('''
+      SELECT e.*, mg.Name AS muscle_group
+      FROM Exercise e
+      LEFT JOIN MuscleGroup mg ON e.muscle_group_id = mg.muscle_group_id
+      WHERE e.exercise_id NOT IN (
+        SELECT exercise_id FROM TemplateExercise WHERE template_id = ?
+      )
+    ''', [templateId]);
+  }
+
   Future<int> getTemplatePremadeStatus(int templateId) async {
     final db = await database;
     final result = await db.query(

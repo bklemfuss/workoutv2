@@ -35,8 +35,8 @@ class _AddExercisesScreenState extends State<AddExercisesScreen> {
   }
 
   Future<void> _initializeExercises() async {
-    // Fetch all exercises not in the template initially
-    _allExercises = await _dbHelper.getExercisesNotInTemplate(widget.templateId);
+    // Fetch all exercises not in the template, including muscle group names
+    _allExercises = await _dbHelper.getExercisesNotInTemplateWithMuscleGroup(widget.templateId);
     _applyFilters(); // Apply initial filters (which is 'All' and empty search)
   }
 
