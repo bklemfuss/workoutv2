@@ -253,7 +253,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             final workout = displayedWorkouts[index];
                             String formattedDate = 'Invalid Date';
                             try {
-                              formattedDate = DateFormat.yMMMd().add_jm().format(DateTime.parse(workout['date']));
+                              // Format as DD, MON, YYYY (e.g., 05, JUN, 2024)
+                              final date = DateTime.parse(workout['date']);
+                              formattedDate = DateFormat('dd, MMM, yyyy').format(date).toUpperCase();
                             } catch (e) {
                               debugPrint('Error formatting date for display: ${workout['date']}');
                             }
