@@ -39,13 +39,6 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
 
   void _applyFilters() {
     setState(() {
-      // Debug: print all muscle group values in _exercises
-      print('DEBUG: All muscle_group values in _exercises:');
-      for (final ex in _exercises) {
-        print('  exercise_id=${ex['exercise_id']} name=${ex['name']} muscle_group=${ex['muscle_group']}');
-      }
-      print('DEBUG: _selectedMuscleGroup=$_selectedMuscleGroup');
-
       _filteredExercises = _exercises.where((exercise) {
         final matchesSearch = exercise['name']
             .toString()
@@ -54,19 +47,11 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
         final matchesMuscleGroup = _selectedMuscleGroup == 'All'
             ? true
             : (exercise['muscle_group'] == _selectedMuscleGroup);
-        if (!matchesMuscleGroup) {
-          print('DEBUG: Filtered out by muscle_group: exercise_id=${exercise['exercise_id']} muscle_group=${exercise['muscle_group']}');
-        }
         final matchesBodyweight = !_bodyweightOnly
             ? true
             : (exercise['equipment'] == 0 || exercise['equipment'] == false || exercise['equipment'] == '0');
-        if (!matchesBodyweight) {
-          print('DEBUG: Filtered out by bodyweight: exercise_id=${exercise['exercise_id']} equipment=${exercise['equipment']}');
-        }
         return matchesSearch && matchesMuscleGroup && matchesBodyweight;
       }).toList();
-
-      print('DEBUG: Filtered exercises count: ${_filteredExercises.length}');
     });
   }
 
