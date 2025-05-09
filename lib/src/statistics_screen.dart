@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'services/database_helper.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'widgets/app_toolbar.dart'; // Import AppToolbar
@@ -121,22 +122,19 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final theme = Theme.of(context); // Get theme data
-
+    final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: const AppToolbar(title: 'Statistics'), // Use AppToolbar
+      appBar: AppBar(title: Text(loc.statisticsTitle)),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _statisticsFuture, // Use the state future
         builder: (context, snapshot) {
-          // ... existing loading/error/no data handling ...
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            // Use theme's error color or a standard text style for errors
-            return Center(child: Text('Error: ${snapshot.error}', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error)));
+            return Center(child: Text(loc.errorLoadingStatistics(snapshot.error.toString()), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error)));
           } else if (!snapshot.hasData || snapshot.data == null) {
-            return Center(child: Text('No data available.', style: theme.textTheme.bodyMedium));
+            return Center(child: Text(loc.noStatisticsFound, style: theme.textTheme.bodyMedium));
           }
 
           final stats = snapshot.data!;
@@ -145,7 +143,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             children: [
               // Top 25% of the screen with 2x2 cards
               SizedBox(
-                height: screenHeight * 0.25,
+                height: MediaQuery.of(context).size.height * 0.25,
                 child: GridView.count(
                   // ... existing GridView setup ...
                   physics: const NeverScrollableScrollPhysics(),

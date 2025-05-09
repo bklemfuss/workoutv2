@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'providers/theme_provider.dart';
 import 'providers/unit_provider.dart';
 import 'providers/goal_provider.dart';
@@ -7,7 +8,8 @@ import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
 
 class OptionsScreen extends StatefulWidget {
-  const OptionsScreen({super.key});
+  final ValueChanged<String>? onLocaleChanged;
+  const OptionsScreen({super.key, this.onLocaleChanged});
 
   @override
   State<OptionsScreen> createState() => _OptionsScreenState();
@@ -23,17 +25,18 @@ class _OptionsScreenState extends State<OptionsScreen> {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final unitProvider = Provider.of<UnitProvider>(context);
     final goalProvider = Provider.of<GoalProvider>(context);
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: const AppToolbar(title: 'Options'),
+      appBar: AppToolbar(title: loc.optionsTitle),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // General Section
-          _buildSectionHeader('General', theme),
+          _buildSectionHeader(loc.general, theme),
           SwitchListTile(
             title: Text(
-              'Enable Notifications',
+              loc.enableNotifications,
               style: theme.textTheme.bodyMedium,
             ),
             value: notificationsEnabled,
@@ -45,13 +48,13 @@ class _OptionsScreenState extends State<OptionsScreen> {
           ),
           ListTile(
             title: Text(
-              'Language',
+              loc.language,
               style: theme.textTheme.bodyMedium,
             ),
             trailing: DropdownButton<String>(
               value: selectedLanguage,
               dropdownColor: theme.cardColor, // Use cardColor for dropdown background
-              items: const [
+              items: [
                 DropdownMenuItem(value: 'English', child: Text('English')),
                 DropdownMenuItem(value: 'Spanish', child: Text('Spanish')),
                 DropdownMenuItem(value: 'French', child: Text('French')),
@@ -60,15 +63,20 @@ class _OptionsScreenState extends State<OptionsScreen> {
                 setState(() {
                   selectedLanguage = value!;
                 });
+                if (widget.onLocaleChanged != null) {
+                  if (value == 'English') widget.onLocaleChanged!('en');
+                  if (value == 'Spanish') widget.onLocaleChanged!('es');
+                  if (value == 'French') widget.onLocaleChanged!('fr');
+                }
               },
             ),
           ),
 
           // Appearance Section
-          _buildSectionHeader('Appearance', theme),
+          _buildSectionHeader(loc.appearance, theme),
           SwitchListTile(
             title: Text(
-              'Dark Mode',
+              loc.darkMode,
               style: theme.textTheme.bodyMedium,
             ),
             value: themeProvider.isDarkMode,
@@ -78,7 +86,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
           ),
           ListTile(
             title: Text(
-              'Font Size',
+              loc.fontSize,
               style: theme.textTheme.bodyMedium,
             ),
             subtitle: Slider(
@@ -94,18 +102,18 @@ class _OptionsScreenState extends State<OptionsScreen> {
           ),
 
           // Preferences Section
-          _buildSectionHeader('Preferences', theme),
+          _buildSectionHeader(loc.preferences, theme),
           ListTile(
             title: Text(
-              'Units',
+              loc.units,
               style: theme.textTheme.bodyMedium,
             ),
             trailing: DropdownButton<String>(
               value: unitProvider.unitSystem,
               dropdownColor: theme.cardColor,
-              items: const [
-                DropdownMenuItem(value: 'Imperial', child: Text('Imperial')),
-                DropdownMenuItem(value: 'Metric', child: Text('Metric')),
+              items: [
+                DropdownMenuItem(value: 'Imperial', child: Text(loc.imperial)),
+                DropdownMenuItem(value: 'Metric', child: Text(loc.metric)),
               ],
               onChanged: (value) {
                 if (value != null) {
@@ -116,10 +124,10 @@ class _OptionsScreenState extends State<OptionsScreen> {
           ),
 
           // Goals Section
-          _buildSectionHeader('Goals', theme),
+          _buildSectionHeader(loc.goals, theme),
           ListTile(
             title: Text(
-              'Weekly Goal',
+              loc.weeklyGoal,
               style: theme.textTheme.bodyMedium,
             ),
             subtitle: Slider(
@@ -127,7 +135,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
               min: 1,
               max: 7,
               divisions: 6,
-              label: '${goalProvider.weeklyGoal} workouts',
+              label: '${goalProvider.weeklyGoal} ${loc.workoutsToday}',
               onChanged: (value) {
                 goalProvider.setWeeklyGoal(value.toInt());
               },
@@ -135,10 +143,10 @@ class _OptionsScreenState extends State<OptionsScreen> {
           ),
 
           // About Section
-          _buildSectionHeader('About', theme),
+          _buildSectionHeader(loc.about, theme),
           ListTile(
             title: Text(
-              'App Version',
+              loc.appVersion,
               style: theme.textTheme.bodyMedium,
             ),
             subtitle: Text(
@@ -148,7 +156,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
           ),
           ListTile(
             title: Text(
-              'Privacy Policy',
+              loc.privacyPolicy,
               style: theme.textTheme.bodyMedium,
             ),
             onTap: () {

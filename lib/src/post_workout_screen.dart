@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Import Provider
+import 'package:flutter_gen/gen_l10n/app_localizations.dart'; // Import AppLocalizations
 import 'services/database_helper.dart';
 import 'providers/unit_provider.dart'; // Import UnitProvider
 
@@ -27,12 +28,13 @@ class PostWorkoutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context); // Access theme
+    final loc = AppLocalizations.of(context)!; // Access localized strings
     final unitProvider =
         Provider.of<UnitProvider>(context); // Access UnitProvider
     final isMetric = unitProvider.unitSystem == 'Metric'; // Check unit system
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Workout Summary')),
+      appBar: AppBar(title: Text(loc.postWorkoutSummary)),
       body: Column(
         children: [
           Expanded(
@@ -42,9 +44,11 @@ class PostWorkoutScreen extends StatelessWidget {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
+                  return Center(
+                      child: Text(loc.errorLoadingWorkoutSummary(
+                          snapshot.error.toString())));
                 } else if (!snapshot.hasData || snapshot.data == null) {
-                  return const Center(child: Text('No data available.'));
+                  return Center(child: Text(loc.noWorkoutSummaryFound));
                 }
 
                 final workoutDetails = snapshot.data!['workoutDetails'];
