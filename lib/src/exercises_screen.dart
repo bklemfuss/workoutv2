@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'services/database_helper.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
@@ -100,8 +101,9 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: const AppToolbar(title: 'Exercises'),
+      appBar: AppBar(title: Text(loc.exercisesTitle)),
       body: Column(
         children: [
           Padding(
@@ -109,7 +111,7 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
             child: TextField(
               onChanged: _onSearchChanged,
               decoration: InputDecoration(
-                hintText: 'Search exercises...',
+                hintText: loc.searchExercisesHint,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -124,7 +126,7 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Filter by Muscle Group:'),
+                Text(loc.filterByMuscleGroup),
                 DropdownButton<String>(
                   value: _selectedMuscleGroup,
                   items: _muscleGroupOptions
@@ -137,11 +139,10 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
                 ),
                 Row(
                   children: [
-                    const Text('Bodyweight Only'),
+                    Text(loc.bodyweightOnly),
                     Switch(
                       value: _bodyweightOnly,
                       onChanged: _onBodyweightSwitchChanged,
-                      activeColor: theme.colorScheme.primary,
                     ),
                   ],
                 ),
@@ -151,7 +152,7 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
           const SizedBox(height: 8),
           Expanded(
             child: _filteredExercises.isEmpty
-                ? const Center(child: Text('No exercises found.'))
+                ? Center(child: Text(loc.noExercisesFound))
                 : ListView.builder(
                     itemCount: _filteredExercises.length,
                     itemBuilder: (context, index) {
@@ -161,7 +162,7 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
                         child: ListTile(
                           title: Text(exercise['name'] ?? ''),
                           subtitle: Text(
-                            (exercise['equipment'] == 1) ? 'Equipment' : 'Bodyweight',
+                            (exercise['equipment'] == 1) ? loc.requiresEquipment : loc.bodyweightOnly,
                           ),
                           onTap: () => _showExerciseDetailsDialog(exercise),
                         ),
@@ -175,14 +176,14 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.add),
-                label: const Text('Create New Exercise'),
+                label: Text(loc.createNewExercise),
                 onPressed: _showCreateExerciseDialog,
               ),
             ),
           ),
         ],
       ),
-      bottomNavigationBar: const BottomNavBar(currentIndex: 3), // Exercises tab (4th tab)
+      bottomNavigationBar: const BottomNavBar(currentIndex: 3),
     );
   }
 }

@@ -8,6 +8,7 @@ import 'start_workout_screen.dart';
 import 'create_workout_screen.dart';
 import 'widgets/dashboard_template_card.dart';
 import 'widgets/goal_progress_ring.dart'; // Import the new ring widget
+import 'package:flutter_gen/gen_l10n/app_localizations.dart'; // Import localization
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -94,9 +95,10 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context); // Access the current theme
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: const AppToolbar(title: 'Dashboard'),
+      appBar: AppToolbar(title: loc.dashboardTitle),
       body: LayoutBuilder(
         builder: (context, constraints) {
           return Column(
@@ -112,9 +114,9 @@ class _DashboardState extends State<Dashboard> {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
-                        return Center(child: Text('Error loading goals: ${snapshot.error}'));
+                        return Center(child: Text(loc.errorLoadingGoals(snapshot.error.toString())));
                       } else if (!snapshot.hasData || snapshot.data == null) {
-                        return const Center(child: Text('No goal data found.'));
+                        return Center(child: Text(loc.noGoalDataFound));
                       } else {
                         final goalData = snapshot.data!;
                         final ringSize = constraints.maxHeight * 0.25 * 0.6; // Example size calculation
@@ -125,13 +127,13 @@ class _DashboardState extends State<Dashboard> {
                             GoalProgressRing(
                               currentValue: goalData['weeklyCompleted']!,
                               goalValue: goalData['weeklyGoal']!,
-                              label: 'Weekly',
+                              label: loc.weekly,
                               size: ringSize,
                             ),
                             GoalProgressRing(
                               currentValue: goalData['monthlyCompleted']!,
                               goalValue: goalData['monthlyGoal']!,
-                              label: 'Monthly',
+                              label: loc.monthly,
                               size: ringSize,
                             ),
                           ],
@@ -149,13 +151,12 @@ class _DashboardState extends State<Dashboard> {
                   child: FutureBuilder<List<Map<String, dynamic>>>(
                     future: _templatesFuture,
                     builder: (context, snapshot) {
-                      // ... existing FutureBuilder code for templates ...
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
-                        return const Center(child: Text('Error loading templates.'));
+                        return Center(child: Text(loc.errorLoadingTemplates));
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(child: Text('No templates found.'));
+                        return Center(child: Text(loc.noTemplatesFound));
                       } else {
                         final templates = snapshot.data!;
                         return GridView.builder(
@@ -170,7 +171,7 @@ class _DashboardState extends State<Dashboard> {
                           itemBuilder: (context, index) {
                             final template = templates[index];
                             return DashboardTemplateCard(
-                              templateName: template['template_name'] ?? 'Unknown Template',
+                              templateName: template['template_name'] ?? loc.unknownTemplate,
                               onTap: () {
                                 _showStartWorkoutScreen(context, template['template_id']);
                               },
@@ -186,7 +187,6 @@ class _DashboardState extends State<Dashboard> {
               Expanded(
                 flex: 1, // Adjust flex as needed
                 child: Container(
-                  // ... existing Bottom Section code ...
                   color: Theme.of(context).colorScheme.background, // Use background color from theme
                   child: Center(
                     child: SizedBox(
@@ -196,22 +196,9 @@ class _DashboardState extends State<Dashboard> {
                         onPressed: () {
                           _navigateToCreateWorkoutScreen(context); // Navigate to CreateWorkoutScreen
                         },
-                        // Remove the explicit style property below
-                        // style: ElevatedButton.styleFrom(
-                        //   backgroundColor: Theme.of(context).colorScheme.primary, // Use primary color
-                        //   shape: RoundedRectangleBorder(
-                        //     borderRadius: BorderRadius.circular(12),
-                        //   ),
-                        // ),
                         child: Text(
-                          'Create New Workout',
-                          // Use the theme's labelLarge style for button text
+                          loc.createNewWorkout,
                           style: theme.textTheme.labelLarge,
-                          // Remove explicit color/weight if labelLarge provides it
-                          // ?.copyWith(
-                          //   color: Colors.white, // Ensure text is visible on primary color
-                          //   fontWeight: FontWeight.bold,
-                          // ),
                         ),
                       ),
                     ),
