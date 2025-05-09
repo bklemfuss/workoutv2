@@ -415,32 +415,4 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       ),
     );
   }
-
-  Future<List<Map<String, dynamic>>> _fetchPersonalRecords() async {
-    final db = DatabaseHelper();
-    // Query: join Exercise, MuscleGroup, WorkoutExercise
-    final result = await db.database.then((db) => db.rawQuery('''
-      SELECT 
-        e.exercise_id,
-        e.name AS exercise_name,
-        mg.Name AS muscle_group,
-        MAX(we.weight) AS max_weight,
-        MAX(we.reps) AS max_reps,
-        MAX(we.weight * we.reps) AS max_volume
-      FROM WorkoutExercise we
-      INNER JOIN Exercise e ON we.exercise_id = e.exercise_id
-      LEFT JOIN MuscleGroup mg ON e.muscle_group_id = mg.muscle_group_id
-      GROUP BY we.exercise_id
-      ORDER BY mg.Name, e.name
-    '''));
-    // Convert numeric fields to int/double for display
-    return result.map((row) => {
-      'exercise_id': row['exercise_id'],
-      'exercise_name': row['exercise_name'],
-      'muscle_group': row['muscle_group'] ?? 'Other',
-      'max_weight': (row['max_weight'] as num?)?.toStringAsFixed(1) ?? '0',
-      'max_reps': (row['max_reps'] as num?)?.toStringAsFixed(0) ?? '0',
-      'max_volume': (row['max_volume'] as num?)?.toStringAsFixed(1) ?? '0',
-    }).toList();
-  }
 }
