@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'services/database_helper.dart';
 import 'widgets/app_toolbar.dart';
 import 'widgets/bottom_nav_bar.dart';
@@ -17,10 +16,10 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
   List<Map<String, dynamic>> _exercises = [];
   List<Map<String, dynamic>> _filteredExercises = [];
   String _searchQuery = '';
-  String _selectedBodyWeight = 'All';
-  bool _showBodyweightOnly = false; // New state for radio button
+  String _selectedMuscleGroup = 'All';
+  bool _bodyweightOnly = false; // Add bodyweight filter
 
-  final List<String> _bodyWeightOptions = ['All', 'Bodyweight', 'Equipment'];
+  final List<String> _muscleGroupOptions = ['All', 'Chest', 'Back', 'Legs', 'Arms', 'Core'];
 
   @override
   void initState() {
@@ -29,8 +28,9 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
   }
 
   Future<void> _fetchExercises() async {
+    // Use the new method from DatabaseHelper to get exercises with muscle group info
     final db = DatabaseHelper();
-    final allExercises = await db.getAllExercises();
+    final allExercises = await db.getAllExercisesWithMuscleGroup();
     setState(() {
       _exercises = allExercises;
       _applyFilters();
@@ -39,19 +39,34 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
 
   void _applyFilters() {
     setState(() {
+      // Debug: print all muscle group values in _exercises
+      print('DEBUG: All muscle_group values in _exercises:');
+      for (final ex in _exercises) {
+        print('  exercise_id=${ex['exercise_id']} name=${ex['name']} muscle_group=${ex['muscle_group']}');
+      }
+      print('DEBUG: _selectedMuscleGroup=$_selectedMuscleGroup');
+
       _filteredExercises = _exercises.where((exercise) {
         final matchesSearch = exercise['name']
             .toString()
             .toLowerCase()
             .contains(_searchQuery.toLowerCase());
-        final matchesBodyWeight = _selectedBodyWeight == 'All'
+        final matchesMuscleGroup = _selectedMuscleGroup == 'All'
             ? true
-            : (_selectedBodyWeight == 'Bodyweight'
-                ? exercise['equipment'] == 0
-                : exercise['equipment'] == 1);
-        final matchesEquipment = _showBodyweightOnly ? exercise['equipment'] == 0 : true;
-        return matchesSearch && matchesBodyWeight && matchesEquipment;
+            : (exercise['muscle_group'] == _selectedMuscleGroup);
+        if (!matchesMuscleGroup) {
+          print('DEBUG: Filtered out by muscle_group: exercise_id=${exercise['exercise_id']} muscle_group=${exercise['muscle_group']}');
+        }
+        final matchesBodyweight = !_bodyweightOnly
+            ? true
+            : (exercise['equipment'] == 0 || exercise['equipment'] == false || exercise['equipment'] == '0');
+        if (!matchesBodyweight) {
+          print('DEBUG: Filtered out by bodyweight: exercise_id=${exercise['exercise_id']} equipment=${exercise['equipment']}');
+        }
+        return matchesSearch && matchesMuscleGroup && matchesBodyweight;
       }).toList();
+
+      print('DEBUG: Filtered exercises count: ${_filteredExercises.length}');
     });
   }
 
@@ -60,11 +75,18 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
     _applyFilters();
   }
 
-  void _onBodyWeightChanged(String? value) {
+  void _onMuscleGroupChanged(String? value) {
     if (value != null) {
-      _selectedBodyWeight = value;
+      _selectedMuscleGroup = value;
       _applyFilters();
     }
+  }
+
+  void _onBodyweightSwitchChanged(bool value) {
+    setState(() {
+      _bodyweightOnly = value;
+      _applyFilters();
+    });
   }
 
   void _showExerciseDetailsDialog(Map<String, dynamic> exercise) {
@@ -117,35 +139,26 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Equipment switch
-                SizedBox(
-                  width: 140,
-                  child: SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    title: Text(
-                      'Bodyweight',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    value: _showBodyweightOnly,
-                    onChanged: (val) {
-                      setState(() {
-                        _showBodyweightOnly = val;
-                        _applyFilters();
-                      });
-                    },
-                  ),
-                ),
-                const Text('Filter by:'),
+                const Text('Filter by Muscle Group:'),
                 DropdownButton<String>(
-                  value: _selectedBodyWeight,
-                  items: _bodyWeightOptions
+                  value: _selectedMuscleGroup,
+                  items: _muscleGroupOptions
                       .map((option) => DropdownMenuItem(
                             value: option,
                             child: Text(option),
                           ))
                       .toList(),
-                  onChanged: _onBodyWeightChanged,
+                  onChanged: _onMuscleGroupChanged,
+                ),
+                Row(
+                  children: [
+                    const Text('Bodyweight Only'),
+                    Switch(
+                      value: _bodyweightOnly,
+                      onChanged: _onBodyweightSwitchChanged,
+                      activeColor: theme.colorScheme.primary,
+                    ),
+                  ],
                 ),
               ],
             ),

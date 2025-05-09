@@ -1032,4 +1032,29 @@ class DatabaseHelper {
 
     return 0.0; // Exercise not found or no volume recorded in the last workout
   }
+
+  // Returns all exercises with their muscle group name (as 'muscle_group')
+  Future<List<Map<String, dynamic>>> getAllExercisesWithMuscleGroup() async {
+    final db = await DatabaseHelper().database;
+    return await db.rawQuery('''
+      SELECT e.*, mg.Name AS muscle_group
+      FROM Exercise e
+      LEFT JOIN MuscleGroup mg ON e.muscle_group_id = mg.muscle_group_id
+    ''');
+  }
+
+  // Returns all exercises filtered by muscle group name (as 'muscle_group')
+  Future<List<Map<String, dynamic>>> getExercisesByMuscleGroupName(String muscleGroup) async {
+    final db = await DatabaseHelper().database;
+    if (muscleGroup == 'All') {
+      return getAllExercisesWithMuscleGroup();
+    }
+    return await db.rawQuery('''
+      SELECT e.*, mg.Name AS muscle_group
+      FROM Exercise e
+      LEFT JOIN MuscleGroup mg ON e.muscle_group_id = mg.muscle_group_id
+      WHERE mg.Name = ?
+    ''', [muscleGroup]);
+  }
+
 }
