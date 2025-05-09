@@ -1,67 +1,140 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import '../services/database_helper.dart';
 
-class DashboardTemplateCard extends StatelessWidget {
+class DashboardTemplateCard extends StatefulWidget {
   final String templateName;
+  final int templateId;
   final VoidCallback onTap;
 
   const DashboardTemplateCard({
     Key? key,
     required this.templateName,
+    required this.templateId,
     required this.onTap,
   }) : super(key: key);
 
   @override
+  State<DashboardTemplateCard> createState() => _DashboardTemplateCardState();
+}
+
+class _DashboardTemplateCardState extends State<DashboardTemplateCard> {
+  late Future<Map<String, int>> _muscleGroupCountsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _muscleGroupCountsFuture = DatabaseHelper().getMuscleGroupCountsForTemplate(widget.templateId);
+  }
+
+  Color? _getOverlayColor(int count) {
+    if (count >= 5) return Colors.red.withOpacity(0.7);
+    if (count >= 3) return Colors.orange.withOpacity(0.7);
+    if (count >= 1) return Colors.yellow.withOpacity(0.7);
+    return null;
+  }
+
+  String? _getMuscleGroupAsset(String group) {
+    switch (group.toLowerCase()) {
+      case 'arms': return 'assets/wireGuySVG_Arms.svg';
+      case 'legs': return 'assets/wireGuySVG_Legs.svg';
+      case 'chest': return 'assets/wireGuySVG_Chest.svg';
+      case 'core':
+      case 'abs': return 'assets/wireGuySVG_Abs.svg';
+      default: return null;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // Access the current theme
-    // Define a slightly different color for the header
-    final headerColor = theme.colorScheme.primaryContainer; // Example: Use primaryContainer
-    final cardColor = theme.cardColor; // Use theme's card color for the main body
+    final theme = Theme.of(context);
+    final headerColor = theme.colorScheme.primaryContainer;
+    final cardColor = theme.cardColor;
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Card(
-        clipBehavior: Clip.antiAlias, // Ensures content respects rounded corners
+        clipBehavior: Clip.antiAlias,
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        child: LayoutBuilder( // Use LayoutBuilder for dynamic sizing/padding
+        child: LayoutBuilder(
           builder: (context, constraints) {
             final double cardWidth = constraints.maxWidth;
             final double cardHeight = constraints.maxHeight;
-            final double horizontalPadding = cardWidth * 0.05; // 5% padding horizontally
-            final double verticalPadding = cardHeight * 0.03; // 3% padding vertically
+            final double horizontalPadding = cardWidth * 0.05;
+            final double verticalPadding = cardHeight * 0.03;
 
             return Column(
               children: [
-                // Top Section (Template Name) - Approx 10% height
                 Expanded(
-                  flex: 1, // Takes up 1 part of the total flex (1+9=10)
+                  flex: 1,
                   child: Container(
-                    width: double.infinity, // Take full width
-                    color: headerColor, // Slightly different background
+                    width: double.infinity,
+                    color: headerColor,
                     padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding / 2),
                     child: Center(
                       child: Text(
-                        templateName,
+                        widget.templateName,
                         textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis, // Handle long names
-                        style: theme.textTheme.bodyMedium?.copyWith( // Adjust text style if needed
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onPrimaryContainer, // Text color suitable for headerColor
+                          color: theme.colorScheme.onPrimaryContainer,
                         ),
                       ),
                     ),
                   ),
                 ),
-                // Bottom Section (Image) - Approx 90% height
                 Expanded(
-                  flex: 9, // Takes up 9 parts of the total flex
+                  flex: 9,
                   child: Container(
-                    color: cardColor, // Background for the image area
+                    color: cardColor,
                     padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
-                    child: Center( // Center the content (if any) within the padded area
-                      // Removed Image.asset widget
+                    child: Center(
+                      child: FutureBuilder<Map<String, int>>(
+                        future: _muscleGroupCountsFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const SizedBox(
+                              width: 60, height: 60,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            );
+                          }
+                          final List<Widget> stackChildren = [
+                            SvgPicture.asset(
+                              'assets/wireGuySVG.svg',
+                              width: cardWidth * 0.7,
+                              height: cardHeight * 0.7,
+                              fit: BoxFit.contain,
+                            ),
+                          ];
+                          if (snapshot.hasData) {
+                            final counts = snapshot.data!;
+                            for (final group in ['Arms', 'Legs', 'Chest', 'Abs', 'Core']) {
+                              final count = counts[group] ?? counts[group.toLowerCase()] ?? 0;
+                              final asset = _getMuscleGroupAsset(group);
+                              final color = _getOverlayColor(count);
+                              if (asset != null && color != null) {
+                                stackChildren.add(
+                                  SvgPicture.asset(
+                                    asset,
+                                    width: cardWidth * 0.7,
+                                    height: cardHeight * 0.7,
+                                    fit: BoxFit.contain,
+                                    colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                                  ),
+                                );
+                              }
+                            }
+                          }
+                          return Stack(
+                            alignment: Alignment.center,
+                            children: stackChildren,
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),

@@ -149,7 +149,6 @@ class _DashboardState extends State<Dashboard> {
                   child: FutureBuilder<List<Map<String, dynamic>>>(
                     future: _templatesFuture,
                     builder: (context, snapshot) {
-                      // ... existing FutureBuilder code for templates ...
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
@@ -171,6 +170,7 @@ class _DashboardState extends State<Dashboard> {
                             final template = templates[index];
                             return DashboardTemplateCard(
                               templateName: template['template_name'] ?? 'Unknown Template',
+                              templateId: template['template_id'], // Pass template_id here
                               onTap: () {
                                 _showStartWorkoutScreen(context, template['template_id']);
                               },
@@ -186,7 +186,6 @@ class _DashboardState extends State<Dashboard> {
               Expanded(
                 flex: 1, // Adjust flex as needed
                 child: Container(
-                  // ... existing Bottom Section code ...
                   color: Theme.of(context).colorScheme.background, // Use background color from theme
                   child: Center(
                     child: SizedBox(
@@ -196,22 +195,9 @@ class _DashboardState extends State<Dashboard> {
                         onPressed: () {
                           _navigateToCreateWorkoutScreen(context); // Navigate to CreateWorkoutScreen
                         },
-                        // Remove the explicit style property below
-                        // style: ElevatedButton.styleFrom(
-                        //   backgroundColor: Theme.of(context).colorScheme.primary, // Use primary color
-                        //   shape: RoundedRectangleBorder(
-                        //     borderRadius: BorderRadius.circular(12),
-                        //   ),
-                        // ),
                         child: Text(
                           'Create New Workout',
-                          // Use the theme's labelLarge style for button text
                           style: theme.textTheme.labelLarge,
-                          // Remove explicit color/weight if labelLarge provides it
-                          // ?.copyWith(
-                          //   color: Colors.white, // Ensure text is visible on primary color
-                          //   fontWeight: FontWeight.bold,
-                          // ),
                         ),
                       ),
                     ),

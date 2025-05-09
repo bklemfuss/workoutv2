@@ -25,25 +25,49 @@ import 'src/exercises_screen.dart'; // <-- Add this import
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize the database factory
-  if (kIsWeb) {
-    databaseFactory = databaseFactoryFfiWeb; // Use web-specific factory
-  } else if (
-    io.Platform.isLinux || io.Platform.isWindows || io.Platform.isMacOS) {
-    sqfliteFfiInit(); // Initialize FFI for desktop platforms
-    databaseFactory = databaseFactoryFfi;
+  // Add logging for startup
+  debugPrint('main: Starting app initialization');
+
+  try {
+    // Initialize the database factory
+    if (kIsWeb) {
+      debugPrint('main: Detected web platform, using databaseFactoryFfiWeb');
+      databaseFactory = databaseFactoryFfiWeb; // Use web-specific factory
+    } else if (
+      io.Platform.isLinux || io.Platform.isWindows || io.Platform.isMacOS) {
+      debugPrint('main: Detected desktop platform, initializing sqfliteFfi');
+      sqfliteFfiInit(); // Initialize FFI for desktop platforms
+      databaseFactory = databaseFactoryFfi;
+    }
+  } catch (e, stack) {
+    debugPrint('main: Error during database factory initialization: $e\n$stack');
   }
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => ThemeProvider()..loadPreferences()),
-        ChangeNotifierProvider(create: (context) => UnitProvider()..loadPreferences()),
-        ChangeNotifierProvider(create: (context) => GoalProvider()..loadPreferences()),
-      ],
-      child: const MyApp(),
-    ),
-  );
+  try {
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) {
+            debugPrint('main: Initializing ThemeProvider');
+            return ThemeProvider()..loadPreferences();
+          }),
+          ChangeNotifierProvider(create: (context) {
+            debugPrint('main: Initializing UnitProvider');
+            return UnitProvider()..loadPreferences();
+          }),
+          ChangeNotifierProvider(create: (context) {
+            debugPrint('main: Initializing GoalProvider');
+            return GoalProvider()..loadPreferences();
+          }),
+        ],
+        child: const MyApp(),
+      ),
+    );
+    debugPrint('main: runApp called');
+  } catch (e, stack) {
+    debugPrint('main: Error during runApp: $e\n$stack');
+    rethrow;
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -51,6 +75,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('MyApp: build called');
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(

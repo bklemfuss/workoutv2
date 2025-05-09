@@ -24,6 +24,7 @@ dependencies:
   table_calendar: ^3.0.9
   fl_chart: ^0.71.0
   intl: ^0.19.0
+  flutter_svg: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -34,10 +35,15 @@ flutter:
   uses-material-design: true
 
   # Enable generation of localized Strings from arb files.
-  #generate: true
+  generate: true
 
   assets:
     # Add assets from the images directory to the application.
     - assets/images/
-    - assets/workout_db_test.db
+    #- assets/images/workout_db_test.db
+    - assets/images/wireGuySVG.svg
+    - assets/images/wireGuySVG_Abs.svg
+    - assets/images/wireGuySVG_Arms.svg
+    - assets/images/wireGuySVG_Chest.svg
+    - assets/images/wireGuySVG_Legs.svg
 #- assets/my_workout_database.db

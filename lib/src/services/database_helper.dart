@@ -1057,4 +1057,23 @@ class DatabaseHelper {
     ''', [muscleGroup]);
   }
 
+  // Returns a map of muscle group name to count of exercises for a template
+  Future<Map<String, int>> getMuscleGroupCountsForTemplate(int templateId) async {
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT mg.Name as muscle_group, COUNT(*) as count
+      FROM TemplateExercise te
+      JOIN Exercise e ON te.exercise_id = e.exercise_id
+      JOIN MuscleGroup mg ON e.muscle_group_id = mg.muscle_group_id
+      WHERE te.template_id = ?
+      GROUP BY mg.Name
+    ''', [templateId]);
+    final counts = <String, int>{};
+    for (final row in result) {
+      final group = (row['muscle_group'] as String?) ?? '';
+      final count = (row['count'] as int?) ?? 0;
+      counts[group] = count;
+    }
+    return counts;
+  }
 }
