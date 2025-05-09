@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/database_helper.dart'; // For accessing the database helper
 import '../widgets/exercise_details_dialog.dart';
 
@@ -149,7 +150,22 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
 
   void _onSetChanged(int index, String field, dynamic value) {
     setState(() {
-      sets[index][field] = value;
+      // Clamp value between 0 and 9999
+      if (field == 'weight') {
+        double v = (value as num?)?.toDouble() ?? 0.0;
+        v = v.clamp(0.0, 9999.0);
+        sets[index][field] = v;
+        _weightControllers[index].text = v == v.toInt() ? v.toInt().toString() : v.toString();
+        _weightControllers[index].selection = TextSelection.fromPosition(TextPosition(offset: _weightControllers[index].text.length));
+      } else if (field == 'reps') {
+        int v = (value as num?)?.toInt() ?? 0;
+        v = v.clamp(0, 9999);
+        sets[index][field] = v;
+        _repsControllers[index].text = v.toString();
+        _repsControllers[index].selection = TextSelection.fromPosition(TextPosition(offset: _repsControllers[index].text.length));
+      } else {
+        sets[index][field] = value;
+      }
       widget.onSetsChanged(widget.exercise['exercise_id'], sets); // Notify about changes
       _calculateAndSetPercentage(); // Recalculate percentage
     });
@@ -214,7 +230,11 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
             ElevatedButton(
               onPressed: () async {
                 final updatedNotes = notesController.text;
-                // *** Add Validation ***
+                // Validation for notes length is present.
+                // TODO: Consider adding validation for weight/reps fields elsewhere in this widget.
+                // For example:
+                // - Ensure weight and reps are non-negative numbers
+                // - Optionally, set upper/lower bounds
                 const maxLength = 500; // Example maximum length
                 if (updatedNotes.length > maxLength) {
                    ScaffoldMessenger.of(context).showSnackBar(
@@ -432,6 +452,12 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
         ? theme.primaryColor.withOpacity(0.2) // Greenish tint when checked
         : theme.inputDecorationTheme.fillColor; // Default fill color
 
+    // Input formatter for 0-9999 numbers only
+    final List<TextInputFormatter> inputFormatters = [
+      FilteringTextInputFormatter.digitsOnly,
+      LengthLimitingTextInputFormatter(4),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -444,6 +470,7 @@ class _ExerciseInputCardState extends State<ExerciseInputCard> {
           child: TextField(
             controller: controller, // Use the passed controller
             keyboardType: TextInputType.number,
+            inputFormatters: inputFormatters,
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
